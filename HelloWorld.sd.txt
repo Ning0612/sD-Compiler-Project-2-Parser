@@ -1,0 +1,15 @@
+// Hello World Example
+int main () {
+  int i;
+  for (i = 0; i + 2; i++){
+    int k;
+    b = ca;
+    int c[10][0];
+
+    v = a[0];
+    b = -a + b;
+    c = a == b && v == c;
+    a = - - - - 5;
+  }
+  
+}
