@@ -1,17 +1,20 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "y.tab.h"
-#define Trace(t) printf(t)
+#include "sd_common.hpp"
+#include <cstdio>
+#include <cstdlib>
 
-extern int   yylex(void);
-extern FILE *yyin;
-extern int   yylineno;
+extern int  yylex();
+extern int  yylineno;
+extern FILE* yyin;
 
-void yyerror(const char *s) {
-    fprintf(stderr, "Syntax error at line %d: %s\n", yylineno, s);
-    exit(1);
+static SymbolTable symTab;
+
+/* 之後若要在 semantic action 使用，可用 $$ = new ExprNode 之類 */
+
+void yyerror(const char* s)
+{
+    std::fprintf(stderr, "Syntax error @ line %d: %s\n", yylineno, s);
+    std::exit(1);
 }
 %}
 
@@ -282,14 +285,19 @@ type_spec:
 
 %% /* ---------- user C code ---------- */
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     if (argc != 2) {
-        puts("Usage: sd <source-file>");
+        std::puts("Usage: sd <source-file>");
         return 1;
     }
-    FILE *fp = fopen(argv[1], "r");
-    if (!fp) { perror("open"); return 1; }
-    yyin = fp;                 /* 由 flex 產生器宣告 extern FILE* yyin; */
-    return yyparse();
+    if (!(yyin = std::fopen(argv[1], "r"))) { perror("open"); return 1; }
+
+    try {
+        return yyparse();
+    } catch (SemanticError& e) {
+        std::fprintf(stderr, "Semantic error @ line %d: %s\n",
+                     e.line(), e.what());
+        return 1;
+    }
 }

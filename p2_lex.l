@@ -1,27 +1,37 @@
 %option noyywrap nodefault         
 %option yylineno                   
+%option noyywrap
 
 %{
 /* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
-#include "y.tab.h"                 /* 由 yacc -d 產生，帶 token 編號與 yylval */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
+#include <cstdio>
+#include <cstdlib>
+#include "sd_common.hpp"
 
 #define MAX_LINE_LENGTH 1024
 static char buf[MAX_LINE_LENGTH] = "";
 
+#define DEBUG_LEX
+
+
 #ifdef DEBUG_LEX
 #define LIST strcat(buf, yytext)
+#define tokenNewline() printf("\n")
+#define token(t)          { LIST; printf("<%s> ", #t); return t; }
+#define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
+#define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
+#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = strdup(str); return STRING_LIT; }
 #else
 #define LIST /* nothing */
+#define tokenNewline() /* nothing */
+#define token(t)          { return t; }
+#define tokenInteger(i)   { yylval.ival = (i); return INT_LIT; }
+#define tokenReal(r)      { yylval.fval = (r); return REAL_LIT; }
+#define tokenString(str)  { yylval.sval = strdup(str); return STRING_LIT; }
 #endif
 
-#define token(t)          { LIST; printf("<%s> ", #t);        return t; }
-#define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i);           return INT_LIT; }
-#define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval  = (r);          return REAL_LIT; }
-#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = strdup(str);   return STRING_LIT; }
+
 
 %}
 
@@ -44,7 +54,7 @@ static char buf[MAX_LINE_LENGTH] = "";
 }
 
 [ \t\r]+        ;                  /* 捨棄空白 */
-\n              { printf("\n"); };
+\n { tokenNewline(); }
 
 "++"            token(INC);
 "--"            token(DEC);
@@ -133,7 +143,3 @@ static char buf[MAX_LINE_LENGTH] = "";
 
 %%
 
-/* ---------- （選擇性）除錯輸出 ---------- */
-#ifdef DEBUG_LEX
-int yywrap(void){ return 1; }
-#endif

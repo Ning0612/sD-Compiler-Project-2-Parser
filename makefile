@@ -1,16 +1,38 @@
-# ---- 原本是 gcc / cc ----
-CC      = g++
-LEX     = flex          # flex → lex.yy.c
-YACC    = bison -y -d   # -y 產生 y.tab.c, y.tab.h
-CFLAGS  = -std=c++17 -Wall -Wextra -O2
-LDFLAGS = -lfl          # flex run‑time；若用 -lfl 找不到，改 -llex
+# ────────────── Tool chain ──────────────
+CXX   = g++           # 或 clang++
+LEX   = flex
+YACC  = bison         # -y: 與傳統 yacc 相容
 
+# ────────────── Flags ───────────────────
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
+LEXFLAGS =
+YACCFLAGS = -y -d     # -d 產生 y.tab.hpp 給 scanner 用
+
+# ────────────── Object list ─────────────
+OBJ = y.tab.o lex.yy.o sd_common.o
+
+# ────────────── Default target ──────────
 all: sd
 
-sd: lex.yy.o y.tab.o main.o symbol.o
-	$(CC) $^ $(LDFLAGS) -o $@
+# ────────────── 產生 parser (Bison) ─────
+# 會輸出 y.tab.cpp / y.tab.hpp
+y.tab.cpp y.tab.hpp: p2_parser.y
+	$(YACC) $(YACCFLAGS) -o y.tab.cpp $<
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# ────────────── 產生 scanner (Flex) ─────
+# 依賴 y.tab.hpp 取得 token 定義
+lex.yy.cpp: p2_lex.l y.tab.hpp
+	$(LEX) --outfile=$@ $<
+
+# ────────────── 編譯物件檔 ──────────────
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $<
+
+# ────────────── 連結 ───────────────────
+sd: $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+# ────────────── 其他目標 ────────────────
 clean:
-	rm -f *.o lex.yy.c y.tab.* sd
+	rm -f sd lex.yy.cpp y.tab.* *.o
+.PHONY: all clean
