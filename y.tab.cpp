@@ -70,6 +70,8 @@
 #line 1 "p2_parser.y"
 
 #include "sd_common.hpp"
+#include "sem_utils.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -91,7 +93,7 @@ void yyerror(const char* s)
     std::exit(1);
 }
 
-#line 95 "y.tab.cpp"
+#line 97 "y.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -609,16 +611,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    93,    93,    97,    99,   104,   105,   106,   111,   145,
-     182,   185,   192,   193,   200,   205,   207,   211,   213,   217,
-     218,   222,   223,   228,   228,   235,   237,   241,   242,   246,
-     247,   251,   252,   253,   254,   255,   256,   261,   262,   263,
-     264,   269,   278,   287,   291,   305,   314,   336,   342,   352,
-     357,   362,   365,   367,   370,   372,   373,   382,   394,   409,
-     414,   443,   468,   493,   523,   546,   568,   590,   612,   634,
-     675,   716,   729,   742,   754,   770,   787,   790,   793,   796,
-     803,   808,   813,   819,   827,   831,   834,   836,   840,   841,
-     846,   853,   863,   869,   879,   880,   881,   882
+       0,    95,    95,    99,   101,   106,   107,   108,   113,   147,
+     184,   187,   194,   195,   202,   207,   209,   213,   215,   219,
+     220,   224,   225,   230,   230,   237,   239,   243,   244,   248,
+     249,   253,   254,   255,   256,   257,   258,   263,   264,   265,
+     266,   271,   280,   289,   293,   307,   316,   338,   344,   354,
+     359,   364,   367,   369,   372,   374,   375,   384,   396,   411,
+     416,   417,   418,   419,   420,   422,   423,   424,   425,   427,
+     428,   429,   442,   455,   467,   483,   500,   503,   506,   509,
+     516,   521,   526,   532,   540,   544,   547,   549,   553,   554,
+     559,   566,   576,   582,   592,   593,   594,   595
 };
 #endif
 
@@ -1358,7 +1360,7 @@ yyreduce:
   switch (yyn)
     {
   case 8: /* const_decl: CONST type_spec ID ASSIGN expression SEMICOLON  */
-#line 112 "p2_parser.y"
+#line 114 "p2_parser.y"
     {
         if (*(yyvsp[-4].type) != *(yyvsp[-1].expr_info)->type) {
             throw SemanticError("const type mismatch", yylineno);
@@ -1388,11 +1390,11 @@ yyreduce:
 
         delete (yyvsp[-3].sval); 
     }
-#line 1392 "y.tab.cpp"
+#line 1394 "y.tab.cpp"
     break;
 
   case 9: /* var_decl: type_spec var_init_list SEMICOLON  */
-#line 146 "p2_parser.y"
+#line 148 "p2_parser.y"
     {
         for (auto& var : *(yyvsp[-1].var_init_list)) {
            if (var->constType != nullptr) {
@@ -1426,34 +1428,34 @@ yyreduce:
             delete var;
         }
     }
-#line 1430 "y.tab.cpp"
+#line 1432 "y.tab.cpp"
     break;
 
   case 10: /* var_init_list: var_init  */
-#line 182 "p2_parser.y"
+#line 184 "p2_parser.y"
              {
         (yyval.var_init_list) = new std::vector<varInit*>;
         (yyval.var_init_list)->push_back((yyvsp[0].var_init));}
-#line 1438 "y.tab.cpp"
+#line 1440 "y.tab.cpp"
     break;
 
   case 11: /* var_init_list: var_init_list COMMA var_init  */
-#line 185 "p2_parser.y"
+#line 187 "p2_parser.y"
                                   {
         (yyval.var_init_list) = (yyvsp[-2].var_init_list);
         (yyval.var_init_list)->push_back((yyvsp[0].var_init));
     }
-#line 1447 "y.tab.cpp"
+#line 1449 "y.tab.cpp"
     break;
 
   case 12: /* var_init: ID  */
-#line 192 "p2_parser.y"
+#line 194 "p2_parser.y"
                             { (yyval.var_init) = new varInit((yyvsp[0].sval)); }
-#line 1453 "y.tab.cpp"
+#line 1455 "y.tab.cpp"
     break;
 
   case 13: /* var_init: ID ASSIGN expression  */
-#line 193 "p2_parser.y"
+#line 195 "p2_parser.y"
                             {
         if (!(yyvsp[0].expr_info)->isConst) {
             throw SemanticError("assignment to non-const", yylineno);
@@ -1461,43 +1463,43 @@ yyreduce:
 
         (yyval.var_init) = new varInit((yyvsp[-2].sval), (yyvsp[0].expr_info)->type);
    }
-#line 1465 "y.tab.cpp"
+#line 1467 "y.tab.cpp"
     break;
 
   case 14: /* var_init: ID array_dims  */
-#line 200 "p2_parser.y"
+#line 202 "p2_parser.y"
                             { (yyval.var_init) = new varInit((yyvsp[-1].sval), (yyvsp[0].int_list)); }
-#line 1471 "y.tab.cpp"
+#line 1473 "y.tab.cpp"
     break;
 
   case 23: /* $@1: %empty  */
-#line 228 "p2_parser.y"
+#line 230 "p2_parser.y"
             {
         symTab.enterScope();
      }
-#line 1479 "y.tab.cpp"
+#line 1481 "y.tab.cpp"
     break;
 
   case 24: /* block: LBRACE $@1 block_items_opt RBRACE  */
-#line 230 "p2_parser.y"
+#line 232 "p2_parser.y"
                              {
         symTab.leaveScope();
      }
-#line 1487 "y.tab.cpp"
+#line 1489 "y.tab.cpp"
     break;
 
   case 40: /* simple_stmt: READ lvalue SEMICOLON  */
-#line 264 "p2_parser.y"
+#line 266 "p2_parser.y"
                            {
         if ((yyvsp[-1].symbol)->isConst) {
             throw SemanticError("read to const", yylineno);
         }
     }
-#line 1497 "y.tab.cpp"
+#line 1499 "y.tab.cpp"
     break;
 
   case 41: /* simple_stmt: lvalue INC SEMICOLON  */
-#line 269 "p2_parser.y"
+#line 271 "p2_parser.y"
                           {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("increment to const", yylineno);
@@ -1507,11 +1509,11 @@ yyreduce:
             throw SemanticError("increment to non-integer type", yylineno);
         }
      }
-#line 1511 "y.tab.cpp"
+#line 1513 "y.tab.cpp"
     break;
 
   case 42: /* simple_stmt: lvalue DEC SEMICOLON  */
-#line 278 "p2_parser.y"
+#line 280 "p2_parser.y"
                           {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("decrement to const", yylineno);
@@ -1521,11 +1523,11 @@ yyreduce:
             throw SemanticError("decrement to non-integer type", yylineno);
         }
     }
-#line 1525 "y.tab.cpp"
+#line 1527 "y.tab.cpp"
     break;
 
   case 44: /* assign_stmt: lvalue ASSIGN expression SEMICOLON  */
-#line 291 "p2_parser.y"
+#line 293 "p2_parser.y"
                                         {
         if ((yyvsp[-3].symbol)->isConst) {
             throw SemanticError("assignment to const", yylineno);
@@ -1537,11 +1539,11 @@ yyreduce:
             }
         }
      }
-#line 1541 "y.tab.cpp"
+#line 1543 "y.tab.cpp"
     break;
 
   case 45: /* lvalue: ID  */
-#line 306 "p2_parser.y"
+#line 308 "p2_parser.y"
      {
         Symbol* symbol = symTab.lookup(*(yyvsp[0].sval));
         if (symbol == nullptr) {
@@ -1550,11 +1552,11 @@ yyreduce:
 
         (yyval.symbol) = symbol;
      }
-#line 1554 "y.tab.cpp"
+#line 1556 "y.tab.cpp"
     break;
 
   case 46: /* lvalue: ID array_ref  */
-#line 315 "p2_parser.y"
+#line 317 "p2_parser.y"
     {
         Symbol* symbol = symTab.lookup(*(yyvsp[-1].sval));
         if (symbol == nullptr) {
@@ -1572,51 +1574,51 @@ yyreduce:
 
         (yyval.symbol) = symbol;
     }
-#line 1576 "y.tab.cpp"
+#line 1578 "y.tab.cpp"
     break;
 
   case 47: /* if_stmt: IF LPAREN expression RPAREN statement  */
-#line 337 "p2_parser.y"
+#line 339 "p2_parser.y"
      {
         if ((yyvsp[-2].expr_info)->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
      }
-#line 1586 "y.tab.cpp"
+#line 1588 "y.tab.cpp"
     break;
 
   case 48: /* if_stmt: IF LPAREN expression RPAREN statement ELSE statement  */
-#line 343 "p2_parser.y"
+#line 345 "p2_parser.y"
     {
         if ((yyvsp[-4].expr_info)->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
     }
-#line 1596 "y.tab.cpp"
+#line 1598 "y.tab.cpp"
     break;
 
   case 49: /* loop_stmt: WHILE LPAREN expression RPAREN statement  */
-#line 352 "p2_parser.y"
+#line 354 "p2_parser.y"
                                              {
             if ((yyvsp[-2].expr_info)->type->base != BK_Bool) {
                 throw SemanticError("while condition must be bool", yylineno);
             }
         }
-#line 1606 "y.tab.cpp"
+#line 1608 "y.tab.cpp"
     break;
 
   case 50: /* loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement  */
-#line 357 "p2_parser.y"
+#line 359 "p2_parser.y"
                                                                                             {
         if ((yyvsp[-4].expr_info)->type->base != BK_Bool) {
             throw SemanticError("for condition must be bool", yylineno);
         }
       }
-#line 1616 "y.tab.cpp"
+#line 1618 "y.tab.cpp"
     break;
 
   case 56: /* for_update_opt: lvalue INC  */
-#line 373 "p2_parser.y"
+#line 375 "p2_parser.y"
                {
             if ((yyvsp[-1].symbol)->isConst) {
                 throw SemanticError("increment to const", yylineno);
@@ -1626,11 +1628,11 @@ yyreduce:
                 throw SemanticError("increment to non-integer type", yylineno);
             }
     }
-#line 1630 "y.tab.cpp"
+#line 1632 "y.tab.cpp"
     break;
 
   case 57: /* for_update_opt: lvalue DEC  */
-#line 382 "p2_parser.y"
+#line 384 "p2_parser.y"
               {
             if ((yyvsp[-1].symbol)->isConst) {
                 throw SemanticError("decrement to const", yylineno);
@@ -1640,11 +1642,11 @@ yyreduce:
                 throw SemanticError("decrement to non-integer type", yylineno);
             }
         }
-#line 1644 "y.tab.cpp"
+#line 1646 "y.tab.cpp"
     break;
 
   case 58: /* assign_no_semi: lvalue ASSIGN expression  */
-#line 394 "p2_parser.y"
+#line 396 "p2_parser.y"
                               {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("assignment to const", yylineno);
@@ -1656,368 +1658,77 @@ yyreduce:
             }
         }
      }
-#line 1660 "y.tab.cpp"
+#line 1662 "y.tab.cpp"
     break;
 
   case 60: /* expression: expression PLUS expression  */
-#line 414 "p2_parser.y"
-                                {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if (b1 == BK_String && b2 == BK_String) {
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_String), isConst);
-            if (isConst) (yyval.expr_info)->setString((yyvsp[-2].expr_info)->getString() + (yyvsp[0].expr_info)->getString());
-        }
-        else if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
-            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
-            if (isConst) {
-                if (resultKind == BK_Float) {
-                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                    (yyval.expr_info)->setFloat(v1 + v2);
-                } else {
-                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() + (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("addition type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1694 "y.tab.cpp"
+#line 416 "p2_parser.y"
+                                    { (yyval.expr_info) = numericResult(OPADD,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1668 "y.tab.cpp"
     break;
 
   case 61: /* expression: expression MINUS expression  */
-#line 443 "p2_parser.y"
-                                    { 
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
-            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
-            if (isConst) {
-                if (resultKind == BK_Float) {
-                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                    (yyval.expr_info)->setFloat(v1 - v2);
-                } else {
-                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() - (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("subtraction type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1724 "y.tab.cpp"
+#line 417 "p2_parser.y"
+                                    { (yyval.expr_info) = numericResult(OPSUB,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1674 "y.tab.cpp"
     break;
 
   case 62: /* expression: expression MUL expression  */
-#line 468 "p2_parser.y"
-                                    { 
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
-            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
-            if (isConst) {
-                if (resultKind == BK_Float) {
-                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                    (yyval.expr_info)->setFloat(v1 * v2);
-                } else {
-                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() * (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("multiplication type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1754 "y.tab.cpp"
+#line 418 "p2_parser.y"
+                                    { (yyval.expr_info) = numericResult(OPMUL,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1680 "y.tab.cpp"
     break;
 
   case 63: /* expression: expression DIV expression  */
-#line 493 "p2_parser.y"
-                               {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            if ((yyvsp[0].expr_info)->isZeroValue()) {
-                throw SemanticError("division by zero", yylineno);
-            }
-
-            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
-            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
-
-            if (isConst) {
-                if (resultKind == BK_Float) {
-                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                    (yyval.expr_info)->setFloat(v1 / v2);
-                } else {
-                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() / (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("division type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1789 "y.tab.cpp"
+#line 419 "p2_parser.y"
+                                    { (yyval.expr_info) = numericResult(OPDIV,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1686 "y.tab.cpp"
     break;
 
   case 64: /* expression: expression MOD expression  */
-#line 523 "p2_parser.y"
-                               {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if (b1 == BK_Int && b2 == BK_Int) {
-            if ((yyvsp[0].expr_info)->isZeroValue()) {
-                throw SemanticError("modulus by zero", yylineno);
-            }
-
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Int), isConst);
-
-            if (isConst) {
-                (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() % (yyvsp[0].expr_info)->getInt());
-            }
-        }
-        else {
-            throw SemanticError("modulus type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1817 "y.tab.cpp"
+#line 420 "p2_parser.y"
+                                    { (yyval.expr_info) = numericResult(OPMOD,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1692 "y.tab.cpp"
     break;
 
   case 65: /* expression: expression LT expression  */
-#line 546 "p2_parser.y"
-                                    { 
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-            if (isConst) {
-                if (b1 == BK_Float || b2 == BK_Float) {
-                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) < toFloat((yyvsp[0].expr_info)));
-                } else {
-                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() < (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("less than type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1844 "y.tab.cpp"
+#line 422 "p2_parser.y"
+                                    { (yyval.expr_info) = relResult(OPLT, (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1698 "y.tab.cpp"
     break;
 
   case 66: /* expression: expression LE expression  */
-#line 568 "p2_parser.y"
-                                    {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-            if (isConst) {
-                if (b1 == BK_Float || b2 == BK_Float) {
-                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) <= toFloat((yyvsp[0].expr_info)));
-                } else {
-                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() <= (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("less than or equal type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1871 "y.tab.cpp"
+#line 423 "p2_parser.y"
+                                    { (yyval.expr_info) = relResult(OPLE, (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1704 "y.tab.cpp"
     break;
 
   case 67: /* expression: expression GT expression  */
-#line 590 "p2_parser.y"
-                                    { 
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-            if (isConst) {
-                if (b1 == BK_Float || b2 == BK_Float) {
-                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) > toFloat((yyvsp[0].expr_info)));
-                } else {
-                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() > (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("greater than type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1898 "y.tab.cpp"
+#line 424 "p2_parser.y"
+                                    { (yyval.expr_info) = relResult(OPGT, (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1710 "y.tab.cpp"
     break;
 
   case 68: /* expression: expression GE expression  */
-#line 612 "p2_parser.y"
-                                    {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-            if (isConst) {
-                if (b1 == BK_Float || b2 == BK_Float) {
-                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) >= toFloat((yyvsp[0].expr_info)));
-                } else {
-                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() >= (yyvsp[0].expr_info)->getInt());
-                }
-            }
-        }
-        else {
-            throw SemanticError("greater than or equal type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1925 "y.tab.cpp"
+#line 425 "p2_parser.y"
+                                    { (yyval.expr_info) = relResult(OPGE, (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1716 "y.tab.cpp"
     break;
 
   case 69: /* expression: expression EQ expression  */
-#line 634 "p2_parser.y"
-                               {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            if (isConst) {
-                float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                (yyval.expr_info)->setBool(v1 == v2);
-            }
-        }
-        else if (b1 == b2) {
-            if (isConst) {
-                switch (b1) {
-                    case BK_Bool:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getBool() == (yyvsp[0].expr_info)->getBool());
-                        break;
-                    case BK_String:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getString() == (yyvsp[0].expr_info)->getString());
-                        break;
-                    case BK_Int:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() == (yyvsp[0].expr_info)->getInt());
-                        break;
-                    case BK_Float:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getFloat() == (yyvsp[0].expr_info)->getFloat());
-                        break;
-                    default:
-                        throw SemanticError("unsupported == type", yylineno);
-                }
-            }
-        }
-        else {
-            throw SemanticError("equal type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 1971 "y.tab.cpp"
+#line 427 "p2_parser.y"
+                                    { (yyval.expr_info) = eqResult(true,  (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1722 "y.tab.cpp"
     break;
 
   case 70: /* expression: expression NEQ expression  */
-#line 675 "p2_parser.y"
-                                    {
-        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
-        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
-        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
-
-        (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
-
-        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
-            if (isConst) {
-                float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
-                float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
-                (yyval.expr_info)->setBool(v1 != v2);
-            }
-        }
-        else if (b1 == b2) {
-            if (isConst) {
-                switch (b1) {
-                    case BK_Bool:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getBool() != (yyvsp[0].expr_info)->getBool());
-                        break;
-                    case BK_String:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getString() != (yyvsp[0].expr_info)->getString());
-                        break;
-                    case BK_Int:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() != (yyvsp[0].expr_info)->getInt());
-                        break;
-                    case BK_Float:
-                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getFloat() != (yyvsp[0].expr_info)->getFloat());
-                        break;
-                    default:
-                        throw SemanticError("unsupported != type", yylineno);
-                }
-            }
-        }
-        else {
-            throw SemanticError("not equal type mismatch", yylineno);
-        }
-
-        delete (yyvsp[-2].expr_info);
-        delete (yyvsp[0].expr_info);
-    }
-#line 2017 "y.tab.cpp"
+#line 428 "p2_parser.y"
+                                    { (yyval.expr_info) = eqResult(false, (yyvsp[-2].expr_info),(yyvsp[0].expr_info),typePool,yylineno); }
+#line 1728 "y.tab.cpp"
     break;
 
   case 71: /* expression: expression AND expression  */
-#line 716 "p2_parser.y"
+#line 429 "p2_parser.y"
                                     {
         if ((yyvsp[-2].expr_info)->type->base != BK_Bool || (yyvsp[0].expr_info)->type->base != BK_Bool) {
             throw SemanticError("and on non-bool type", yylineno);
@@ -2031,11 +1742,11 @@ yyreduce:
         delete (yyvsp[-2].expr_info);
         delete (yyvsp[0].expr_info);
     }
-#line 2035 "y.tab.cpp"
+#line 1746 "y.tab.cpp"
     break;
 
   case 72: /* expression: expression OR expression  */
-#line 729 "p2_parser.y"
+#line 442 "p2_parser.y"
                                     { 
         if ((yyvsp[-2].expr_info)->type->base != BK_Bool || (yyvsp[0].expr_info)->type->base != BK_Bool) {
             throw SemanticError("or on non-bool type", yylineno);
@@ -2049,11 +1760,11 @@ yyreduce:
         delete (yyvsp[-2].expr_info);
         delete (yyvsp[0].expr_info);
     }
-#line 2053 "y.tab.cpp"
+#line 1764 "y.tab.cpp"
     break;
 
   case 73: /* expression: NOT expression  */
-#line 742 "p2_parser.y"
+#line 455 "p2_parser.y"
                                     { 
         if ((yyvsp[0].expr_info)->type->base != BK_Bool) {
             throw SemanticError("not on non-bool type", yylineno);
@@ -2066,11 +1777,11 @@ yyreduce:
         (yyval.expr_info) = expr;
         delete (yyvsp[0].expr_info);
     }
-#line 2070 "y.tab.cpp"
+#line 1781 "y.tab.cpp"
     break;
 
   case 74: /* expression: MINUS expression  */
-#line 754 "p2_parser.y"
+#line 467 "p2_parser.y"
                                     { 
         if ((yyvsp[0].expr_info)->type->base != BK_Float && (yyvsp[0].expr_info)->type->base != BK_Int) {
             throw SemanticError("unary minus on non-numeric type", yylineno);
@@ -2087,11 +1798,11 @@ yyreduce:
         (yyval.expr_info) = expr;
         delete (yyvsp[0].expr_info);
     }
-#line 2091 "y.tab.cpp"
+#line 1802 "y.tab.cpp"
     break;
 
   case 75: /* expression: PLUS expression  */
-#line 770 "p2_parser.y"
+#line 483 "p2_parser.y"
                                     { 
         if ((yyvsp[0].expr_info)->type->base != BK_Float && (yyvsp[0].expr_info)->type->base != BK_Int) {
             throw SemanticError("unary plus on non-numeric type", yylineno);
@@ -2109,84 +1820,84 @@ yyreduce:
         (yyval.expr_info) = expr;
         delete (yyvsp[0].expr_info);
     }
-#line 2113 "y.tab.cpp"
+#line 1824 "y.tab.cpp"
     break;
 
   case 76: /* expression: LPAREN expression RPAREN  */
-#line 787 "p2_parser.y"
+#line 500 "p2_parser.y"
                                     {
         (yyval.expr_info) = (yyvsp[-1].expr_info);
     }
-#line 2121 "y.tab.cpp"
+#line 1832 "y.tab.cpp"
     break;
 
   case 77: /* expression: lvalue  */
-#line 790 "p2_parser.y"
+#line 503 "p2_parser.y"
                                     {
         (yyval.expr_info) = (yyvsp[0].symbol)->getExpr();
     }
-#line 2129 "y.tab.cpp"
+#line 1840 "y.tab.cpp"
     break;
 
   case 78: /* expression: const_expr  */
-#line 793 "p2_parser.y"
+#line 506 "p2_parser.y"
                                      {
         (yyval.expr_info) = (yyvsp[0].expr_info);
     }
-#line 2137 "y.tab.cpp"
+#line 1848 "y.tab.cpp"
     break;
 
   case 79: /* expression: func_call  */
-#line 796 "p2_parser.y"
+#line 509 "p2_parser.y"
                                     {
     
   }
-#line 2145 "y.tab.cpp"
+#line 1856 "y.tab.cpp"
     break;
 
   case 80: /* const_expr: INT_LIT  */
-#line 803 "p2_parser.y"
+#line 516 "p2_parser.y"
                   { 
         ExprInfo* expr = new ExprInfo(typePool.make(BK_Int), true);
         expr->setInt((yyvsp[0].ival));
         (yyval.expr_info) = expr;
     }
-#line 2155 "y.tab.cpp"
+#line 1866 "y.tab.cpp"
     break;
 
   case 81: /* const_expr: REAL_LIT  */
-#line 808 "p2_parser.y"
+#line 521 "p2_parser.y"
                   {
         ExprInfo* expr = new ExprInfo(typePool.make(BK_Float), true);
         expr->setFloat((yyvsp[0].fval));
         (yyval.expr_info) = expr;
     }
-#line 2165 "y.tab.cpp"
+#line 1876 "y.tab.cpp"
     break;
 
   case 82: /* const_expr: STRING_LIT  */
-#line 813 "p2_parser.y"
+#line 526 "p2_parser.y"
                   { 
         ExprInfo* expr = new ExprInfo(typePool.make(BK_String), true);
         expr->setString(*(yyvsp[0].sval));
         (yyval.expr_info) = expr;
         delete (yyvsp[0].sval);
     }
-#line 2176 "y.tab.cpp"
+#line 1887 "y.tab.cpp"
     break;
 
   case 83: /* const_expr: BOOL_LIT  */
-#line 819 "p2_parser.y"
+#line 532 "p2_parser.y"
                   {
         ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), true);
         expr->setBool((yyvsp[0].bval));
         (yyval.expr_info) = expr;
     }
-#line 2186 "y.tab.cpp"
+#line 1897 "y.tab.cpp"
     break;
 
   case 90: /* array_dims: LBRACK INT_LIT RBRACK  */
-#line 846 "p2_parser.y"
+#line 559 "p2_parser.y"
                           {
         if ((yyvsp[-1].ival) <= 0) {
             throw SemanticError("array dimension must be positive", yylineno);
@@ -2194,11 +1905,11 @@ yyreduce:
         (yyval.int_list) = new std::vector<int>;
         (yyval.int_list)->push_back((yyvsp[-1].ival));
      }
-#line 2198 "y.tab.cpp"
+#line 1909 "y.tab.cpp"
     break;
 
   case 91: /* array_dims: array_dims LBRACK INT_LIT RBRACK  */
-#line 853 "p2_parser.y"
+#line 566 "p2_parser.y"
                                      {
         if ((yyvsp[-1].ival) <= 0) {
             throw SemanticError("array dimension must be positive", yylineno);
@@ -2206,57 +1917,57 @@ yyreduce:
         (yyval.int_list) = (yyvsp[-3].int_list);
         (yyval.int_list)->push_back((yyvsp[-1].ival));
      }
-#line 2210 "y.tab.cpp"
+#line 1921 "y.tab.cpp"
     break;
 
   case 92: /* array_ref: LBRACK expression RBRACK  */
-#line 863 "p2_parser.y"
+#line 576 "p2_parser.y"
                              {
         if ((yyvsp[-1].expr_info)->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         (yyval.ival) = 0;
      }
-#line 2221 "y.tab.cpp"
+#line 1932 "y.tab.cpp"
     break;
 
   case 93: /* array_ref: array_ref LBRACK expression RBRACK  */
-#line 869 "p2_parser.y"
+#line 582 "p2_parser.y"
                                        {
         if ((yyvsp[-1].expr_info)->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         (yyval.ival) += 1;
   }
-#line 2232 "y.tab.cpp"
+#line 1943 "y.tab.cpp"
     break;
 
   case 94: /* type_spec: INT_TOK  */
-#line 879 "p2_parser.y"
+#line 592 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Int);   }
-#line 2238 "y.tab.cpp"
+#line 1949 "y.tab.cpp"
     break;
 
   case 95: /* type_spec: FLOAT  */
-#line 880 "p2_parser.y"
+#line 593 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Float); }
-#line 2244 "y.tab.cpp"
+#line 1955 "y.tab.cpp"
     break;
 
   case 96: /* type_spec: BOOL  */
-#line 881 "p2_parser.y"
+#line 594 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Bool);  }
-#line 2250 "y.tab.cpp"
+#line 1961 "y.tab.cpp"
     break;
 
   case 97: /* type_spec: STRING_TOK  */
-#line 882 "p2_parser.y"
+#line 595 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_String);}
-#line 2256 "y.tab.cpp"
+#line 1967 "y.tab.cpp"
     break;
 
 
-#line 2260 "y.tab.cpp"
+#line 1971 "y.tab.cpp"
 
       default: break;
     }
@@ -2449,7 +2160,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 885 "p2_parser.y"
+#line 598 "p2_parser.y"
  /* ---------- user C code ---------- */
 
 int main(int argc, char* argv[])

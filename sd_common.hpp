@@ -244,6 +244,94 @@ struct SemanticError : public std::runtime_error {
     SemanticError(const std::string& m, int l) : std::runtime_error(m), line(l) {}
 };
 
-inline float toFloat(ExprInfo* e) {
+inline float toFloat(const ExprInfo* e) {
     return (e->valueKind == VK_Float) ? e->getFloat() : e->getInt();
+}
+inline int   toInt  (const ExprInfo* e) { return e->getInt(); }
+
+
+enum NumOp { OPADD, OPSUB, OPMUL, OPDIV, OPMOD };
+inline ExprInfo* numericResult(NumOp op,
+                         ExprInfo* lhs, ExprInfo* rhs,
+                         TypeArena& pool, int lineno)
+{
+    BaseKind b1 = lhs->type->base, b2 = rhs->type->base;
+    bool isConst = lhs->isConst && rhs->isConst;
+
+    // 僅允許 int/float
+    if (!( (b1==BK_Int||b1==BK_Float) && (b2==BK_Int||b2==BK_Float) ))
+        throw SemanticError("numeric type mismatch", lineno);
+
+    // OPMOD 只允許 int
+    if (op==OPMOD && (b1!=BK_Int || b2!=BK_Int))
+        throw SemanticError("modulus type mismatch", lineno);
+
+    // 除以零 / 餘零
+    if ((op==OPDIV||op==OPMOD) && rhs->isZeroValue())
+        throw SemanticError(op==OPDIV? "division by zero":"modulus by zero", lineno);
+
+    BaseKind resKind = (b1==BK_Float||b2==BK_Float) ? BK_Float : BK_Int;
+    ExprInfo* out = new ExprInfo(pool.make(resKind), isConst);
+
+    if (isConst) {
+        if (resKind==BK_Float) {
+            float a = toFloat(lhs), b = toFloat(rhs);
+            float r = (op==OPADD)? a+b : (op==OPSUB)? a-b :
+                      (op==OPMUL)? a*b : (op==OPDIV)? a/b : a;   // OPMOD 不走這裡
+            out->setFloat(r);
+        } else {                               // int
+            int a = lhs->getInt(), b = rhs->getInt();
+            int r = (op==OPADD)? a+b : (op==OPSUB)? a-b :
+                    (op==OPMUL)? a*b : (op==OPDIV)? a/b : a%b;
+            out->setInt(r);
+        }
+    }
+    return out;
+}
+
+
+enum RelOp { OPLT, OPLE, OPGT, OPGE };
+inline ExprInfo* relResult(RelOp op,
+                    ExprInfo* lhs, ExprInfo* rhs,
+                    TypeArena& pool, int lineno)
+{
+    BaseKind b1 = lhs->type->base, b2 = rhs->type->base;
+    bool isConst = lhs->isConst && rhs->isConst;
+
+    if (!( (b1==BK_Int||b1==BK_Float) && (b2==BK_Int||b2==BK_Float) ))
+        throw SemanticError("relational type mismatch", lineno);
+
+    ExprInfo* out = new ExprInfo(pool.make(BK_Bool), isConst);
+    if (isConst) {
+        float a = toFloat(lhs), b = toFloat(rhs);
+        bool r = (op==OPLT)? a<b : (op==OPLE)? a<=b : (op==OPGT)? a>b : a>=b;
+        out->setBool(r);
+    }
+    return out;
+}
+
+inline ExprInfo* eqResult(bool equal, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool, int lineno) {
+    BaseKind b1 = lhs->type->base, b2 = rhs->type->base;
+    bool isConst = lhs->isConst && rhs->isConst;
+    ExprInfo* out = new ExprInfo(pool.make(BK_Bool), isConst);
+
+    auto cmpNum = [&](auto a, auto b){return equal ? a==b : a!=b;};
+
+    if ((b1==BK_Int||b1==BK_Float) && (b2==BK_Int||b2==BK_Float)) {
+        if (isConst) out->setBool(cmpNum(toFloat(lhs), toFloat(rhs)));
+    }
+    else if (b1==b2) {
+        if (isConst) {
+            switch (b1) {
+                case BK_Bool:   out->setBool(cmpNum(lhs->getBool(),   rhs->getBool())); break;
+                case BK_String: out->setBool(cmpNum(lhs->getString(), rhs->getString())); break;
+                case BK_Int:    out->setBool(cmpNum(lhs->getInt(),    rhs->getInt())); break;
+                case BK_Float:  out->setBool(cmpNum(lhs->getFloat(),  rhs->getFloat())); break;
+                default: throw SemanticError("unsupported ==/!= type", lineno);
+            }
+        }
+    } else
+    throw SemanticError("equal type mismatch", lineno);
+
+    return out;
 }

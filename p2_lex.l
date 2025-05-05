@@ -4,6 +4,7 @@
 %{
 /* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
 #include "sd_common.hpp"
+#include "sem_utils.hpp"
 #include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
 #include <cstdio>
 #include <cstdlib>
