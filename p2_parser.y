@@ -30,7 +30,9 @@ void yyerror(const char* s)
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    std::vector<Symbol *>* vardecl_list;
+    std::vector<Symbol *>*
+    
+     vardecl_list;
     std::vector<int>* int_list;
     varInit* var_init;
     std::vector<varInit*>* var_init_list;
@@ -54,7 +56,7 @@ void yyerror(const char* s)
 %type <ival> array_ref
 %type <var_init> var_init
 %type <var_init_list> var_init_list
-%type <type> lvalue
+%type <symbol> lvalue
 
 /* ---------- 運算子 / 分隔符 ---------- */
 %token                LE GE EQ NEQ LT GT
@@ -237,25 +239,40 @@ simple_stmt:
      assign_stmt
   |  PRINT  expression SEMICOLON
   |  PRINTLN expression SEMICOLON
-  |  READ   lvalue SEMICOLON
+  |  READ lvalue SEMICOLON {
+        if ($2->isConst) {
+            throw SemanticError("read to const", yylineno);
+        }
+    }
   |  lvalue INC SEMICOLON {
-        if ($1->base != BK_Int && $1->base != BK_Float) {
+        if ($1->isConst) {
+            throw SemanticError("increment to const", yylineno);
+        }
+
+        if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
             throw SemanticError("increment to non-integer type", yylineno);
         }
      }
   |  lvalue DEC SEMICOLON {
-        if ($1->base != BK_Int && $1->base != BK_Float) {
+        if ($1->isConst) {
+            throw SemanticError("decrement to const", yylineno);
+        }
+
+        if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
             throw SemanticError("decrement to non-integer type", yylineno);
         }
-  }
+    }
   |  SEMICOLON
     ;
 
 assign_stmt:
-     lvalue ASSIGN expression SEMICOLON
-     {
-        if ($1 != $3) {
-            if (!(($1->base == BK_Int || $1->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
+     lvalue ASSIGN expression SEMICOLON {
+        if ($1->isConst) {
+            throw SemanticError("assignment to const", yylineno);
+        }
+
+        if ($1->type != $3) {
+            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
@@ -270,21 +287,13 @@ lvalue:
             throw SemanticError("undeclared identifier: " + *$1, yylineno);
         }
 
-        if (symbol->isConst) {
-            throw SemanticError("assignment to const: " + *$1, yylineno);
-        }
-
-        $$ = symbol->type;
+        $$ = symbol;
      }
   |  ID array_ref
     {
         Symbol* symbol = symTab.lookup(*$1);
         if (symbol == nullptr) {
             throw SemanticError("undeclared identifier: " + *$1, yylineno);
-        }
-
-        if (symbol->isConst) {
-            throw SemanticError("assignment to const: " + *$1, yylineno);
         }
 
         if (!symbol->type->isArray()) {
@@ -296,7 +305,7 @@ lvalue:
             throw SemanticError("array index dimension mismatch: " + *$1, yylineno);
         }
 
-        $$ = symbol->type;
+        $$ = symbol;
     }
     ;
 
@@ -319,10 +328,10 @@ if_stmt:
 /* 5-c. Loop ------------------------------------------------------------------*/
 loop_stmt:
      WHILE LPAREN expression RPAREN statement{
-        if ($3->base != BK_Bool) {
-            throw SemanticError("while condition must be bool", yylineno);
+            if ($3->base != BK_Bool) {
+                throw SemanticError("while condition must be bool", yylineno);
+            }
         }
-     }
   |  FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement{
         if ($5->base != BK_Bool) {
             throw SemanticError("for condition must be bool", yylineno);
@@ -340,12 +349,20 @@ for_update_opt:
     /* empty */
   | assign_no_semi
   | lvalue INC {
-            if ($1->base != BK_Int && $1->base != BK_Float) {
+            if ($1->isConst) {
+                throw SemanticError("increment to const", yylineno);
+            }
+
+            if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
                 throw SemanticError("increment to non-integer type", yylineno);
             }
     }
   | lvalue DEC{
-            if ($1->base != BK_Int && $1->base != BK_Float) {
+            if ($1->isConst) {
+                throw SemanticError("decrement to const", yylineno);
+            }
+
+            if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
                 throw SemanticError("decrement to non-integer type", yylineno);
             }
         }   
@@ -353,8 +370,12 @@ for_update_opt:
 
 assign_no_semi:
      lvalue ASSIGN expression {
-        if ($1 != $3) {
-            if (!(($1->base == BK_Int || $1->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
+        if ($1->isConst) {
+            throw SemanticError("assignment to const", yylineno);
+        }
+
+        if ($1->type != $3) {
+            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
@@ -406,7 +427,7 @@ expression:
         }
     }
   |  LPAREN expression RPAREN       { $$ = $2;}
-  |  lvalue                         { $$ = $1;}
+  |  lvalue                         { $$ = $1->type;}
   |  const_expr                     { $$ = $1;}
   |  func_call                      { $$ = typePool.make(BK_Int);}
     ;

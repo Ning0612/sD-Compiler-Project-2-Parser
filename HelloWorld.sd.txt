@@ -9,7 +9,7 @@ void main() {
   int b[24][6];
   int c[24][6];
   
-  c = h + b;
+  c = h + k;
   i++;
   h[35][34]++;
   if (i == 3){

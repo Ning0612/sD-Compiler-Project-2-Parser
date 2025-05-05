@@ -13,7 +13,7 @@ struct Type {
     std::vector<int>    sizes;             // 各維大小
     std::vector<Type*>  params;           // 函式參數型別
     Type*               ret;               // 函式回傳型別
-    bool                isZero;          // 是否為常數 
+    bool                isZero;          // 是否為 0 
 
     Type(BaseKind b) : base(b), dim(0), ret(0), isZero(false){}
     Type(BaseKind b, bool z) : base(b), dim(0), ret(0), isZero(z){}
@@ -31,7 +31,7 @@ struct Type {
         else if (base == BK_Void) printf("void");
         else printf("unknown");
         if (isArray()) {
-            printf(", Array: [");
+            printf(", Array dims: [");
             for (size_t i = 0; i < sizes.size(); ++i) {
                 printf("%d", sizes[i]);
                 if (i < sizes.size() - 1) printf(", ");
@@ -55,17 +55,17 @@ struct TypeHash {
 };
 
 class TypeArena {
-    public:
-        ~TypeArena();
-        Type* make(BaseKind kind);
-        Type* make(BaseKind kind, bool isZero);
-        Type* makeArray(Type* elem, const std::vector<int>& sizes);
-        Type* makeFunc(Type* ret, const std::vector<Type*>& params);
-    
-    private:
-        std::vector<Type*> types;
-        std::unordered_map<Type, Type*, TypeHash> typeCache;
-    };
+public:
+    ~TypeArena();
+    Type* make(BaseKind kind);
+    Type* make(BaseKind kind, bool isZero);
+    Type* makeArray(Type* elem, const std::vector<int>& sizes);
+    Type* makeFunc(Type* ret, const std::vector<Type*>& params);
+
+private:
+    std::vector<Type*> types;
+    std::unordered_map<Type, Type*, TypeHash> typeCache;
+};
 
 /* ───── 符號表項 ───── */
 class Symbol {
