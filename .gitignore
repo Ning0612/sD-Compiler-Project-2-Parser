@@ -1,0 +1,25 @@
+# 編譯產物
+/build/
+/bin/
+*.o
+*.out
+
+# Bison & Flex 產物
+src/y.tab.*
+src/lex.yy.cpp
+
+# 編輯器備份檔
+*~
+*.swp
+*.swo
+.DS_Store
+
+# 可選的測試執行結果或暫存
+*.log
+*.tmp
+
+# CTags / IDE 檔案
+tags
+.vscode/
+.idea/
+*.
