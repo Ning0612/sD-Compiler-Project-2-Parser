@@ -1,7 +1,6 @@
 %{
-#include "sd_common.hpp"
+#include "var.hpp" 
 #include "sem_utils.hpp"
-
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
