@@ -195,14 +195,13 @@ union YYSTYPE
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    std::vector<Symbol *>*
-    
-     vardecl_list;
+    std::vector<Symbol *>* vardecl_list;
     std::vector<int>* int_list;
     varInit* var_init;
     std::vector<varInit*>* var_init_list;
+    ExprInfo* expr_info;
 
-#line 206 "y.tab.hpp"
+#line 205 "y.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

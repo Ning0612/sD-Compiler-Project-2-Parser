@@ -30,12 +30,11 @@ void yyerror(const char* s)
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    std::vector<Symbol *>*
-    
-     vardecl_list;
+    std::vector<Symbol *>* vardecl_list;
     std::vector<int>* int_list;
     varInit* var_init;
     std::vector<varInit*>* var_init_list;
+    ExprInfo* expr_info;
 }
 
 /* ---------- 關鍵字 / 常數 / 識別元 ---------- */
@@ -49,8 +48,8 @@ void yyerror(const char* s)
 %token <bval>         BOOL_LIT         
 
 %type <type> type_spec
-%type <type> const_expr
-%type <type> expression
+%type <expr_info> const_expr
+%type <expr_info> expression
 %type <symbol> const_decl
 %type <int_list> array_dims
 %type <ival> array_ref
@@ -109,16 +108,33 @@ declaration:
 
 /* 4-a. 常數宣告 --------------------------------------------------------------*/
 const_decl:
-    CONST type_spec ID ASSIGN const_expr SEMICOLON
+    CONST type_spec ID ASSIGN expression SEMICOLON
     {
-        if (*$2 != *$5) {
+        if (*$2 != *$5->type) {
             throw SemanticError("const type mismatch", yylineno);
         }
 
+        if (!$5->isConst) {
+            throw SemanticError("const expression must be const", yylineno);
+        }
+
         Symbol s(*$3, $2, true);
+
+        if ($5->valueKind == VK_Float) {
+            s.setFloat($5->getFloat());
+        } else if ($5->valueKind == VK_Int) {
+            s.setInt($5->getInt());
+        } else if ($5->valueKind == VK_String) {
+            s.setString($5->getString());
+        } else if ($5->valueKind == VK_Bool) {
+            s.setBool($5->getBool());
+        }
+        
         if (!symTab.insert(s)) {
             throw SemanticError("redeclared const: " + *$3, yylineno);
         }
+
+        
 
         delete $3; 
     }
@@ -174,7 +190,13 @@ var_init_list:
 
 var_init:
      ID                     { $$ = new varInit($1); }  
-  |  ID ASSIGN const_expr   { $$ = new varInit($1, $3); }
+  |  ID ASSIGN expression   {
+        if (!$3->isConst) {
+            throw SemanticError("assignment to non-const", yylineno);
+        }
+
+        $$ = new varInit($1, $3->type);
+   }
   |  ID array_dims          { $$ = new varInit($1, $2); }
     ;
 
@@ -271,8 +293,8 @@ assign_stmt:
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ($1->type != $3) {
-            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
+        if ($1->type != $3->type) {
+            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->type->base == BK_Int || $3->type->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
@@ -313,13 +335,13 @@ lvalue:
 if_stmt:
      IF LPAREN expression RPAREN statement 
      {
-        if ($3->base != BK_Bool) {
+        if ($3->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
      }
   |  IF LPAREN expression RPAREN statement ELSE statement
     {
-        if ($3->base != BK_Bool) {
+        if ($3->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
     }
@@ -328,12 +350,12 @@ if_stmt:
 /* 5-c. Loop ------------------------------------------------------------------*/
 loop_stmt:
      WHILE LPAREN expression RPAREN statement{
-            if ($3->base != BK_Bool) {
+            if ($3->type->base != BK_Bool) {
                 throw SemanticError("while condition must be bool", yylineno);
             }
         }
   |  FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement{
-        if ($5->base != BK_Bool) {
+        if ($5->type->base != BK_Bool) {
             throw SemanticError("for condition must be bool", yylineno);
         }
       }
@@ -374,8 +396,8 @@ assign_no_semi:
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ($1->type != $3) {
-            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->base == BK_Int || $3->base == BK_Float))) {
+        if ($1->type != $3->type) {
+            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->type->base == BK_Int || $3->type->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
@@ -389,57 +411,416 @@ return_stmt:
 
 /* 6. Expressions -------------------------------------------------------------*/
 expression:
-     expression PLUS  expression    { $$ = binaryNumericResult($1, $3, typePool, yylineno);}
-  |  expression MINUS expression    { $$ = binaryNumericResult($1, $3, typePool, yylineno);}
-  |  expression MUL   expression    { $$ = binaryNumericResult($1, $3, typePool, yylineno);}
-  |  expression DIV   expression    { 
-        if ($3->isZero) {
-            throw SemanticError("division by zero", yylineno);
+     expression PLUS expression {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if (b1 == BK_String && b2 == BK_String) {
+            $$ = new ExprInfo(typePool.make(BK_String), isConst);
+            if (isConst) $$->setString($1->getString() + $3->getString());
         }
-        $$ = binaryNumericResult($1, $3, typePool, yylineno);
+        else if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            $$ = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                    float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                    $$->setFloat(v1 + v2);
+                } else {
+                    $$->setInt($1->getInt() + $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("addition type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
     }
-  |  expression MOD   expression    { $$ = binaryModResult($1, $3, typePool, yylineno);}
-  |  expression LT    expression    { $$ = binaryCompareResult($1, $3, typePool, yylineno);}
-  |  expression LE    expression    { $$ = binaryCompareResult($1, $3, typePool, yylineno);}
-  |  expression GT    expression    { $$ = binaryCompareResult($1, $3, typePool, yylineno);}
-  |  expression GE    expression    { $$ = binaryCompareResult($1, $3, typePool, yylineno);}
-  |  expression EQ    expression    { $$ = binaryEqualNotEqualResult($1, $3, typePool, yylineno);}
-  |  expression NEQ   expression    { $$ = binaryEqualNotEqualResult($1, $3, typePool, yylineno);}
-  |  expression AND   expression    { $$ = binaryBoolResult($1, $3, typePool, yylineno);}
-  |  expression OR    expression    { $$ = binaryBoolResult($1, $3, typePool, yylineno);}
-  |  NOT expression                 { $$ = unaryBoolResult($2, typePool, yylineno);}
+  |  expression MINUS expression    { 
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            $$ = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                    float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                    $$->setFloat(v1 - v2);
+                } else {
+                    $$->setInt($1->getInt() - $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("subtraction type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression MUL   expression    { 
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            $$ = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                    float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                    $$->setFloat(v1 * v2);
+                } else {
+                    $$->setInt($1->getInt() * $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("multiplication type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression DIV expression {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if ($3->isZeroValue()) {
+                throw SemanticError("division by zero", yylineno);
+            }
+
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            $$ = new ExprInfo(typePool.make(resultKind), isConst);
+
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                    float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                    $$->setFloat(v1 / v2);
+                } else {
+                    $$->setInt($1->getInt() / $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("division type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression MOD expression {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if (b1 == BK_Int && b2 == BK_Int) {
+            if ($3->isZeroValue()) {
+                throw SemanticError("modulus by zero", yylineno);
+            }
+
+            $$ = new ExprInfo(typePool.make(BK_Int), isConst);
+
+            if (isConst) {
+                $$->setInt($1->getInt() % $3->getInt());
+            }
+        }
+        else {
+            throw SemanticError("modulus type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression LT    expression    { 
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    $$->setBool(toFloat($1) < toFloat($3));
+                } else {
+                    $$->setBool($1->getInt() < $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("less than type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression LE    expression    {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    $$->setBool(toFloat($1) <= toFloat($3));
+                } else {
+                    $$->setBool($1->getInt() <= $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("less than or equal type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression GT    expression    { 
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    $$->setBool(toFloat($1) > toFloat($3));
+                } else {
+                    $$->setBool($1->getInt() > $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("greater than type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression GE    expression    {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    $$->setBool(toFloat($1) >= toFloat($3));
+                } else {
+                    $$->setBool($1->getInt() >= $3->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("greater than or equal type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+    | expression EQ expression {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if (isConst) {
+                float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                $$->setBool(v1 == v2);
+            }
+        }
+        else if (b1 == b2) {
+            if (isConst) {
+                switch (b1) {
+                    case BK_Bool:
+                        $$->setBool($1->getBool() == $3->getBool());
+                        break;
+                    case BK_String:
+                        $$->setBool($1->getString() == $3->getString());
+                        break;
+                    case BK_Int:
+                        $$->setBool($1->getInt() == $3->getInt());
+                        break;
+                    case BK_Float:
+                        $$->setBool($1->getFloat() == $3->getFloat());
+                        break;
+                    default:
+                        throw SemanticError("unsupported == type", yylineno);
+                }
+            }
+        }
+        else {
+            throw SemanticError("equal type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression NEQ   expression    {
+        BaseKind b1 = $1->type->base;
+        BaseKind b2 = $3->type->base;
+        bool isConst = $1->isConst && $3->isConst;
+
+        $$ = new ExprInfo(typePool.make(BK_Bool), isConst);
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if (isConst) {
+                float v1 = (b1 == BK_Float) ? $1->getFloat() : $1->getInt();
+                float v2 = (b2 == BK_Float) ? $3->getFloat() : $3->getInt();
+                $$->setBool(v1 != v2);
+            }
+        }
+        else if (b1 == b2) {
+            if (isConst) {
+                switch (b1) {
+                    case BK_Bool:
+                        $$->setBool($1->getBool() != $3->getBool());
+                        break;
+                    case BK_String:
+                        $$->setBool($1->getString() != $3->getString());
+                        break;
+                    case BK_Int:
+                        $$->setBool($1->getInt() != $3->getInt());
+                        break;
+                    case BK_Float:
+                        $$->setBool($1->getFloat() != $3->getFloat());
+                        break;
+                    default:
+                        throw SemanticError("unsupported != type", yylineno);
+                }
+            }
+        }
+        else {
+            throw SemanticError("not equal type mismatch", yylineno);
+        }
+
+        delete $1;
+        delete $3;
+    }
+  |  expression AND   expression    {
+        if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
+            throw SemanticError("and on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $1->isConst && $3->isConst);
+        if (expr->isConst){
+            expr->setBool($1->getBool() && $3->getBool());
+        }
+        $$ = expr;
+        delete $1;
+        delete $3;
+    }
+  |  expression OR    expression    { 
+        if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
+            throw SemanticError("or on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $1->isConst && $3->isConst);
+        if (expr->isConst){
+            expr->setBool($1->getBool() || $3->getBool());
+        }
+        $$ = expr;
+        delete $1;
+        delete $3;
+    }
+  |  NOT expression                 { 
+        if ($2->type->base != BK_Bool) {
+            throw SemanticError("not on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $2->isConst);
+        if ($2->isConst){
+            expr->setBool(!$2->getBool());
+        }
+        $$ = expr;
+        delete $2;
+    }
   |  MINUS expression %prec UMINUS  { 
-        if ($2->base == BK_Float) {
-            $$ = typePool.make(BK_Float);
-        } else if ($2->base == BK_Int) {
-            $$ = typePool.make(BK_Int);
-        } else {
+        if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
             throw SemanticError("unary minus on non-numeric type", yylineno);
         }
+
+        ExprInfo* expr = new ExprInfo($2->type, $2->isConst);
+        if ($2->isConst){
+            if ($2->valueKind == VK_Float) {
+                expr->setFloat(-$2->getFloat());
+            } else if ($2->valueKind == VK_Int) {
+                expr->setInt(-$2->getInt());
+            }
+        }
+        $$ = expr;
+        delete $2;
     }
   |  PLUS expression %prec UPLUS    { 
-        if ($2->base == BK_Float) {
-            $$ = typePool.make(BK_Float);
-        } else if ($2->base == BK_Int) {
-            $$ = typePool.make(BK_Int);
-        } else {
+        if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
             throw SemanticError("unary plus on non-numeric type", yylineno);
         }
+
+        ExprInfo* expr = new ExprInfo($2->type, $2->isConst);
+        if ($2->isConst){
+            if ($2->valueKind == VK_Float) {
+                expr->setFloat($2->getFloat());
+            } else if ($2->valueKind == VK_Int) {
+                expr->setInt($2->getInt());
+            }
+        }
+
+        $$ = expr;
+        delete $2;
     }
-  |  LPAREN expression RPAREN       { $$ = $2;}
-  |  lvalue                         { $$ = $1->type;}
-  |  const_expr                     { $$ = $1;}
-  |  func_call                      { $$ = typePool.make(BK_Int);}
+  |  LPAREN expression RPAREN       {
+        $$ = $2;
+    }
+  |  lvalue                         {
+        $$ = $1->getExpr();
+    }
+  |  const_expr                      {
+        $$ = $1;
+    }
+  |  func_call                      {
+    
+  }
     ;
-
-
 
 /* 7. 常數 / 呼叫 -------------------------------------------------------------*/
 const_expr
-    : INT_LIT     { $$ = typePool.make(BK_Int, $1 == 0);    }
-    | REAL_LIT    { $$ = typePool.make(BK_Float, $1 == 0);  }
-    | STRING_LIT  { $$ = typePool.make(BK_String); }
-    | BOOL_LIT    { $$ = typePool.make(BK_Bool);   }
+    : INT_LIT     { 
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Int), true);
+        expr->setInt($1);
+        $$ = expr;
+    }
+    | REAL_LIT    {
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Float), true);
+        expr->setFloat($1);
+        $$ = expr;
+    }
+    | STRING_LIT  { 
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_String), true);
+        expr->setString(*$1);
+        $$ = expr;
+        delete $1;
+    }
+    | BOOL_LIT    {
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), true);
+        expr->setBool($1);
+        $$ = expr;
+    }
     ;
 
 func_call:
@@ -480,13 +861,13 @@ array_dims:
 
 array_ref:
      LBRACK expression RBRACK{
-        if ($2->base != BK_Int) {
+        if ($2->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         $$ = 0;
      }
   |  array_ref LBRACK expression RBRACK{
-        if ($3->base != BK_Int) {
+        if ($3->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         $$ += 1;

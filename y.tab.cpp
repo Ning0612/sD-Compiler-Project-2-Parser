@@ -545,7 +545,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   423
+#define YYLAST   443
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  63
@@ -609,16 +609,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    94,    94,    98,   100,   105,   106,   107,   112,   129,
-     166,   169,   176,   177,   178,   183,   185,   189,   191,   195,
-     196,   200,   201,   206,   206,   213,   215,   219,   220,   224,
-     225,   229,   230,   231,   232,   233,   234,   239,   240,   241,
-     242,   247,   256,   265,   269,   283,   292,   314,   320,   330,
-     335,   340,   343,   345,   348,   350,   351,   360,   372,   387,
-     392,   393,   394,   395,   401,   402,   403,   404,   405,   406,
-     407,   408,   409,   410,   411,   420,   429,   430,   431,   432,
-     439,   440,   441,   442,   446,   450,   453,   455,   459,   460,
-     465,   472,   482,   488,   498,   499,   500,   501
+       0,    93,    93,    97,    99,   104,   105,   106,   111,   145,
+     182,   185,   192,   193,   200,   205,   207,   211,   213,   217,
+     218,   222,   223,   228,   228,   235,   237,   241,   242,   246,
+     247,   251,   252,   253,   254,   255,   256,   261,   262,   263,
+     264,   269,   278,   287,   291,   305,   314,   336,   342,   352,
+     357,   362,   365,   367,   370,   372,   373,   382,   394,   409,
+     414,   443,   468,   493,   523,   546,   568,   590,   612,   634,
+     675,   716,   729,   742,   754,   770,   787,   790,   793,   796,
+     803,   808,   813,   819,   827,   831,   834,   836,   840,   841,
+     846,   853,   863,   869,   879,   880,   881,   882
 };
 #endif
 
@@ -659,7 +659,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-143)
+#define YYPACT_NINF (-102)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -673,26 +673,26 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-    -143,    27,     1,  -143,  -143,  -143,  -143,  -143,   -16,    57,
-    -143,  -143,  -143,  -143,    11,    45,    32,     7,    -6,  -143,
-      57,     4,    66,    57,    26,     9,    34,  -143,    55,    69,
-    -143,    95,    66,  -143,  -143,  -143,  -143,  -143,    72,    76,
-     105,   -35,  -143,    78,    57,    81,    88,    78,  -143,    85,
-    -143,  -143,  -143,     9,  -143,  -143,  -143,    93,    89,    90,
-      94,    96,   100,   100,   100,   119,    50,  -143,  -143,  -143,
-     118,    93,  -143,  -143,  -143,  -143,     8,  -143,  -143,  -143,
-      99,   100,   100,   119,   121,    68,   100,   100,   100,   100,
-    -143,   241,  -143,  -143,   262,   283,    97,   125,   100,   100,
-     135,  -143,  -143,   100,   139,   142,  -143,   172,   195,   152,
-     144,  -143,   146,   100,  -143,  -143,  -143,   218,   100,   100,
-     100,   100,   100,   100,   100,   100,   100,   100,   100,   100,
-     100,  -143,  -143,  -143,  -143,   346,   145,   148,   122,   100,
-     304,  -143,  -143,     6,     6,   100,   100,   173,   161,  -143,
-     133,   133,   375,   375,   133,   133,    46,    46,  -143,  -143,
-    -143,   386,   361,  -143,   100,  -143,   147,  -143,   184,  -143,
-     346,   325,   153,  -143,   346,  -143,     6,   119,   167,  -143,
-      42,   165,  -143,   192,  -143,  -143,     6,   168,  -143,     6,
-    -143
+    -102,     8,    92,  -102,  -102,  -102,  -102,  -102,    -2,     1,
+    -102,  -102,  -102,  -102,    16,   -25,    40,   -36,    -8,  -102,
+       1,    36,    34,     1,    46,    30,    61,  -102,    37,    42,
+    -102,    68,    34,     5,  -102,  -102,  -102,  -102,    34,    34,
+      34,    34,  -102,   366,  -102,  -102,    45,    52,    74,   -37,
+    -102,    54,     1,    57,   240,    34,    34,    64,  -102,  -102,
+    -102,   171,    34,    34,    34,    34,    34,    34,    34,    34,
+      34,    34,    34,    34,    34,    54,  -102,    53,  -102,  -102,
+    -102,    30,  -102,   366,    62,    70,   121,    34,  -102,   106,
+     106,   395,   395,   106,   106,    35,    35,  -102,  -102,  -102,
+     406,   381,  -102,  -102,   113,  -102,    34,  -102,   146,    72,
+      88,    98,    99,    34,    34,    34,    96,    31,  -102,  -102,
+    -102,   111,   113,  -102,  -102,  -102,  -102,    67,  -102,  -102,
+    -102,   112,   366,  -102,    34,    34,    96,   144,   261,   282,
+     303,   119,   123,    34,  -102,  -102,    34,   124,   137,  -102,
+     194,   217,   147,   141,  -102,   143,  -102,  -102,  -102,  -102,
+     142,   324,  -102,  -102,    14,    14,    34,    34,   167,  -102,
+    -102,   181,  -102,   366,   345,   149,    14,    96,   150,  -102,
+     125,   160,  -102,   172,  -102,  -102,    14,   161,  -102,    14,
+    -102
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -703,21 +703,21 @@ static const yytype_int8 yydefact[] =
        3,     0,     2,     1,    96,    95,    94,    97,     0,     0,
        4,     5,     6,     7,     0,     0,     0,    12,     0,    10,
       17,     0,     0,    17,     0,    14,     0,     9,     0,    18,
-      19,     0,     0,    80,    81,    82,    83,    13,     0,     0,
-       0,    12,    11,     0,     0,    21,     0,     0,    90,     0,
-      23,    16,    20,    22,     8,    15,    91,    25,     0,     0,
-       0,     0,     0,     0,     0,     0,    45,    43,    29,    36,
-       0,    26,    28,    30,    31,    37,     0,    32,    33,    34,
-       0,     0,     0,    52,     0,    45,     0,     0,     0,     0,
-      77,     0,    78,    79,     0,     0,    45,     0,    86,     0,
-      46,    24,    27,     0,     0,     0,    35,     0,     0,     0,
-       0,    53,     0,    86,    75,    74,    73,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    59,    38,    39,    40,    88,     0,    87,     0,     0,
-       0,    41,    42,     0,     0,     0,     0,     0,     0,    76,
-      66,    68,    69,    70,    65,    67,    60,    61,    62,    63,
-      64,    71,    72,    85,     0,    92,     0,    44,    47,    49,
-      58,     0,     0,    84,    89,    93,     0,    54,     0,    48,
+      19,     0,     0,    45,    80,    81,    82,    83,     0,     0,
+       0,     0,    77,    13,    78,    79,     0,     0,     0,    12,
+      11,     0,     0,    21,     0,    86,     0,    46,    75,    74,
+      73,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    90,     0,    23,    16,
+      20,    22,     8,    88,     0,    87,     0,     0,    76,    66,
+      68,    69,    70,    65,    67,    60,    61,    62,    63,    64,
+      71,    72,    15,    91,    25,    84,     0,    92,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    45,    43,    29,
+      36,     0,    26,    28,    30,    31,    37,     0,    32,    33,
+      34,     0,    89,    93,     0,     0,    52,     0,     0,     0,
+       0,    45,     0,    86,    24,    27,     0,     0,     0,    35,
+       0,     0,     0,     0,    53,     0,    59,    38,    39,    40,
+       0,     0,    41,    42,     0,     0,     0,     0,     0,    85,
+      44,    47,    49,    58,     0,     0,     0,    54,     0,    48,
        0,     0,    55,     0,    56,    57,     0,     0,    50,     0,
       51
 };
@@ -725,19 +725,19 @@ static const yytype_int8 yydefact[] =
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -143,  -143,  -143,   214,  -143,  -143,  -143,   193,  -143,   197,
-    -143,   174,    19,  -143,  -143,  -143,   162,  -142,  -143,  -143,
-     -57,  -143,  -143,  -143,  -143,    60,  -143,   -51,     0,  -143,
-    -143,   126,  -143,   189,  -143,    20
+    -102,  -102,  -102,   211,  -102,  -102,  -102,   170,  -102,   191,
+    -102,   163,   -45,  -102,  -102,  -102,    94,   -87,  -102,  -102,
+    -101,  -102,  -102,  -102,  -102,    41,  -102,   -22,  -102,  -102,
+    -102,    76,  -102,   164,  -102,     2
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
-       0,     1,     2,    68,    11,    12,    18,    19,    13,    28,
-      29,    30,    69,    57,    70,    71,    72,    73,    74,    75,
-      90,    77,    78,   110,   181,   111,    79,   135,    92,    93,
-      80,   136,   137,    25,   100,    14
+       0,     1,     2,   119,    11,    12,    18,    19,    13,    28,
+      29,    30,   120,   104,   121,   122,   123,   124,   125,   126,
+      42,   128,   129,   153,   181,   154,   130,    83,    44,    45,
+     131,    84,    85,    25,    57,    14
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -745,80 +745,84 @@ static const yytype_uint8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      76,   168,   169,    22,     4,     5,    15,     6,    97,     7,
-       8,    91,    94,    95,    76,    24,    58,     9,    59,    60,
-      61,    62,    37,    63,    64,    65,   109,     3,    66,    16,
-     107,   108,    46,    17,   179,   114,   115,   116,   117,    26,
-      31,    27,    32,    31,   188,    22,   103,   190,   138,    39,
-     104,   105,   140,    67,    21,    23,    41,    24,    50,    40,
-       4,     5,    51,     6,    31,     7,    55,   150,   151,   152,
-     153,   154,   155,   156,   157,   158,   159,   160,   161,   162,
-     145,   126,   127,   128,   184,   185,    76,    76,   166,    33,
-      34,    35,    36,    20,   170,   171,     4,     5,    98,     6,
-      99,     7,     8,    58,    43,    59,    60,    61,    62,     9,
-      63,    64,    65,   174,    44,    66,   113,    45,    99,    76,
-     180,    47,    85,    33,    34,    35,    36,    48,    49,    76,
-      50,    24,    76,    86,    87,    54,    56,    81,    82,    88,
-      67,    96,    83,   112,    84,    50,   106,    99,    89,   118,
-     119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-      -1,    -1,   129,   130,    -1,    -1,   124,   125,   126,   127,
-     128,   101,   134,   165,   118,   119,   120,   121,   122,   123,
-     124,   125,   126,   127,   128,   139,   141,   129,   130,   142,
-     145,   146,   147,   164,   163,   176,   172,   178,   175,   118,
-     119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-     173,   183,   129,   130,   186,   187,    10,   189,    52,    42,
-      38,   143,   118,   119,   120,   121,   122,   123,   124,   125,
-     126,   127,   128,   102,    53,   129,   130,   182,     0,   148,
-       0,     0,     0,     0,   144,   118,   119,   120,   121,   122,
-     123,   124,   125,   126,   127,   128,     0,     0,   129,   130,
-       0,     0,     0,     0,     0,     0,     0,   149,   118,   119,
-     120,   121,   122,   123,   124,   125,   126,   127,   128,     0,
-       0,   129,   130,     0,     0,     0,     0,     0,   131,   118,
-     119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-       0,     0,   129,   130,     0,     0,     0,     0,     0,   132,
-     118,   119,   120,   121,   122,   123,   124,   125,   126,   127,
-     128,     0,     0,   129,   130,     0,     0,     0,     0,     0,
-     133,   118,   119,   120,   121,   122,   123,   124,   125,   126,
-     127,   128,     0,     0,   129,   130,     0,     0,     0,     0,
-       0,   167,   118,   119,   120,   121,   122,   123,   124,   125,
-     126,   127,   128,     0,     0,   129,   130,     0,     0,     0,
-       0,     0,   177,   118,   119,   120,   121,   122,   123,   124,
-     125,   126,   127,   128,     0,     0,   129,   130,   118,   119,
-     120,   121,   122,   123,   124,   125,   126,   127,   128,     0,
-       0,   129,   118,   119,    -1,    -1,   122,   123,   124,   125,
-     126,   127,   128,   118,   119,   120,   121,   122,   123,   124,
-     125,   126,   127,   128
+      43,    22,    22,   127,     4,     5,    79,     6,     3,     7,
+      54,    16,    23,    24,    24,   142,    58,    59,    60,    61,
+      15,   127,    31,    20,   109,    31,   110,   111,   112,   113,
+     102,   114,   115,   116,    86,   152,   117,    26,    17,    27,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,    55,    31,    56,    33,    34,    35,    36,
+      37,   118,    21,   127,   127,   108,    78,    38,    39,    47,
+      70,    71,    72,    40,    32,   127,   180,   171,   172,   143,
+      48,    56,    41,    49,   132,   127,    51,    52,   127,   179,
+      53,   138,   139,   140,    75,     4,     5,    77,     6,   188,
+       7,     8,   190,    76,   103,   146,    78,    24,     9,   147,
+     148,   105,   150,   151,    87,   106,     4,     5,   141,     6,
+     134,     7,     8,   109,   161,   110,   111,   112,   113,     9,
+     114,   115,   116,    -1,    -1,   117,   135,    -1,    -1,    68,
+      69,    70,    71,    72,   173,   174,   136,   137,    62,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,   149,
+     118,    73,    74,   166,   144,    78,   155,   184,   185,    56,
+     159,   162,   107,    62,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,   163,   166,    73,    74,   167,   168,
+     175,   169,   176,   178,   183,   187,    50,   133,    62,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,   186,
+     189,    73,    74,    10,    46,    80,   145,    81,   182,   160,
+      88,    62,    63,    64,    65,    66,    67,    68,    69,    70,
+      71,    72,     0,     0,    73,    74,     0,     0,     0,     0,
+       0,     0,     0,   164,    62,    63,    64,    65,    66,    67,
+      68,    69,    70,    71,    72,     0,     0,    73,    74,     0,
+       0,     0,     0,     0,     0,     0,   165,    62,    63,    64,
+      65,    66,    67,    68,    69,    70,    71,    72,     0,     0,
+      73,    74,     0,     0,     0,     0,     0,    82,    62,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,     0,
+       0,    73,    74,     0,     0,     0,     0,     0,   156,    62,
+      63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+       0,     0,    73,    74,     0,     0,     0,     0,     0,   157,
+      62,    63,    64,    65,    66,    67,    68,    69,    70,    71,
+      72,     0,     0,    73,    74,     0,     0,     0,     0,     0,
+     158,    62,    63,    64,    65,    66,    67,    68,    69,    70,
+      71,    72,     0,     0,    73,    74,     0,     0,     0,     0,
+       0,   170,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,     0,     0,    73,    74,     0,     0,     0,
+       0,     0,   177,    62,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,     0,     0,    73,    74,    62,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,     0,
+       0,    73,    62,    63,    -1,    -1,    66,    67,    68,    69,
+      70,    71,    72,    62,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72
 };
 
 static const yytype_int16 yycheck[] =
 {
-      57,   143,   144,    38,     3,     4,    22,     6,    65,     8,
-       9,    62,    63,    64,    71,    50,    10,    16,    12,    13,
-      14,    15,    22,    17,    18,    19,    83,     0,    22,     9,
-      81,    82,    32,    22,   176,    86,    87,    88,    89,    45,
-      20,    47,    38,    23,   186,    38,    38,   189,    99,    23,
-      42,    43,   103,    47,    22,    48,    22,    50,    52,    50,
-       3,     4,    43,     6,    44,     8,    47,   118,   119,   120,
-     121,   122,   123,   124,   125,   126,   127,   128,   129,   130,
-      38,    35,    36,    37,    42,    43,   143,   144,   139,    23,
-      24,    25,    26,    48,   145,   146,     3,     4,    48,     6,
-      50,     8,     9,    10,    49,    12,    13,    14,    15,    16,
-      17,    18,    19,   164,    45,    22,    48,    22,    50,   176,
-     177,    49,    22,    23,    24,    25,    26,    51,    23,   186,
-      52,    50,   189,    33,    34,    47,    51,    48,    48,    39,
-      47,    22,    48,    22,    48,    52,    47,    50,    48,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      27,    28,    40,    41,    31,    32,    33,    34,    35,    36,
-      37,    53,    47,    51,    27,    28,    29,    30,    31,    32,
-      33,    34,    35,    36,    37,    50,    47,    40,    41,    47,
-      38,    47,    46,    45,    49,    11,    23,    44,    51,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      49,    44,    40,    41,    49,    23,     2,    49,    44,    26,
-      23,    49,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    71,    45,    40,    41,   177,    -1,   113,
-      -1,    -1,    -1,    -1,    49,    27,    28,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    -1,    -1,    40,    41,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    49,    27,    28,
+      22,    38,    38,   104,     3,     4,    51,     6,     0,     8,
+      32,     9,    48,    50,    50,   116,    38,    39,    40,    41,
+      22,   122,    20,    48,    10,    23,    12,    13,    14,    15,
+      75,    17,    18,    19,    56,   136,    22,    45,    22,    47,
+      62,    63,    64,    65,    66,    67,    68,    69,    70,    71,
+      72,    73,    74,    48,    52,    50,    22,    23,    24,    25,
+      26,    47,    22,   164,   165,    87,    52,    33,    34,    23,
+      35,    36,    37,    39,    38,   176,   177,   164,   165,    48,
+      50,    50,    48,    22,   106,   186,    49,    45,   189,   176,
+      22,   113,   114,   115,    49,     3,     4,    23,     6,   186,
+       8,     9,   189,    51,    51,    38,    52,    50,    16,    42,
+      43,    49,   134,   135,    50,    45,     3,     4,    22,     6,
+      48,     8,     9,    10,   146,    12,    13,    14,    15,    16,
+      17,    18,    19,    27,    28,    22,    48,    31,    32,    33,
+      34,    35,    36,    37,   166,   167,    48,    48,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    47,
+      47,    40,    41,    38,    53,    52,    22,    42,    43,    50,
+      47,    47,    51,    27,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    37,    47,    38,    40,    41,    47,    46,
+      23,    49,    11,    44,    44,    23,    26,    51,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    49,
+      49,    40,    41,     2,    23,    52,   122,    53,   177,   143,
+      49,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    -1,    -1,    40,    41,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    49,    27,    28,    29,    30,    31,    32,
+      33,    34,    35,    36,    37,    -1,    -1,    40,    41,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    49,    27,    28,    29,
+      30,    31,    32,    33,    34,    35,    36,    37,    -1,    -1,
+      40,    41,    -1,    -1,    -1,    -1,    -1,    47,    27,    28,
       29,    30,    31,    32,    33,    34,    35,    36,    37,    -1,
       -1,    40,    41,    -1,    -1,    -1,    -1,    -1,    47,    27,
       28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
@@ -844,21 +848,21 @@ static const yytype_int8 yystos[] =
        0,    64,    65,     0,     3,     4,     6,     8,     9,    16,
       66,    67,    68,    71,    98,    22,    98,    22,    69,    70,
       48,    22,    38,    48,    50,    96,    45,    47,    72,    73,
-      74,    98,    38,    23,    24,    25,    26,    91,    72,    23,
-      50,    22,    70,    49,    45,    22,    91,    49,    51,    23,
-      52,    75,    74,    96,    47,    75,    51,    76,    10,    12,
-      13,    14,    15,    17,    18,    19,    22,    47,    66,    75,
-      77,    78,    79,    80,    81,    82,    83,    84,    85,    89,
-      93,    48,    48,    48,    48,    22,    33,    34,    39,    48,
-      83,    90,    91,    92,    90,    90,    22,    83,    48,    50,
-      97,    53,    79,    38,    42,    43,    47,    90,    90,    83,
-      86,    88,    22,    48,    90,    90,    90,    90,    27,    28,
-      29,    30,    31,    32,    33,    34,    35,    36,    37,    40,
-      41,    47,    47,    47,    47,    90,    94,    95,    90,    50,
-      90,    47,    47,    49,    49,    38,    47,    46,    94,    49,
+      74,    98,    38,    22,    23,    24,    25,    26,    33,    34,
+      39,    48,    83,    90,    91,    92,    72,    23,    50,    22,
+      70,    49,    45,    22,    90,    48,    50,    97,    90,    90,
+      90,    90,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    40,    41,    49,    51,    23,    52,    75,
+      74,    96,    47,    90,    94,    95,    90,    50,    49,    90,
       90,    90,    90,    90,    90,    90,    90,    90,    90,    90,
-      90,    90,    90,    49,    45,    51,    90,    47,    80,    80,
-      90,    90,    23,    49,    90,    51,    11,    47,    44,    80,
+      90,    90,    75,    51,    76,    49,    45,    51,    90,    10,
+      12,    13,    14,    15,    17,    18,    19,    22,    47,    66,
+      75,    77,    78,    79,    80,    81,    82,    83,    84,    85,
+      89,    93,    90,    51,    48,    48,    48,    48,    90,    90,
+      90,    22,    83,    48,    53,    79,    38,    42,    43,    47,
+      90,    90,    83,    86,    88,    22,    47,    47,    47,    47,
+      94,    90,    47,    47,    49,    49,    38,    47,    46,    49,
+      47,    80,    80,    90,    90,    23,    11,    47,    44,    80,
       83,    87,    88,    44,    42,    43,    49,    23,    80,    49,
       80
 };
@@ -1353,25 +1357,42 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 8: /* const_decl: CONST type_spec ID ASSIGN const_expr SEMICOLON  */
-#line 113 "p2_parser.y"
+  case 8: /* const_decl: CONST type_spec ID ASSIGN expression SEMICOLON  */
+#line 112 "p2_parser.y"
     {
-        if (*(yyvsp[-4].type) != *(yyvsp[-1].type)) {
+        if (*(yyvsp[-4].type) != *(yyvsp[-1].expr_info)->type) {
             throw SemanticError("const type mismatch", yylineno);
         }
 
+        if (!(yyvsp[-1].expr_info)->isConst) {
+            throw SemanticError("const expression must be const", yylineno);
+        }
+
         Symbol s(*(yyvsp[-3].sval), (yyvsp[-4].type), true);
+
+        if ((yyvsp[-1].expr_info)->valueKind == VK_Float) {
+            s.setFloat((yyvsp[-1].expr_info)->getFloat());
+        } else if ((yyvsp[-1].expr_info)->valueKind == VK_Int) {
+            s.setInt((yyvsp[-1].expr_info)->getInt());
+        } else if ((yyvsp[-1].expr_info)->valueKind == VK_String) {
+            s.setString((yyvsp[-1].expr_info)->getString());
+        } else if ((yyvsp[-1].expr_info)->valueKind == VK_Bool) {
+            s.setBool((yyvsp[-1].expr_info)->getBool());
+        }
+        
         if (!symTab.insert(s)) {
             throw SemanticError("redeclared const: " + *(yyvsp[-3].sval), yylineno);
         }
 
+        
+
         delete (yyvsp[-3].sval); 
     }
-#line 1371 "y.tab.cpp"
+#line 1392 "y.tab.cpp"
     break;
 
   case 9: /* var_decl: type_spec var_init_list SEMICOLON  */
-#line 130 "p2_parser.y"
+#line 146 "p2_parser.y"
     {
         for (auto& var : *(yyvsp[-1].var_init_list)) {
            if (var->constType != nullptr) {
@@ -1405,72 +1426,78 @@ yyreduce:
             delete var;
         }
     }
-#line 1409 "y.tab.cpp"
+#line 1430 "y.tab.cpp"
     break;
 
   case 10: /* var_init_list: var_init  */
-#line 166 "p2_parser.y"
+#line 182 "p2_parser.y"
              {
         (yyval.var_init_list) = new std::vector<varInit*>;
         (yyval.var_init_list)->push_back((yyvsp[0].var_init));}
-#line 1417 "y.tab.cpp"
+#line 1438 "y.tab.cpp"
     break;
 
   case 11: /* var_init_list: var_init_list COMMA var_init  */
-#line 169 "p2_parser.y"
+#line 185 "p2_parser.y"
                                   {
         (yyval.var_init_list) = (yyvsp[-2].var_init_list);
         (yyval.var_init_list)->push_back((yyvsp[0].var_init));
     }
-#line 1426 "y.tab.cpp"
+#line 1447 "y.tab.cpp"
     break;
 
   case 12: /* var_init: ID  */
-#line 176 "p2_parser.y"
+#line 192 "p2_parser.y"
                             { (yyval.var_init) = new varInit((yyvsp[0].sval)); }
-#line 1432 "y.tab.cpp"
+#line 1453 "y.tab.cpp"
     break;
 
-  case 13: /* var_init: ID ASSIGN const_expr  */
-#line 177 "p2_parser.y"
-                            { (yyval.var_init) = new varInit((yyvsp[-2].sval), (yyvsp[0].type)); }
-#line 1438 "y.tab.cpp"
+  case 13: /* var_init: ID ASSIGN expression  */
+#line 193 "p2_parser.y"
+                            {
+        if (!(yyvsp[0].expr_info)->isConst) {
+            throw SemanticError("assignment to non-const", yylineno);
+        }
+
+        (yyval.var_init) = new varInit((yyvsp[-2].sval), (yyvsp[0].expr_info)->type);
+   }
+#line 1465 "y.tab.cpp"
     break;
 
   case 14: /* var_init: ID array_dims  */
-#line 178 "p2_parser.y"
+#line 200 "p2_parser.y"
                             { (yyval.var_init) = new varInit((yyvsp[-1].sval), (yyvsp[0].int_list)); }
-#line 1444 "y.tab.cpp"
+#line 1471 "y.tab.cpp"
     break;
 
   case 23: /* $@1: %empty  */
-#line 206 "p2_parser.y"
+#line 228 "p2_parser.y"
             {
         symTab.enterScope();
      }
-#line 1452 "y.tab.cpp"
+#line 1479 "y.tab.cpp"
     break;
 
   case 24: /* block: LBRACE $@1 block_items_opt RBRACE  */
-#line 208 "p2_parser.y"
+#line 230 "p2_parser.y"
                              {
         symTab.leaveScope();
      }
-#line 1460 "y.tab.cpp"
+#line 1487 "y.tab.cpp"
     break;
 
   case 40: /* simple_stmt: READ lvalue SEMICOLON  */
-#line 242 "p2_parser.y"
+#line 264 "p2_parser.y"
                            {
         if ((yyvsp[-1].symbol)->isConst) {
             throw SemanticError("read to const", yylineno);
         }
     }
-#line 1470 "y.tab.cpp"
+#line 1497 "y.tab.cpp"
     break;
 
   case 41: /* simple_stmt: lvalue INC SEMICOLON  */
-#line 247 "p2_parser.y"
+#line 269 "p2_parser.y"
                           {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("increment to const", yylineno);
@@ -1480,11 +1507,11 @@ yyreduce:
             throw SemanticError("increment to non-integer type", yylineno);
         }
      }
-#line 1484 "y.tab.cpp"
+#line 1511 "y.tab.cpp"
     break;
 
   case 42: /* simple_stmt: lvalue DEC SEMICOLON  */
-#line 256 "p2_parser.y"
+#line 278 "p2_parser.y"
                           {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("decrement to const", yylineno);
@@ -1494,27 +1521,27 @@ yyreduce:
             throw SemanticError("decrement to non-integer type", yylineno);
         }
     }
-#line 1498 "y.tab.cpp"
+#line 1525 "y.tab.cpp"
     break;
 
   case 44: /* assign_stmt: lvalue ASSIGN expression SEMICOLON  */
-#line 269 "p2_parser.y"
+#line 291 "p2_parser.y"
                                         {
         if ((yyvsp[-3].symbol)->isConst) {
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ((yyvsp[-3].symbol)->type != (yyvsp[-1].type)) {
-            if (!(((yyvsp[-3].symbol)->type->base == BK_Int || (yyvsp[-3].symbol)->type->base == BK_Float) && ((yyvsp[-1].type)->base == BK_Int || (yyvsp[-1].type)->base == BK_Float))) {
+        if ((yyvsp[-3].symbol)->type != (yyvsp[-1].expr_info)->type) {
+            if (!(((yyvsp[-3].symbol)->type->base == BK_Int || (yyvsp[-3].symbol)->type->base == BK_Float) && ((yyvsp[-1].expr_info)->type->base == BK_Int || (yyvsp[-1].expr_info)->type->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
      }
-#line 1514 "y.tab.cpp"
+#line 1541 "y.tab.cpp"
     break;
 
   case 45: /* lvalue: ID  */
-#line 284 "p2_parser.y"
+#line 306 "p2_parser.y"
      {
         Symbol* symbol = symTab.lookup(*(yyvsp[0].sval));
         if (symbol == nullptr) {
@@ -1523,11 +1550,11 @@ yyreduce:
 
         (yyval.symbol) = symbol;
      }
-#line 1527 "y.tab.cpp"
+#line 1554 "y.tab.cpp"
     break;
 
   case 46: /* lvalue: ID array_ref  */
-#line 293 "p2_parser.y"
+#line 315 "p2_parser.y"
     {
         Symbol* symbol = symTab.lookup(*(yyvsp[-1].sval));
         if (symbol == nullptr) {
@@ -1545,51 +1572,51 @@ yyreduce:
 
         (yyval.symbol) = symbol;
     }
-#line 1549 "y.tab.cpp"
+#line 1576 "y.tab.cpp"
     break;
 
   case 47: /* if_stmt: IF LPAREN expression RPAREN statement  */
-#line 315 "p2_parser.y"
+#line 337 "p2_parser.y"
      {
-        if ((yyvsp[-2].type)->base != BK_Bool) {
+        if ((yyvsp[-2].expr_info)->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
      }
-#line 1559 "y.tab.cpp"
+#line 1586 "y.tab.cpp"
     break;
 
   case 48: /* if_stmt: IF LPAREN expression RPAREN statement ELSE statement  */
-#line 321 "p2_parser.y"
+#line 343 "p2_parser.y"
     {
-        if ((yyvsp[-4].type)->base != BK_Bool) {
+        if ((yyvsp[-4].expr_info)->type->base != BK_Bool) {
             throw SemanticError("if condition must be bool", yylineno);
         }
     }
-#line 1569 "y.tab.cpp"
+#line 1596 "y.tab.cpp"
     break;
 
   case 49: /* loop_stmt: WHILE LPAREN expression RPAREN statement  */
-#line 330 "p2_parser.y"
+#line 352 "p2_parser.y"
                                              {
-            if ((yyvsp[-2].type)->base != BK_Bool) {
+            if ((yyvsp[-2].expr_info)->type->base != BK_Bool) {
                 throw SemanticError("while condition must be bool", yylineno);
             }
         }
-#line 1579 "y.tab.cpp"
+#line 1606 "y.tab.cpp"
     break;
 
   case 50: /* loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement  */
-#line 335 "p2_parser.y"
+#line 357 "p2_parser.y"
                                                                                             {
-        if ((yyvsp[-4].type)->base != BK_Bool) {
+        if ((yyvsp[-4].expr_info)->type->base != BK_Bool) {
             throw SemanticError("for condition must be bool", yylineno);
         }
       }
-#line 1589 "y.tab.cpp"
+#line 1616 "y.tab.cpp"
     break;
 
   case 56: /* for_update_opt: lvalue INC  */
-#line 351 "p2_parser.y"
+#line 373 "p2_parser.y"
                {
             if ((yyvsp[-1].symbol)->isConst) {
                 throw SemanticError("increment to const", yylineno);
@@ -1599,11 +1626,11 @@ yyreduce:
                 throw SemanticError("increment to non-integer type", yylineno);
             }
     }
-#line 1603 "y.tab.cpp"
+#line 1630 "y.tab.cpp"
     break;
 
   case 57: /* for_update_opt: lvalue DEC  */
-#line 360 "p2_parser.y"
+#line 382 "p2_parser.y"
               {
             if ((yyvsp[-1].symbol)->isConst) {
                 throw SemanticError("decrement to const", yylineno);
@@ -1613,192 +1640,553 @@ yyreduce:
                 throw SemanticError("decrement to non-integer type", yylineno);
             }
         }
-#line 1617 "y.tab.cpp"
+#line 1644 "y.tab.cpp"
     break;
 
   case 58: /* assign_no_semi: lvalue ASSIGN expression  */
-#line 372 "p2_parser.y"
+#line 394 "p2_parser.y"
                               {
         if ((yyvsp[-2].symbol)->isConst) {
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ((yyvsp[-2].symbol)->type != (yyvsp[0].type)) {
-            if (!(((yyvsp[-2].symbol)->type->base == BK_Int || (yyvsp[-2].symbol)->type->base == BK_Float) && ((yyvsp[0].type)->base == BK_Int || (yyvsp[0].type)->base == BK_Float))) {
+        if ((yyvsp[-2].symbol)->type != (yyvsp[0].expr_info)->type) {
+            if (!(((yyvsp[-2].symbol)->type->base == BK_Int || (yyvsp[-2].symbol)->type->base == BK_Float) && ((yyvsp[0].expr_info)->type->base == BK_Int || (yyvsp[0].expr_info)->type->base == BK_Float))) {
                 throw SemanticError("assignment type mismatch", yylineno);
             }
         }
      }
-#line 1633 "y.tab.cpp"
+#line 1660 "y.tab.cpp"
     break;
 
   case 60: /* expression: expression PLUS expression  */
-#line 392 "p2_parser.y"
-                                    { (yyval.type) = binaryNumericResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1639 "y.tab.cpp"
+#line 414 "p2_parser.y"
+                                {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if (b1 == BK_String && b2 == BK_String) {
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_String), isConst);
+            if (isConst) (yyval.expr_info)->setString((yyvsp[-2].expr_info)->getString() + (yyvsp[0].expr_info)->getString());
+        }
+        else if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                    (yyval.expr_info)->setFloat(v1 + v2);
+                } else {
+                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() + (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("addition type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1694 "y.tab.cpp"
     break;
 
   case 61: /* expression: expression MINUS expression  */
-#line 393 "p2_parser.y"
-                                    { (yyval.type) = binaryNumericResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1645 "y.tab.cpp"
+#line 443 "p2_parser.y"
+                                    { 
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                    (yyval.expr_info)->setFloat(v1 - v2);
+                } else {
+                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() - (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("subtraction type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1724 "y.tab.cpp"
     break;
 
   case 62: /* expression: expression MUL expression  */
-#line 394 "p2_parser.y"
-                                    { (yyval.type) = binaryNumericResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1651 "y.tab.cpp"
+#line 468 "p2_parser.y"
+                                    { 
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                    (yyval.expr_info)->setFloat(v1 * v2);
+                } else {
+                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() * (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("multiplication type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1754 "y.tab.cpp"
     break;
 
   case 63: /* expression: expression DIV expression  */
-#line 395 "p2_parser.y"
-                                    { 
-        if ((yyvsp[0].type)->isZero) {
-            throw SemanticError("division by zero", yylineno);
+#line 493 "p2_parser.y"
+                               {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if ((yyvsp[0].expr_info)->isZeroValue()) {
+                throw SemanticError("division by zero", yylineno);
+            }
+
+            BaseKind resultKind = (b1 == BK_Float || b2 == BK_Float) ? BK_Float : BK_Int;
+            (yyval.expr_info) = new ExprInfo(typePool.make(resultKind), isConst);
+
+            if (isConst) {
+                if (resultKind == BK_Float) {
+                    float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                    float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                    (yyval.expr_info)->setFloat(v1 / v2);
+                } else {
+                    (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() / (yyvsp[0].expr_info)->getInt());
+                }
+            }
         }
-        (yyval.type) = binaryNumericResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);
+        else {
+            throw SemanticError("division type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
     }
-#line 1662 "y.tab.cpp"
+#line 1789 "y.tab.cpp"
     break;
 
   case 64: /* expression: expression MOD expression  */
-#line 401 "p2_parser.y"
-                                    { (yyval.type) = binaryModResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1668 "y.tab.cpp"
+#line 523 "p2_parser.y"
+                               {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if (b1 == BK_Int && b2 == BK_Int) {
+            if ((yyvsp[0].expr_info)->isZeroValue()) {
+                throw SemanticError("modulus by zero", yylineno);
+            }
+
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Int), isConst);
+
+            if (isConst) {
+                (yyval.expr_info)->setInt((yyvsp[-2].expr_info)->getInt() % (yyvsp[0].expr_info)->getInt());
+            }
+        }
+        else {
+            throw SemanticError("modulus type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1817 "y.tab.cpp"
     break;
 
   case 65: /* expression: expression LT expression  */
-#line 402 "p2_parser.y"
-                                    { (yyval.type) = binaryCompareResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1674 "y.tab.cpp"
+#line 546 "p2_parser.y"
+                                    { 
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) < toFloat((yyvsp[0].expr_info)));
+                } else {
+                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() < (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("less than type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1844 "y.tab.cpp"
     break;
 
   case 66: /* expression: expression LE expression  */
-#line 403 "p2_parser.y"
-                                    { (yyval.type) = binaryCompareResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1680 "y.tab.cpp"
+#line 568 "p2_parser.y"
+                                    {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) <= toFloat((yyvsp[0].expr_info)));
+                } else {
+                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() <= (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("less than or equal type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1871 "y.tab.cpp"
     break;
 
   case 67: /* expression: expression GT expression  */
-#line 404 "p2_parser.y"
-                                    { (yyval.type) = binaryCompareResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1686 "y.tab.cpp"
+#line 590 "p2_parser.y"
+                                    { 
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) > toFloat((yyvsp[0].expr_info)));
+                } else {
+                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() > (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("greater than type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1898 "y.tab.cpp"
     break;
 
   case 68: /* expression: expression GE expression  */
-#line 405 "p2_parser.y"
-                                    { (yyval.type) = binaryCompareResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1692 "y.tab.cpp"
+#line 612 "p2_parser.y"
+                                    {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+            if (isConst) {
+                if (b1 == BK_Float || b2 == BK_Float) {
+                    (yyval.expr_info)->setBool(toFloat((yyvsp[-2].expr_info)) >= toFloat((yyvsp[0].expr_info)));
+                } else {
+                    (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() >= (yyvsp[0].expr_info)->getInt());
+                }
+            }
+        }
+        else {
+            throw SemanticError("greater than or equal type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1925 "y.tab.cpp"
     break;
 
   case 69: /* expression: expression EQ expression  */
-#line 406 "p2_parser.y"
-                                    { (yyval.type) = binaryEqualNotEqualResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1698 "y.tab.cpp"
+#line 634 "p2_parser.y"
+                               {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if (isConst) {
+                float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                (yyval.expr_info)->setBool(v1 == v2);
+            }
+        }
+        else if (b1 == b2) {
+            if (isConst) {
+                switch (b1) {
+                    case BK_Bool:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getBool() == (yyvsp[0].expr_info)->getBool());
+                        break;
+                    case BK_String:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getString() == (yyvsp[0].expr_info)->getString());
+                        break;
+                    case BK_Int:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() == (yyvsp[0].expr_info)->getInt());
+                        break;
+                    case BK_Float:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getFloat() == (yyvsp[0].expr_info)->getFloat());
+                        break;
+                    default:
+                        throw SemanticError("unsupported == type", yylineno);
+                }
+            }
+        }
+        else {
+            throw SemanticError("equal type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 1971 "y.tab.cpp"
     break;
 
   case 70: /* expression: expression NEQ expression  */
-#line 407 "p2_parser.y"
-                                    { (yyval.type) = binaryEqualNotEqualResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1704 "y.tab.cpp"
+#line 675 "p2_parser.y"
+                                    {
+        BaseKind b1 = (yyvsp[-2].expr_info)->type->base;
+        BaseKind b2 = (yyvsp[0].expr_info)->type->base;
+        bool isConst = (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst;
+
+        (yyval.expr_info) = new ExprInfo(typePool.make(BK_Bool), isConst);
+
+        if ((b1 == BK_Int || b1 == BK_Float) && (b2 == BK_Int || b2 == BK_Float)) {
+            if (isConst) {
+                float v1 = (b1 == BK_Float) ? (yyvsp[-2].expr_info)->getFloat() : (yyvsp[-2].expr_info)->getInt();
+                float v2 = (b2 == BK_Float) ? (yyvsp[0].expr_info)->getFloat() : (yyvsp[0].expr_info)->getInt();
+                (yyval.expr_info)->setBool(v1 != v2);
+            }
+        }
+        else if (b1 == b2) {
+            if (isConst) {
+                switch (b1) {
+                    case BK_Bool:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getBool() != (yyvsp[0].expr_info)->getBool());
+                        break;
+                    case BK_String:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getString() != (yyvsp[0].expr_info)->getString());
+                        break;
+                    case BK_Int:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getInt() != (yyvsp[0].expr_info)->getInt());
+                        break;
+                    case BK_Float:
+                        (yyval.expr_info)->setBool((yyvsp[-2].expr_info)->getFloat() != (yyvsp[0].expr_info)->getFloat());
+                        break;
+                    default:
+                        throw SemanticError("unsupported != type", yylineno);
+                }
+            }
+        }
+        else {
+            throw SemanticError("not equal type mismatch", yylineno);
+        }
+
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 2017 "y.tab.cpp"
     break;
 
   case 71: /* expression: expression AND expression  */
-#line 408 "p2_parser.y"
-                                    { (yyval.type) = binaryBoolResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1710 "y.tab.cpp"
+#line 716 "p2_parser.y"
+                                    {
+        if ((yyvsp[-2].expr_info)->type->base != BK_Bool || (yyvsp[0].expr_info)->type->base != BK_Bool) {
+            throw SemanticError("and on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst);
+        if (expr->isConst){
+            expr->setBool((yyvsp[-2].expr_info)->getBool() && (yyvsp[0].expr_info)->getBool());
+        }
+        (yyval.expr_info) = expr;
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 2035 "y.tab.cpp"
     break;
 
   case 72: /* expression: expression OR expression  */
-#line 409 "p2_parser.y"
-                                    { (yyval.type) = binaryBoolResult((yyvsp[-2].type), (yyvsp[0].type), typePool, yylineno);}
-#line 1716 "y.tab.cpp"
+#line 729 "p2_parser.y"
+                                    { 
+        if ((yyvsp[-2].expr_info)->type->base != BK_Bool || (yyvsp[0].expr_info)->type->base != BK_Bool) {
+            throw SemanticError("or on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), (yyvsp[-2].expr_info)->isConst && (yyvsp[0].expr_info)->isConst);
+        if (expr->isConst){
+            expr->setBool((yyvsp[-2].expr_info)->getBool() || (yyvsp[0].expr_info)->getBool());
+        }
+        (yyval.expr_info) = expr;
+        delete (yyvsp[-2].expr_info);
+        delete (yyvsp[0].expr_info);
+    }
+#line 2053 "y.tab.cpp"
     break;
 
   case 73: /* expression: NOT expression  */
-#line 410 "p2_parser.y"
-                                    { (yyval.type) = unaryBoolResult((yyvsp[0].type), typePool, yylineno);}
-#line 1722 "y.tab.cpp"
+#line 742 "p2_parser.y"
+                                    { 
+        if ((yyvsp[0].expr_info)->type->base != BK_Bool) {
+            throw SemanticError("not on non-bool type", yylineno);
+        }
+
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), (yyvsp[0].expr_info)->isConst);
+        if ((yyvsp[0].expr_info)->isConst){
+            expr->setBool(!(yyvsp[0].expr_info)->getBool());
+        }
+        (yyval.expr_info) = expr;
+        delete (yyvsp[0].expr_info);
+    }
+#line 2070 "y.tab.cpp"
     break;
 
   case 74: /* expression: MINUS expression  */
-#line 411 "p2_parser.y"
+#line 754 "p2_parser.y"
                                     { 
-        if ((yyvsp[0].type)->base == BK_Float) {
-            (yyval.type) = typePool.make(BK_Float);
-        } else if ((yyvsp[0].type)->base == BK_Int) {
-            (yyval.type) = typePool.make(BK_Int);
-        } else {
+        if ((yyvsp[0].expr_info)->type->base != BK_Float && (yyvsp[0].expr_info)->type->base != BK_Int) {
             throw SemanticError("unary minus on non-numeric type", yylineno);
         }
+
+        ExprInfo* expr = new ExprInfo((yyvsp[0].expr_info)->type, (yyvsp[0].expr_info)->isConst);
+        if ((yyvsp[0].expr_info)->isConst){
+            if ((yyvsp[0].expr_info)->valueKind == VK_Float) {
+                expr->setFloat(-(yyvsp[0].expr_info)->getFloat());
+            } else if ((yyvsp[0].expr_info)->valueKind == VK_Int) {
+                expr->setInt(-(yyvsp[0].expr_info)->getInt());
+            }
+        }
+        (yyval.expr_info) = expr;
+        delete (yyvsp[0].expr_info);
     }
-#line 1736 "y.tab.cpp"
+#line 2091 "y.tab.cpp"
     break;
 
   case 75: /* expression: PLUS expression  */
-#line 420 "p2_parser.y"
+#line 770 "p2_parser.y"
                                     { 
-        if ((yyvsp[0].type)->base == BK_Float) {
-            (yyval.type) = typePool.make(BK_Float);
-        } else if ((yyvsp[0].type)->base == BK_Int) {
-            (yyval.type) = typePool.make(BK_Int);
-        } else {
+        if ((yyvsp[0].expr_info)->type->base != BK_Float && (yyvsp[0].expr_info)->type->base != BK_Int) {
             throw SemanticError("unary plus on non-numeric type", yylineno);
         }
+
+        ExprInfo* expr = new ExprInfo((yyvsp[0].expr_info)->type, (yyvsp[0].expr_info)->isConst);
+        if ((yyvsp[0].expr_info)->isConst){
+            if ((yyvsp[0].expr_info)->valueKind == VK_Float) {
+                expr->setFloat((yyvsp[0].expr_info)->getFloat());
+            } else if ((yyvsp[0].expr_info)->valueKind == VK_Int) {
+                expr->setInt((yyvsp[0].expr_info)->getInt());
+            }
+        }
+
+        (yyval.expr_info) = expr;
+        delete (yyvsp[0].expr_info);
     }
-#line 1750 "y.tab.cpp"
+#line 2113 "y.tab.cpp"
     break;
 
   case 76: /* expression: LPAREN expression RPAREN  */
-#line 429 "p2_parser.y"
-                                    { (yyval.type) = (yyvsp[-1].type);}
-#line 1756 "y.tab.cpp"
+#line 787 "p2_parser.y"
+                                    {
+        (yyval.expr_info) = (yyvsp[-1].expr_info);
+    }
+#line 2121 "y.tab.cpp"
     break;
 
   case 77: /* expression: lvalue  */
-#line 430 "p2_parser.y"
-                                    { (yyval.type) = (yyvsp[0].symbol)->type;}
-#line 1762 "y.tab.cpp"
+#line 790 "p2_parser.y"
+                                    {
+        (yyval.expr_info) = (yyvsp[0].symbol)->getExpr();
+    }
+#line 2129 "y.tab.cpp"
     break;
 
   case 78: /* expression: const_expr  */
-#line 431 "p2_parser.y"
-                                    { (yyval.type) = (yyvsp[0].type);}
-#line 1768 "y.tab.cpp"
+#line 793 "p2_parser.y"
+                                     {
+        (yyval.expr_info) = (yyvsp[0].expr_info);
+    }
+#line 2137 "y.tab.cpp"
     break;
 
   case 79: /* expression: func_call  */
-#line 432 "p2_parser.y"
-                                    { (yyval.type) = typePool.make(BK_Int);}
-#line 1774 "y.tab.cpp"
+#line 796 "p2_parser.y"
+                                    {
+    
+  }
+#line 2145 "y.tab.cpp"
     break;
 
   case 80: /* const_expr: INT_LIT  */
-#line 439 "p2_parser.y"
-                  { (yyval.type) = typePool.make(BK_Int, (yyvsp[0].ival) == 0);    }
-#line 1780 "y.tab.cpp"
+#line 803 "p2_parser.y"
+                  { 
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Int), true);
+        expr->setInt((yyvsp[0].ival));
+        (yyval.expr_info) = expr;
+    }
+#line 2155 "y.tab.cpp"
     break;
 
   case 81: /* const_expr: REAL_LIT  */
-#line 440 "p2_parser.y"
-                  { (yyval.type) = typePool.make(BK_Float, (yyvsp[0].fval) == 0);  }
-#line 1786 "y.tab.cpp"
+#line 808 "p2_parser.y"
+                  {
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Float), true);
+        expr->setFloat((yyvsp[0].fval));
+        (yyval.expr_info) = expr;
+    }
+#line 2165 "y.tab.cpp"
     break;
 
   case 82: /* const_expr: STRING_LIT  */
-#line 441 "p2_parser.y"
-                  { (yyval.type) = typePool.make(BK_String); }
-#line 1792 "y.tab.cpp"
+#line 813 "p2_parser.y"
+                  { 
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_String), true);
+        expr->setString(*(yyvsp[0].sval));
+        (yyval.expr_info) = expr;
+        delete (yyvsp[0].sval);
+    }
+#line 2176 "y.tab.cpp"
     break;
 
   case 83: /* const_expr: BOOL_LIT  */
-#line 442 "p2_parser.y"
-                  { (yyval.type) = typePool.make(BK_Bool);   }
-#line 1798 "y.tab.cpp"
+#line 819 "p2_parser.y"
+                  {
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), true);
+        expr->setBool((yyvsp[0].bval));
+        (yyval.expr_info) = expr;
+    }
+#line 2186 "y.tab.cpp"
     break;
 
   case 90: /* array_dims: LBRACK INT_LIT RBRACK  */
-#line 465 "p2_parser.y"
+#line 846 "p2_parser.y"
                           {
         if ((yyvsp[-1].ival) <= 0) {
             throw SemanticError("array dimension must be positive", yylineno);
@@ -1806,11 +2194,11 @@ yyreduce:
         (yyval.int_list) = new std::vector<int>;
         (yyval.int_list)->push_back((yyvsp[-1].ival));
      }
-#line 1810 "y.tab.cpp"
+#line 2198 "y.tab.cpp"
     break;
 
   case 91: /* array_dims: array_dims LBRACK INT_LIT RBRACK  */
-#line 472 "p2_parser.y"
+#line 853 "p2_parser.y"
                                      {
         if ((yyvsp[-1].ival) <= 0) {
             throw SemanticError("array dimension must be positive", yylineno);
@@ -1818,57 +2206,57 @@ yyreduce:
         (yyval.int_list) = (yyvsp[-3].int_list);
         (yyval.int_list)->push_back((yyvsp[-1].ival));
      }
-#line 1822 "y.tab.cpp"
+#line 2210 "y.tab.cpp"
     break;
 
   case 92: /* array_ref: LBRACK expression RBRACK  */
-#line 482 "p2_parser.y"
+#line 863 "p2_parser.y"
                              {
-        if ((yyvsp[-1].type)->base != BK_Int) {
+        if ((yyvsp[-1].expr_info)->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         (yyval.ival) = 0;
      }
-#line 1833 "y.tab.cpp"
+#line 2221 "y.tab.cpp"
     break;
 
   case 93: /* array_ref: array_ref LBRACK expression RBRACK  */
-#line 488 "p2_parser.y"
+#line 869 "p2_parser.y"
                                        {
-        if ((yyvsp[-1].type)->base != BK_Int) {
+        if ((yyvsp[-1].expr_info)->type->base != BK_Int) {
             throw SemanticError("array index must be int", yylineno);
         }
         (yyval.ival) += 1;
   }
-#line 1844 "y.tab.cpp"
+#line 2232 "y.tab.cpp"
     break;
 
   case 94: /* type_spec: INT_TOK  */
-#line 498 "p2_parser.y"
+#line 879 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Int);   }
-#line 1850 "y.tab.cpp"
+#line 2238 "y.tab.cpp"
     break;
 
   case 95: /* type_spec: FLOAT  */
-#line 499 "p2_parser.y"
+#line 880 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Float); }
-#line 1856 "y.tab.cpp"
+#line 2244 "y.tab.cpp"
     break;
 
   case 96: /* type_spec: BOOL  */
-#line 500 "p2_parser.y"
+#line 881 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_Bool);  }
-#line 1862 "y.tab.cpp"
+#line 2250 "y.tab.cpp"
     break;
 
   case 97: /* type_spec: STRING_TOK  */
-#line 501 "p2_parser.y"
+#line 882 "p2_parser.y"
                  { (yyval.type) = typePool.make(BK_String);}
-#line 1868 "y.tab.cpp"
+#line 2256 "y.tab.cpp"
     break;
 
 
-#line 1872 "y.tab.cpp"
+#line 2260 "y.tab.cpp"
 
       default: break;
     }
@@ -2061,7 +2449,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 504 "p2_parser.y"
+#line 885 "p2_parser.y"
  /* ---------- user C code ---------- */
 
 int main(int argc, char* argv[])

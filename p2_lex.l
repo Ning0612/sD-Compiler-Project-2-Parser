@@ -9,13 +9,11 @@
 #include <cstdlib>
 
 #define MAX_LINE_LENGTH 1024
-static char buf[MAX_LINE_LENGTH] = "";
 
 // #define DEBUG_LEX
 
 
 #ifdef DEBUG_LEX
-#define LIST strcat(buf, yytext)
 #define tokenNewline() printf("\n")
 #define token(t)          { LIST; printf("<%s> ", #t); return t; }
 #define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
