@@ -1,18 +1,17 @@
 %option noyywrap nodefault         
 %option yylineno                   
-%option noyywrap
 
 %{
 /* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
+#include "sd_common.hpp"
 #include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
 #include <cstdio>
 #include <cstdlib>
-#include "sd_common.hpp"
 
 #define MAX_LINE_LENGTH 1024
 static char buf[MAX_LINE_LENGTH] = "";
 
-#define DEBUG_LEX
+// #define DEBUG_LEX
 
 
 #ifdef DEBUG_LEX
@@ -21,14 +20,16 @@ static char buf[MAX_LINE_LENGTH] = "";
 #define token(t)          { LIST; printf("<%s> ", #t); return t; }
 #define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
 #define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
-#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = strdup(str); return STRING_LIT; }
+#define tokenBool(b)      { LIST; printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
+#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
 #else
 #define LIST /* nothing */
 #define tokenNewline() /* nothing */
 #define token(t)          { return t; }
 #define tokenInteger(i)   { yylval.ival = (i); return INT_LIT; }
 #define tokenReal(r)      { yylval.fval = (r); return REAL_LIT; }
-#define tokenString(str)  { yylval.sval = strdup(str); return STRING_LIT; }
+#define tokenBool(b)      { yylval.bval = (b); return BOOL_LIT; }
+#define tokenString(str)  { yylval.sval = new std::string(str); return STRING_LIT; }
 #endif
 
 
@@ -98,7 +99,7 @@ static char buf[MAX_LINE_LENGTH] = "";
 "double"        token(DOUBLE);
 "else"          token(ELSE);
 "extern"        token(EXTERN);
-"false"         token(FALSE);
+"false"         tokenBool(false);
 "float"         token(FLOAT);
 "for"           token(FOR);
 "foreach"       token(FOREACH);
@@ -110,12 +111,12 @@ static char buf[MAX_LINE_LENGTH] = "";
 "return"        token(RETURN);
 "string"        token(STRING_TOK);
 "switch"        token(SWITCH);
-"true"          token(TRUE);
+"true"          tokenBool(true);
 "void"          token(VOID);
 "while"         token(WHILE);
 
 [a-zA-Z_][a-zA-Z0-9_]* {
-    yylval.sval = strdup(yytext);
+    yylval.sval = new std::string(yytext);
     token(ID);
 }
 

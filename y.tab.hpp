@@ -187,13 +187,20 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "p2_parser.y"
+#line 26 "p2_parser.y"
 
-    int    ival;
-    double fval;
-    char  *sval;
+    int ival;
+    float fval;
+    bool bval;
+    std::string* sval;
+    Type* type;
+    Symbol* symbol;
+    std::vector<Symbol *>* vardecl_list;
+    std::vector<int>* int_list;
+    varInit* var_init;
+    std::vector<varInit*>* var_init_list;
 
-#line 197 "y.tab.hpp"
+#line 204 "y.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

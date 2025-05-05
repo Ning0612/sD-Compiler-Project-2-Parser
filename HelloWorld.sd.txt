@@ -1,15 +1,24 @@
 // Hello World Example
 void main() {
-  int i;
-  for (i = 0; i + 2; i++){
-    int k;
-    b = ca;
-    int c[10][0];
-
-    v = a[0];
-    b = -a + b;
-    c = a == b && v == c;
-    a = - - - - 5;
+  int i = 4, j = 2;
+  const int k = 3;
+  const string l = "fwfF";
+  int g = 3;
+  i = 210 + 43.3;
+  int h[24][3];
+  int b[24][6];
+  int c[24][6];
+  
+  c = h + b;
+  i++;
+  h[35][34]++;
+  if (i == 3){
+    int i = 3;
+    i = 4;
+    // d = 3;
+  } else {
+    i = 5;
   }
+
   
 }

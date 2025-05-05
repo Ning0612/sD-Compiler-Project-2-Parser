@@ -32,6 +32,10 @@ lex.yy.cpp: p2_lex.l y.tab.hpp
 sd: $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+test: sd
+	@echo "=== 測試 ==="
+	./sd HelloWorld.sd.txt
+
 # ────────────── 其他目標 ────────────────
 clean:
 	rm -f sd lex.yy.cpp y.tab.* *.o
