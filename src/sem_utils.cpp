@@ -157,3 +157,43 @@ void checkForeachIndex(Symbol* sym, int lineno) {
     if (sym->type->base != BK_Int)
         throw SemanticError("foreach index must be int", lineno);
 }
+
+int checkArrayDimExpr(ExprInfo* e, int lineno) {
+    if (!e->isConst)
+        throw SemanticError("array dimension must be const", lineno);
+    if (e->valueKind != VK_Int)
+        throw SemanticError("array dimension must be int", lineno);
+    int val = e->getInt();
+    if (val <= 0)
+        throw SemanticError("array dimension must be positive", lineno);
+    return val;
+}
+
+void checkFuncCall(Symbol* symbol, const std::string& name, std::vector<ExprInfo*>* args, int lineno) {
+    if (!symbol) {
+        throw SemanticError("undeclared function: " + name, lineno);
+    }
+
+    if (!symbol->type->isFunc()) {
+        throw SemanticError("not a function: " + name, lineno);
+    }
+
+    size_t argCount = args ? args->size() : 0;
+    size_t expected = symbol->type->params.size();
+
+    if (argCount != expected) {
+        throw SemanticError("function '" + name + "' expects " +
+            std::to_string(expected) + " arguments, but got " +
+            std::to_string(argCount), lineno);
+    }
+
+    if (args) {
+        for (size_t i = 0; i < argCount; ++i) {
+            if (!isAssignable(symbol->type->params[i], (*args)[i]->type)) {
+                throw SemanticError("argument type mismatch", lineno);
+            }
+            delete (*args)[i];
+        }
+        delete args;
+    }
+}

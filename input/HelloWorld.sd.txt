@@ -1,15 +1,18 @@
 // Hello World Example
-void main(int argc, int argv[20][30]) {
-  bool a = true;
-  const bool b = !false;
-  bool c = !b;
-  a = !b;
-  int ia = 0;
-  int k[40][50][43];
-  const int cib = 35 + 35 - 23;
+int cx;
 
-  int i = 0;
-  ia = k[34][3][4];
-  foreach(i : -2 + 4 .. 10) 
-    i = 0;
+int add(int a, int b) {
+  return a + b;
+}
+
+void main(int argc, int argv[20][30]) {
+  const int j = - 34 + - + - + 3;
+  const string s = "Hello";
+  const string s2 = "World";
+  const string s3 = s + " " + s2;
+  int arr[6], c[3];
+  read arr[5];
+  int f;
+  int da; 
+  da = add(4, 5 + 2);
 }

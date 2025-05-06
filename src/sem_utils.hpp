@@ -41,3 +41,5 @@ void checkIncDecValid(Symbol* sym, const std::string& op, int lineno);
 void checkBoolExpr(ExprInfo* expr, const std::string& context, int lineno);
 void checkForeachRange(ExprInfo* from, ExprInfo* to, int lineno);
 void checkForeachIndex(Symbol* sym, int lineno);
+int checkArrayDimExpr(ExprInfo* e, int lineno);
+void checkFuncCall(Symbol* symbol, const std::string& name, std::vector<ExprInfo*>* args, int lineno);

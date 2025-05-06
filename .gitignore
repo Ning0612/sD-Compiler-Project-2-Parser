@@ -5,8 +5,8 @@
 *.out
 
 # Bison & Flex 產物
-src/y.tab.*
-src/lex.yy.cpp
+# src/y.tab.*
+# src/lex.yy.cpp
 
 # 編輯器備份檔
 *~

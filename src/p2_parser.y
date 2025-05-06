@@ -33,11 +33,12 @@ void yyerror(const char* s)
     varInit* var_init;
     std::vector<varInit*>* var_init_list;
     ExprInfo* expr_info;
+    std::vector<ExprInfo*>* expr_info_list;
 }
 
 /* ---------- 關鍵字 / 常數 / 識別元 ---------- */
 %token                BOOL FLOAT DOUBLE INT_TOK CHAR STRING_TOK VOID
-%token                IF ELSE WHILE FOR FOREACH RETURN
+%token                IF ELSE DO WHILE FOR FOREACH RETURN
 %token                CONST PRINT PRINTLN READ TRUE FALSE
 %token <sval>         ID
 %token <ival>         INT_LIT
@@ -46,6 +47,10 @@ void yyerror(const char* s)
 %token <bval>         BOOL_LIT         
 
 %type <type> type_spec
+%type <expr_info_list> arg_list
+%type <expr_info_list> arg_list_opt
+%type <expr_info> return_stmt
+%type <expr_info> func_call
 %type <expr_info> const_expr
 %type <expr_info> expression
 %type <symbol> const_decl
@@ -65,7 +70,7 @@ void yyerror(const char* s)
 %token                DOT COMMA COLON SEMICOLON
 %token                LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
 
-%token BREAK CONTINUE SWITCH CASE DEFAULT DO EXTERN
+%token BREAK CONTINUE SWITCH CASE DEFAULT EXTERN
 
 // DOUBLE CHAR
 
@@ -124,11 +129,11 @@ const_decl:
     CONST type_spec ID ASSIGN expression SEMICOLON
     {
         if (*$2 != *$5->type) {
-            throw SemanticError("const type mismatch", @2.first_line);
+            throw SemanticError("const type mismatch", yylineno);
         }
 
         if (!$5->isConst) {
-            throw SemanticError("const expression must be const", @5.first_line);
+            throw SemanticError("const expression must be const", yylineno);
         }
 
         Symbol s(*$3, $2, true);
@@ -136,11 +141,11 @@ const_decl:
 
         Symbol* exist = symTab.lookupGlobal(s.name);
         if (exist && exist->type->isFunc()) {
-            throw SemanticError("const '" + s.name + "' conflicts with function", @3.first_line);
+            throw SemanticError("const '" + s.name + "' conflicts with function", yylineno);
         }
 
         if (!symTab.insert(s)) {
-            throw SemanticError("redeclared const: " + *$3, @3.first_line);
+            throw SemanticError("redeclared const: " + *$3, yylineno);
         }
 
         delete $3;
@@ -150,14 +155,13 @@ const_decl:
 
 /* 4-b. 變數 / 陣列宣告 --------------------------------------------------------*/
 var_decl:
-     type_spec var_init_list SEMICOLON
-    {
+     type_spec var_init_list SEMICOLON {
         for (auto& var : *$2) {
             Symbol s("", nullptr, false);
 
             if (var->constType != nullptr) {
                 if (*$1 != *var->constType) {
-                    throw SemanticError("var type mismatch", @2.first_line);
+                    throw SemanticError("var type mismatch", yylineno);
                 }
                 s = Symbol(*var->name, $1, false);
             } 
@@ -169,7 +173,7 @@ var_decl:
                 s = Symbol(*var->name, $1, false);
             }
 
-            tryInsertVar(symTab, s, @2.first_line);
+            tryInsertVar(symTab, s, yylineno);
 
             delete var->name;
             if (var->arrayDims) delete var->arrayDims;
@@ -205,18 +209,16 @@ var_init:
 func_decl:
     type_spec ID LPAREN param_list_opt RPAREN LBRACE
     {
-        declareFunction(*$2, $1, $4, typePool, symTab, @2.first_line);
+        declareFunction(*$2, $1, $4, typePool, symTab, yylineno);
         delete $2;
     }
     block_items_opt RBRACE
     {
         symTab.leaveScope();
     }
-  |
-    VOID ID LPAREN param_list_opt RPAREN LBRACE
-    {
+  | VOID ID LPAREN param_list_opt RPAREN LBRACE{
         Type* voidType = typePool.make(BK_Void);
-        declareFunction(*$2, voidType, $4, typePool, symTab, @2.first_line);
+        declareFunction(*$2, voidType, $4, typePool, symTab, yylineno);
         delete $2;
     }
     block_items_opt RBRACE
@@ -321,13 +323,19 @@ assign_stmt:
      }
 ;
 
-
 lvalue:
-     ID
-     {
+     ID {
         Symbol* symbol = symTab.lookup(*$1);
         if (symbol == nullptr) {
             throw SemanticError("undeclared identifier: " + *$1, yylineno);
+        }
+
+        if (symbol->type->isFunc()) {
+            throw SemanticError("function cannot be lvalue: " + *$1, yylineno);
+        }
+
+        if (symbol->type->isArray()) {
+            throw SemanticError("array cannot be lvalue: " + *$1, yylineno);
         }
 
         $$ = symbol;
@@ -370,24 +378,27 @@ lvalue:
 /* 5-b. If --------------------------------------------------------------------*/
 if_stmt:
      IF LPAREN expression RPAREN statement {
-        checkBoolExpr($3, "if", @5.first_line);
+        checkBoolExpr($3, "if", yylineno);
      }
   |  IF LPAREN expression RPAREN statement ELSE statement {
-        checkBoolExpr($3, "if", @3.first_line);
+        checkBoolExpr($3, "if", yylineno);
     }
     ;
 
 /* 5-c. Loop ------------------------------------------------------------------*/
 loop_stmt:
      WHILE LPAREN expression RPAREN statement{ 
-        checkBoolExpr($3, "while", @3.first_line); 
+        checkBoolExpr($3, "while", yylineno); 
+    }
+  |  DO statement WHILE LPAREN expression RPAREN SEMICOLON {
+        checkBoolExpr($5, "do while", yylineno);
     }
   |  FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement{
-        checkBoolExpr($5, "for", @5.first_line);
+        checkBoolExpr($5, "for", yylineno);
     }
   |  FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
-        checkForeachRange($5, $8, @5.first_line);
-        checkForeachIndex(symTab.lookup(*$3), @3.first_line);
+        checkForeachRange($5, $8, yylineno);
+        checkForeachIndex(symTab.lookup(*$3), yylineno);
     }
     ;
 
@@ -416,7 +427,6 @@ assign_no_semi:
         if (*$1->type != *$3->type) {
             if (($1->type->base == BK_Int || $1->type->base == BK_Float) &&
                 ($3->type->base == BK_Int || $3->type->base == BK_Float)) {
-                // 混合 int/float 被接受
             } else {
                 throw SemanticError("assignment type mismatch: " +
                     baseKindToStr($1->type->base) + " = " +
@@ -429,25 +439,45 @@ assign_no_semi:
 
 /* 5-d. Return ----------------------------------------------------------------*/
 return_stmt:
-     RETURN expression SEMICOLON
+     RETURN expression SEMICOLON {
+        $$ = $2;
+     }
     ;
 
 /* 6. Expressions -------------------------------------------------------------*/
 expression:
-      expression PLUS  expression   { $$ = numericResult(OPADD,  $1,$3,typePool,yylineno); }
-    | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); }
-    | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); }
-    | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); }
-    | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); }
+    expression PLUS expression {
+        bool isStringConcat = ($1->type->base == BK_String && $3->type->base == BK_String);
 
-    | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); }
-    | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); }
-    | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); }
-    | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); }
+        if (isStringConcat) {
+            ExprInfo* expr = new ExprInfo(typePool.make(BK_String), $1->isConst && $3->isConst);
+            if (expr->isConst) {
+                expr->setString($1->getString() + $3->getString());
+            }
+            $$ = expr;
+        } else if (($1->type->base == BK_Int || $1->type->base == BK_Float) &&
+                   ($3->type->base == BK_Int || $3->type->base == BK_Float)) {
+            $$ = numericResult(OPADD, $1, $3, typePool, yylineno);
+        } else {
+            throw SemanticError("invalid types for '+' operator", yylineno);
+        }
 
-    | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); }
-    | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); }
-  |  expression AND   expression    {
+        delete $1;
+        delete $3;
+    }
+  | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); }
+  | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); }
+  | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); }
+  | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); }
+
+  | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); }
+  | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); }
+  | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); }
+  | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); }
+
+  | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); }
+  | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); }
+  | expression AND   expression    {
         if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
             throw SemanticError("and on non-bool type", yylineno);
         }
@@ -460,7 +490,7 @@ expression:
         delete $1;
         delete $3;
     }
-  |  expression OR    expression    { 
+  | expression OR    expression    { 
         if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
             throw SemanticError("or on non-bool type", yylineno);
         }
@@ -473,7 +503,7 @@ expression:
         delete $1;
         delete $3;
     }
-  |  NOT expression                 { 
+  | NOT expression                 { 
         if ($2->type->base != BK_Bool) {
             throw SemanticError("not on non-bool type", yylineno);
         }
@@ -485,7 +515,7 @@ expression:
         $$ = expr;
         delete $2;
     }
-  |  MINUS expression %prec UMINUS  { 
+  | MINUS expression %prec UMINUS  { 
         if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
             throw SemanticError("unary minus on non-numeric type", yylineno);
         }
@@ -501,7 +531,7 @@ expression:
         $$ = expr;
         delete $2;
     }
-  |  PLUS expression %prec UPLUS    { 
+  | PLUS expression %prec UPLUS    { 
         if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
             throw SemanticError("unary plus on non-numeric type", yylineno);
         }
@@ -518,10 +548,10 @@ expression:
         $$ = expr;
         delete $2;
     }
-  |  LPAREN expression RPAREN       { $$ = $2; }
-  |  lvalue                         { $$ = $1->getExpr(); }
-  |  const_expr                     { $$ = $1; }
-  |  func_call                      {
+  | LPAREN expression RPAREN       { $$ = $2; }
+  | lvalue                         { $$ = $1->getExpr(); }
+  | const_expr                     { $$ = $1; }
+  | func_call                      {
     
   }
     ;
@@ -552,38 +582,45 @@ const_expr
     ;
 
 func_call:
-     ID LPAREN arg_list_opt RPAREN
-    ;
+    ID LPAREN arg_list_opt RPAREN {
+        Symbol* symbol = symTab.lookup(*$1);
+        checkFuncCall(symbol, *$1, $3, yylineno);
+        $$ = new ExprInfo(symbol->type->ret);
+        delete $1;
+    }
 
 proc_call:
-     ID LPAREN arg_list_opt RPAREN
-    ;
+    ID LPAREN arg_list_opt RPAREN {
+        Symbol* symbol = symTab.lookup(*$1);
+        checkFuncCall(symbol, *$1, $3, yylineno);
+        delete $1;
+    }
 
 arg_list_opt:
-    /* empty */
-  | arg_list
+    /* empty */{ $$ = nullptr; }
+  | arg_list { $$ = $1; }
     ;
 
 arg_list:
-     expression
-  |  arg_list COMMA expression
+     expression {
+        $$ = new std::vector<ExprInfo*>;
+        $$->push_back($1);
+     }
+  |  arg_list COMMA expression{
+        $$ = $1;
+        $$->push_back($3);
+  }
     ;
 
 /* 8. 陣列次方括號 ------------------------------------------------------------*/
 array_dims:
-     LBRACK INT_LIT RBRACK{
-        if ($2 <= 0) {
-            throw SemanticError("array dimension must be positive", yylineno);
-        }
+     LBRACK expression RBRACK {
         $$ = new std::vector<int>;
-        $$->push_back($2);
+        $$->push_back(checkArrayDimExpr($2, yylineno));
      }
-  |  array_dims LBRACK INT_LIT RBRACK{
-        if ($3 <= 0) {
-            throw SemanticError("array dimension must be positive", yylineno);
-        }
+  |  array_dims LBRACK expression RBRACK {
         $$ = $1;
-        $$->push_back($3);
+        $$->push_back(checkArrayDimExpr($3, yylineno));
      }
     ;
 
