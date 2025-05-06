@@ -39,4 +39,14 @@ struct ExprInfo {
     float  getFloat()  const { if(valueKind!=VK_Float) throw std::runtime_error("not float"); return fVal; }
     bool   getBool()   const { if(valueKind!=VK_Bool)  throw std::runtime_error("not bool");  return bVal; }
     std::string getString() const{ if(valueKind!=VK_String) throw std::runtime_error("not string"); return sVal; }
+    void setConstValueFromExpr(const ExprInfo* e) {
+        switch (e->valueKind) {
+            case VK_Int: setInt(e->getInt()); break;
+            case VK_Float: setFloat(e->getFloat()); break;
+            case VK_Bool: setBool(e->getBool()); break;
+            case VK_String: setString(e->getString()); break;
+            default: break;
+        }
+    }
+
 };

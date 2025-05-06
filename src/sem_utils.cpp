@@ -77,3 +77,83 @@ ExprInfo* eqResult(bool equal, ExprInfo* l, ExprInfo* r, TypeArena& pool, int li
 
     return out;
 }
+
+void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno) {
+    Symbol* exist = symTab.lookupGlobal(s.name);
+    if (exist && exist->type->isFunc()) {
+        throw SemanticError("variable '" + s.name + "' conflicts with function", lineno);
+    }
+
+    if (!symTab.insert(s)) {
+        throw SemanticError("redeclared variable: " + s.name, lineno);
+    }
+}
+
+void declareFunction(const std::string& name, Type* returnType, std::vector<Symbol*>* paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno) {
+    std::vector<Type*> paramTypes;
+    if (paramSyms) {
+        for (auto& param : *paramSyms) {
+            paramTypes.push_back(param->type);
+        }
+    }
+
+    Type* funcType = typePool.makeFunc(returnType, paramTypes);
+    Symbol funcSym(name, funcType, false);
+
+    if (!symTab.insert(funcSym)) {
+        throw SemanticError("redeclared func: " + name, lineno);
+    }
+
+    symTab.enterScope();
+
+    if (paramSyms) {
+        for (auto& param : *paramSyms) {
+            if (!symTab.insert(*param)) {
+                throw SemanticError("redeclared param: " + param->name, lineno);
+            }
+            delete param;
+        }
+        delete paramSyms;
+    }
+}
+
+int extractArrayIndexOrZero(ExprInfo* expr, int lineno) {
+    if (expr->type->base != BK_Int) {
+        throw SemanticError("array index must be int", lineno);
+    }
+    if (expr->isConst) {
+        if (expr->valueKind == VK_Float) {
+            throw SemanticError("array index must be int", lineno);
+        }
+        return expr->getInt();
+    }
+    return 0;
+}
+
+void checkIncDecValid(Symbol* sym, const std::string& op, int lineno) {
+    if (sym->isConst)
+        throw SemanticError(op + " on const", lineno);
+    if (sym->type->base != BK_Int && sym->type->base != BK_Float)
+        throw SemanticError(op + " requires int or float, got: " + baseKindToStr(sym->type->base), lineno);
+}
+
+void checkBoolExpr(ExprInfo* expr, const std::string& context, int lineno) {
+    if (expr->type->base != BK_Bool) {
+        throw SemanticError(context + " condition must be bool", lineno);
+    }
+}
+
+void checkForeachRange(ExprInfo* from, ExprInfo* to, int lineno) {
+    if (from->type->base != BK_Int || !from->isConst)
+        throw SemanticError("foreach range must be const int", lineno);
+    if (to->type->base != BK_Int || !to->isConst)
+        throw SemanticError("foreach range must be const int", lineno);
+    if (from->getInt() > to->getInt())
+        throw SemanticError("foreach range error", lineno);
+}
+
+void checkForeachIndex(Symbol* sym, int lineno) {
+    if (!sym) throw SemanticError("undeclared foreach variable", lineno);
+    if (sym->type->base != BK_Int)
+        throw SemanticError("foreach index must be int", lineno);
+}

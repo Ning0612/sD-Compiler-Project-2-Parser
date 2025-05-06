@@ -5,11 +5,11 @@ void main(int argc, int argv[20][30]) {
   bool c = !b;
   a = !b;
   int ia = 0;
-  int k[40][50];
+  int k[40][50][43];
   const int cib = 35 + 35 - 23;
 
   int i = 0;
-
+  ia = k[34][3][4];
   foreach(i : -2 + 4 .. 10) 
     i = 0;
 }

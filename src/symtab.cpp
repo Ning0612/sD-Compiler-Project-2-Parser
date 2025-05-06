@@ -34,6 +34,17 @@ void Symbol::dbgPrint() const {
     puts("");
 }
 
+void Symbol::setConstValueFromExpr(const ExprInfo* e) {
+    switch (e->valueKind) {
+        case VK_Int: setInt(e->getInt()); break;
+        case VK_Float: setFloat(e->getFloat()); break;
+        case VK_Bool: setBool(e->getBool()); break;
+        case VK_String: setString(e->getString()); break;
+        default: break;
+    }
+}
+
+
 /*--------- SymbolTable ------*/
 bool SymbolTable::insert(const Symbol& s){
     return scopes.back().insert({s.name,s}).second;
@@ -53,7 +64,13 @@ Symbol* SymbolTable::lookupGlobal(const std::string& n){
 }
 
 void SymbolTable::leaveScope(){
-    printf("\nLeaving scope:\n");
-    for(auto& p: scopes.back()) p.second.dbgPrint();
+    this->dbgPrintCurrentScope();
     scopes.pop_back();
+}
+
+void SymbolTable::dbgPrintCurrentScope() const {
+    printf("\nSymbol Table in this scope:\n");
+    for (const auto& p : scopes.back()) {
+        p.second.dbgPrint();
+    }
 }

@@ -50,7 +50,7 @@ void yyerror(const char* s)
 %type <expr_info> expression
 %type <symbol> const_decl
 %type <int_list> array_dims
-%type <ival> array_ref
+%type <int_list> array_ref
 %type <var_init> var_init
 %type <var_init_list> var_init_list
 %type <symbol> lvalue
@@ -96,17 +96,13 @@ program:
         if (mainFunc == nullptr) {
             throw SemanticError("missing main function", yylineno);
         }
-        if (mainFunc->type->base != BK_Void) {
-            throw SemanticError("main function must be void", yylineno);
-        }
-        if (mainFunc->type->isArray()) {
-            throw SemanticError("main function must not be array", yylineno);
-        }
+
         if (!mainFunc->type->isFunc()) {
             throw SemanticError("main function must be function", yylineno);
         }
 
-        symTab.leaveScope();
+        symTab.dbgPrintCurrentScope();
+        printf("\nProgram end\n");
      }
     ;
 
@@ -128,30 +124,27 @@ const_decl:
     CONST type_spec ID ASSIGN expression SEMICOLON
     {
         if (*$2 != *$5->type) {
-            throw SemanticError("const type mismatch", yylineno);
+            throw SemanticError("const type mismatch", @2.first_line);
         }
 
         if (!$5->isConst) {
-            throw SemanticError("const expression must be const", yylineno);
+            throw SemanticError("const expression must be const", @5.first_line);
         }
 
         Symbol s(*$3, $2, true);
+        s.setConstValueFromExpr($5);
 
-        if ($5->valueKind == VK_Float) {
-            s.setFloat($5->getFloat());
-        } else if ($5->valueKind == VK_Int) {
-            s.setInt($5->getInt());
-        } else if ($5->valueKind == VK_String) {
-            s.setString($5->getString());
-        } else if ($5->valueKind == VK_Bool) {
-            s.setBool($5->getBool());
+        Symbol* exist = symTab.lookupGlobal(s.name);
+        if (exist && exist->type->isFunc()) {
+            throw SemanticError("const '" + s.name + "' conflicts with function", @3.first_line);
         }
-        
+
         if (!symTab.insert(s)) {
-            throw SemanticError("redeclared const: " + *$3, yylineno);
+            throw SemanticError("redeclared const: " + *$3, @3.first_line);
         }
 
-        delete $3; 
+        delete $3;
+        delete $5;
     }
     ;
 
@@ -160,37 +153,28 @@ var_decl:
      type_spec var_init_list SEMICOLON
     {
         for (auto& var : *$2) {
-           if (var->constType != nullptr) {
+            Symbol s("", nullptr, false);
+
+            if (var->constType != nullptr) {
                 if (*$1 != *var->constType) {
-                    throw SemanticError("var type mismatch", yylineno);
+                    throw SemanticError("var type mismatch", @2.first_line);
                 }
-                Symbol s(*var->name, $1, false);
-                if (!symTab.insert(s)) {
-                    throw SemanticError("redeclared const: " + *var->name, yylineno);
-                }
-            }
+                s = Symbol(*var->name, $1, false);
+            } 
             else if (var->arrayDims != nullptr) {
                 Type* arrType = typePool.makeArray($1, *var->arrayDims);
-                Symbol s(*var->name, arrType, false);
-                if (!symTab.insert(s)) {
-                    throw SemanticError("redeclared var: " + *var->name, yylineno);
-                }
-            }else{
-                Symbol s(*var->name, $1, false);
-                if (!symTab.insert(s)) {
-                    throw SemanticError("redeclared var: " + *var->name, yylineno);
-                }
+                s = Symbol(*var->name, arrType, false);
+            } 
+            else {
+                s = Symbol(*var->name, $1, false);
             }
 
-            if (var->name != nullptr) {
-                delete var->name;
-            }
-            if (var->arrayDims != nullptr) {
-                delete var->arrayDims;
-            }
+            tryInsertVar(symTab, s, @2.first_line);
+
+            delete var->name;
+            if (var->arrayDims) delete var->arrayDims;
             delete var;
         }
-
         delete $2;
     }
     ;
@@ -219,72 +203,27 @@ var_init:
 
 /* 4-c. 函式宣告 --------------------------------------------------------------*/
 func_decl:
-     type_spec ID LPAREN param_list_opt RPAREN LBRACE {
-        std::vector<Type*> paramList;
-
-        if ($4 != nullptr) {
-            for (auto& param : *$4) {
-                paramList.push_back(param->type);
-            }
-        }
-
-        Type* type = typePool.makeFunc($1, paramList);
-
-        Symbol s(*$2, type, false);
-
-        if (!symTab.insert(s)) {
-            throw SemanticError("redeclared func: " + *$2, yylineno);
-        }
-
-        symTab.enterScope();
-
-        for (auto& param : *$4) {
-            if (!symTab.insert(*param)) {
-                throw SemanticError("redeclared param: " + param->name, yylineno);
-            }
-
-            delete param;
-        }
-
-
+    type_spec ID LPAREN param_list_opt RPAREN LBRACE
+    {
+        declareFunction(*$2, $1, $4, typePool, symTab, @2.first_line);
         delete $2;
-     } block_items_opt RBRACE{
-        symTab.leaveScope();
-     }
-  |  VOID      ID LPAREN param_list_opt RPAREN LBRACE{
-        std::vector<Type*> paramList;
-
-        if ($4 != nullptr) {
-            for (auto& param : *$4) {
-                paramList.push_back(param->type);
-            }
-        }
-
-        Type* voidType = typePool.make(BK_Void);
-        Type* type = typePool.makeFunc(voidType, paramList);
-
-        Symbol s(*$2, type, false);
-
-        if (!symTab.insert(s)) {
-            throw SemanticError("redeclared func: " + *$2, yylineno);
-        }
-
-        symTab.enterScope();
-
-        for (auto& param : *$4) {
-            if (!symTab.insert(*param)) {
-                throw SemanticError("redeclared param: " + param->name, yylineno);
-            }
-
-            delete param;
-        }
-
-        delete $2;
-
-    } block_items_opt RBRACE {
-            symTab.leaveScope();
     }
-    ;
+    block_items_opt RBRACE
+    {
+        symTab.leaveScope();
+    }
+  |
+    VOID ID LPAREN param_list_opt RPAREN LBRACE
+    {
+        Type* voidType = typePool.make(BK_Void);
+        declareFunction(*$2, voidType, $4, typePool, symTab, @2.first_line);
+        delete $2;
+    }
+    block_items_opt RBRACE
+    {
+        symTab.leaveScope();
+    };
+
 
 param_list_opt:
     /* empty */
@@ -360,22 +299,10 @@ simple_stmt:
         }
     }
   |  lvalue INC SEMICOLON {
-        if ($1->isConst) {
-            throw SemanticError("increment to const", yylineno);
-        }
-
-        if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
-            throw SemanticError("increment to non-integer type", yylineno);
-        }
+        checkIncDecValid($1, "increment", yylineno);
      }
   |  lvalue DEC SEMICOLON {
-        if ($1->isConst) {
-            throw SemanticError("decrement to const", yylineno);
-        }
-
-        if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
-            throw SemanticError("decrement to non-integer type", yylineno);
-        }
+        checkIncDecValid($1, "decrement", yylineno);
     }
   |  SEMICOLON
     ;
@@ -386,13 +313,14 @@ assign_stmt:
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ($1->type != $3->type) {
-            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->type->base == BK_Int || $3->type->base == BK_Float))) {
-                throw SemanticError("assignment type mismatch", yylineno);
-            }
+        if (!isAssignable($1->type, $3->type)) {
+            throw SemanticError("assignment type mismatch", yylineno);
         }
+
+        delete $3;
      }
-    ;
+;
+
 
 lvalue:
      ID
@@ -404,8 +332,7 @@ lvalue:
 
         $$ = symbol;
      }
-  |  ID array_ref
-    {
+  | ID array_ref {
         Symbol* symbol = symTab.lookup(*$1);
         if (symbol == nullptr) {
             throw SemanticError("undeclared identifier: " + *$1, yylineno);
@@ -415,65 +342,52 @@ lvalue:
             throw SemanticError("array index to non-array type: " + *$1, yylineno);
         }
 
-        if ($2 != symbol->type->dim) {
-            printf("array index dimension: %d, %d\n", $2, symbol->type->dim);
+        size_t given = $2->size();
+        size_t expected = static_cast<size_t>(symbol->type->dim);
+        if (given != expected) {
+            printf("array index dimension: %zu, expected: %zu\n", given, expected);
             throw SemanticError("array index dimension mismatch: " + *$1, yylineno);
         }
 
+        for (size_t i = 0; i < given; ++i) {
+            int index = (*$2)[i];
+            if (index != 0) { 
+                if (index < 0 || index >= symbol->type->sizes[i]) {
+                    throw SemanticError(
+                        "array index out of bounds: " + std::to_string(index) +
+                        " not in [0.." + std::to_string(symbol->type->sizes[i] - 1) + "]",
+                        yylineno
+                    );
+                }
+            }
+        }
+
         $$ = symbol;
+        delete $2;  
     }
     ;
 
 /* 5-b. If --------------------------------------------------------------------*/
 if_stmt:
-     IF LPAREN expression RPAREN statement 
-     {
-        if ($3->type->base != BK_Bool) {
-            throw SemanticError("if condition must be bool", yylineno);
-        }
+     IF LPAREN expression RPAREN statement {
+        checkBoolExpr($3, "if", @5.first_line);
      }
-  |  IF LPAREN expression RPAREN statement ELSE statement
-    {
-        if ($3->type->base != BK_Bool) {
-            throw SemanticError("if condition must be bool", yylineno);
-        }
+  |  IF LPAREN expression RPAREN statement ELSE statement {
+        checkBoolExpr($3, "if", @3.first_line);
     }
     ;
 
 /* 5-c. Loop ------------------------------------------------------------------*/
 loop_stmt:
-     WHILE LPAREN expression RPAREN statement{
-            if ($3->type->base != BK_Bool) {
-                throw SemanticError("while condition must be bool", yylineno);
-            }
-        }
+     WHILE LPAREN expression RPAREN statement{ 
+        checkBoolExpr($3, "while", @3.first_line); 
+    }
   |  FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement{
-        if ($5->type->base != BK_Bool) {
-            throw SemanticError("for condition must be bool", yylineno);
-        }
-      }
+        checkBoolExpr($5, "for", @5.first_line);
+    }
   |  FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
-
-        if ($5->type->base != BK_Int || !$5->isConst){
-            throw SemanticError("foreach range must be const int", yylineno);
-        }
-
-        if ($8->type->base != BK_Int || !$8->isConst){
-            throw SemanticError("foreach range must be const int", yylineno);
-        }
-
-        if ($5->getInt() > $8->getInt()) {
-            throw SemanticError("foreach range error", yylineno);
-        }
-
-        Symbol* symbol = symTab.lookup(*$3);
-        if (symbol == nullptr) {
-            throw SemanticError("undeclared identifier: " + *$3, yylineno);
-        }
-
-        if (symbol->type->base != BK_Int) {
-            throw SemanticError("foreach index must be int", yylineno);
-        }
+        checkForeachRange($5, $8, @5.first_line);
+        checkForeachIndex(symTab.lookup(*$3), @3.first_line);
     }
     ;
 
@@ -486,38 +400,32 @@ for_update_opt:
     /* empty */
   | assign_no_semi
   | lvalue INC {
-            if ($1->isConst) {
-                throw SemanticError("increment to const", yylineno);
-            }
-
-            if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
-                throw SemanticError("increment to non-integer type", yylineno);
-            }
+        checkIncDecValid($1, "increment", yylineno);
     }
   | lvalue DEC{
-            if ($1->isConst) {
-                throw SemanticError("decrement to const", yylineno);
-            }
-
-            if ($1->type->base != BK_Int && $1->type->base != BK_Float) {
-                throw SemanticError("decrement to non-integer type", yylineno);
-            }
-        }   
+        checkIncDecValid($1, "decrement", yylineno);
+    }   
     ;
 
 assign_no_semi:
-     lvalue ASSIGN expression {
+    lvalue ASSIGN expression {
         if ($1->isConst) {
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if ($1->type != $3->type) {
-            if (!(($1->type->base == BK_Int || $1->type->base == BK_Float) && ($3->type->base == BK_Int || $3->type->base == BK_Float))) {
-                throw SemanticError("assignment type mismatch", yylineno);
+        if (*$1->type != *$3->type) {
+            if (($1->type->base == BK_Int || $1->type->base == BK_Float) &&
+                ($3->type->base == BK_Int || $3->type->base == BK_Float)) {
+                // 混合 int/float 被接受
+            } else {
+                throw SemanticError("assignment type mismatch: " +
+                    baseKindToStr($1->type->base) + " = " +
+                    baseKindToStr($3->type->base),
+                    yylineno);
             }
         }
-     }
-    ;
+    };
+
 
 /* 5-d. Return ----------------------------------------------------------------*/
 return_stmt:
@@ -680,18 +588,16 @@ array_dims:
     ;
 
 array_ref:
-     LBRACK expression RBRACK{
-        if ($2->type->base != BK_Int) {
-            throw SemanticError("array index must be int", yylineno);
-        }
-        $$ = 0;
+     LBRACK expression RBRACK {
+        $$ = new std::vector<int>;
+        $$->push_back(extractArrayIndexOrZero($2, yylineno));
+        delete $2;
      }
-  |  array_ref LBRACK expression RBRACK{
-        if ($3->type->base != BK_Int) {
-            throw SemanticError("array index must be int", yylineno);
-        }
-        $$ += 1;
-  }
+  |  array_ref LBRACK expression RBRACK {
+        $$ = $1;
+        $$->push_back(extractArrayIndexOrZero($3, yylineno));
+        delete $3;
+     }
     ;
 
 /* 9. 型別 --------------------------------------------------------------------*/

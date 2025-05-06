@@ -23,8 +23,8 @@ public:
     void setFloat(float v){ valueKind=VK_Float; fVal=v; }
     void setBool(bool v){ valueKind=VK_Bool; bVal=v; }
     void setString(const std::string& s){ valueKind=VK_String; sVal=s; }
-
     bool hasConstValue() const { return isConst && valueKind!=VK_None; }
+    void setConstValueFromExpr(const ExprInfo* e);
 
     ExprInfo* getExpr() const;          // 定義在 symtab.cpp
     void      dbgPrint() const;         // 定義在 symtab.cpp
@@ -39,4 +39,5 @@ public:
     bool insert(const Symbol& s);              // false=duplicate
     Symbol* lookup(const std::string& name);   // nearest
     Symbol* lookupGlobal(const std::string& name);
+    void dbgPrintCurrentScope() const;
 };

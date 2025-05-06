@@ -30,7 +30,7 @@ Type* TypeArena::make(BaseKind k){
 }
 
 Type* TypeArena::makeArray(Type* elem,const std::vector<int>& sz){
-    Type key=*elem; key.dim+=1; key.sizes=sz;
+    Type key=*elem; key.dim=sz.size(); key.sizes=sz;
     auto it=cache.find(key); if(it!=cache.end()) return it->second;
     Type* t=new Type(key); types.push_back(t); cache[*t]=t; return t;
 }
