@@ -15,10 +15,11 @@ ExprInfo* Symbol::getExpr() const {
 }
 
 void Symbol::dbgPrint() const {
-    printf("Symbol %s ", name.c_str());
+    printf("Symbol: %s", name.c_str());
+    printf(", Type: ");
     type->dbgPrint();
     if(isConst){
-        printf(" const");
+        printf(", Const");
         if(hasConstValue()){
             printf(" = ");
             switch(valueKind){
@@ -52,7 +53,7 @@ Symbol* SymbolTable::lookupGlobal(const std::string& n){
 }
 
 void SymbolTable::leaveScope(){
-    printf("Leaving scope:\n");
+    printf("\nLeaving scope:\n");
     for(auto& p: scopes.back()) p.second.dbgPrint();
     scopes.pop_back();
 }

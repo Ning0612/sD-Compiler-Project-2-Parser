@@ -2,9 +2,7 @@
 #include <stdexcept>
 
 /*───────── numeric (+ - * / %) ─────────*/
-ExprInfo* numericResult(NumOp op, ExprInfo* lhs, ExprInfo* rhs,
-                        TypeArena& pool, int lineno)
-{
+ExprInfo* numericResult(NumOp op, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool, int lineno) {
     BaseKind b1=lhs->type->base, b2=rhs->type->base;
     bool isConst = lhs->isConst && rhs->isConst;
 
@@ -37,9 +35,7 @@ ExprInfo* numericResult(NumOp op, ExprInfo* lhs, ExprInfo* rhs,
 }
 
 /*───────── relational (< <= > >=) ─────────*/
-ExprInfo* relResult(RelOp op, ExprInfo* lhs, ExprInfo* rhs,
-                    TypeArena& pool, int lineno)
-{
+ExprInfo* relResult(RelOp op, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool, int lineno) {
     BaseKind b1=lhs->type->base, b2=rhs->type->base;
     bool isConst = lhs->isConst && rhs->isConst;
 
@@ -56,9 +52,7 @@ ExprInfo* relResult(RelOp op, ExprInfo* lhs, ExprInfo* rhs,
 }
 
 /*───────── equal / not‑equal ─────────*/
-ExprInfo* eqResult(bool equal, ExprInfo* l, ExprInfo* r,
-                   TypeArena& pool, int lineno)
-{
+ExprInfo* eqResult(bool equal, ExprInfo* l, ExprInfo* r, TypeArena& pool, int lineno) {
     BaseKind b1=l->type->base, b2=r->type->base;
     bool isConst = l->isConst && r->isConst;
     ExprInfo* out=new ExprInfo(pool.make(BK_Bool), isConst);

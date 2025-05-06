@@ -1,4 +1,5 @@
 #pragma once
+#include "var.hpp" 
 #include "error.hpp"
 #include "expr.hpp"
 #include "sd_types.hpp"
@@ -14,9 +15,6 @@ inline int   toInt  (const ExprInfo* e){ return e->getInt(); }
 enum NumOp { OPADD, OPSUB, OPMUL, OPDIV, OPMOD };
 enum RelOp { OPLT, OPLE, OPGT, OPGE };
 
-ExprInfo* numericResult(NumOp op, ExprInfo* l, ExprInfo* r,
-                        TypeArena& arena, int lineno);
-ExprInfo* relResult    (RelOp op,  ExprInfo* l, ExprInfo* r,
-                        TypeArena& arena, int lineno);
-ExprInfo* eqResult     (bool equal,ExprInfo* l, ExprInfo* r,
-                        TypeArena& arena, int lineno);
+ExprInfo* numericResult(NumOp op, ExprInfo* l, ExprInfo* r, TypeArena& arena, int lineno);
+ExprInfo* relResult    (RelOp op,  ExprInfo* l, ExprInfo* r, TypeArena& arena, int lineno);
+ExprInfo* eqResult     (bool equal,ExprInfo* l, ExprInfo* r, TypeArena& arena, int lineno);

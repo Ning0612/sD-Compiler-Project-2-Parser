@@ -1,5 +1,4 @@
 %{
-#include "var.hpp" 
 #include "sem_utils.hpp"
 #include <cstdio>
 #include <cstdlib>
@@ -12,9 +11,6 @@ extern FILE* yyin;
 
 SymbolTable symTab;
 TypeArena typePool;
-Type* currentDeclType = nullptr;  // 用來暫存 type_spec 傳回的型別
-
-/* 之後若要在 semantic action 使用，可用 $$ = new ExprNode 之類 */
 
 void yyerror(const char* s)
 {
@@ -31,7 +27,8 @@ void yyerror(const char* s)
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    std::vector<Symbol *>* vardecl_list;
+    std::vector<Type*>* type_list;
+    std::vector<Symbol *>* symbol_list;
     std::vector<int>* int_list;
     varInit* var_init;
     std::vector<varInit*>* var_init_list;
@@ -57,6 +54,9 @@ void yyerror(const char* s)
 %type <var_init> var_init
 %type <var_init_list> var_init_list
 %type <symbol> lvalue
+%type <symbol_list> param_list
+%type <symbol_list> param_list_opt
+%type <symbol> param
 
 /* ---------- 運算子 / 分隔符 ---------- */
 %token                LE GE EQ NEQ LT GT
@@ -91,7 +91,23 @@ void yyerror(const char* s)
 
 /* 2. Program  ----------------------------------------------------------------*/
 program:
-     decl_list                              /* 空白程式亦合法 */
+     decl_list{
+        Symbol* mainFunc = symTab.lookup("main");
+        if (mainFunc == nullptr) {
+            throw SemanticError("missing main function", yylineno);
+        }
+        if (mainFunc->type->base != BK_Void) {
+            throw SemanticError("main function must be void", yylineno);
+        }
+        if (mainFunc->type->isArray()) {
+            throw SemanticError("main function must not be array", yylineno);
+        }
+        if (!mainFunc->type->isFunc()) {
+            throw SemanticError("main function must be function", yylineno);
+        }
+
+        symTab.leaveScope();
+     }
     ;
 
 /* 3. 可能為空的宣告序列 ------------------------------------------------------*/
@@ -135,8 +151,6 @@ const_decl:
             throw SemanticError("redeclared const: " + *$3, yylineno);
         }
 
-        
-
         delete $3; 
     }
     ;
@@ -176,6 +190,8 @@ var_decl:
             }
             delete var;
         }
+
+        delete $2;
     }
     ;
 
@@ -203,25 +219,101 @@ var_init:
 
 /* 4-c. 函式宣告 --------------------------------------------------------------*/
 func_decl:
-     type_spec ID LPAREN param_list_opt RPAREN block
-        /* 動作：insertFunc(); */
-  |  VOID      ID LPAREN param_list_opt RPAREN block
-        /* 動作：insertProc(); */
+     type_spec ID LPAREN param_list_opt RPAREN LBRACE {
+        std::vector<Type*> paramList;
+
+        if ($4 != nullptr) {
+            for (auto& param : *$4) {
+                paramList.push_back(param->type);
+            }
+        }
+
+        Type* type = typePool.makeFunc($1, paramList);
+
+        Symbol s(*$2, type, false);
+
+        if (!symTab.insert(s)) {
+            throw SemanticError("redeclared func: " + *$2, yylineno);
+        }
+
+        symTab.enterScope();
+
+        for (auto& param : *$4) {
+            if (!symTab.insert(*param)) {
+                throw SemanticError("redeclared param: " + param->name, yylineno);
+            }
+
+            delete param;
+        }
+
+
+        delete $2;
+     } block_items_opt RBRACE{
+        symTab.leaveScope();
+     }
+  |  VOID      ID LPAREN param_list_opt RPAREN LBRACE{
+        std::vector<Type*> paramList;
+
+        if ($4 != nullptr) {
+            for (auto& param : *$4) {
+                paramList.push_back(param->type);
+            }
+        }
+
+        Type* voidType = typePool.make(BK_Void);
+        Type* type = typePool.makeFunc(voidType, paramList);
+
+        Symbol s(*$2, type, false);
+
+        if (!symTab.insert(s)) {
+            throw SemanticError("redeclared func: " + *$2, yylineno);
+        }
+
+        symTab.enterScope();
+
+        for (auto& param : *$4) {
+            if (!symTab.insert(*param)) {
+                throw SemanticError("redeclared param: " + param->name, yylineno);
+            }
+
+            delete param;
+        }
+
+        delete $2;
+
+    } block_items_opt RBRACE {
+            symTab.leaveScope();
+    }
     ;
 
 param_list_opt:
     /* empty */
-  | param_list
+  | param_list {
+        $$ = $1;
+     }
     ;
 
 param_list:
-     param
-  |  param_list COMMA param
+     param {
+        $$ = new std::vector<Symbol*>;
+        $$->push_back($1);
+     }
+  |  param_list COMMA param {
+        $$ = $1;
+        $$->push_back($3);
+     }
     ;
 
 param:
-     type_spec ID
-  |  type_spec ID array_dims
+     type_spec ID {
+        $$ = new Symbol(*$2, $1, false);
+        delete $2;
+     }
+  |  type_spec ID array_dims{
+        $$ = new Symbol(*$2, typePool.makeArray($1, *$3), false);
+        delete $2;
+        delete $3;
+     }
     ;
 
 /* 5. Block / Statement -------------------------------------------------------*/
@@ -360,7 +452,29 @@ loop_stmt:
             throw SemanticError("for condition must be bool", yylineno);
         }
       }
-  |  FOREACH LPAREN ID COLON INT_LIT DOT DOT INT_LIT RPAREN statement
+  |  FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
+
+        if ($5->type->base != BK_Int || !$5->isConst){
+            throw SemanticError("foreach range must be const int", yylineno);
+        }
+
+        if ($8->type->base != BK_Int || !$8->isConst){
+            throw SemanticError("foreach range must be const int", yylineno);
+        }
+
+        if ($5->getInt() > $8->getInt()) {
+            throw SemanticError("foreach range error", yylineno);
+        }
+
+        Symbol* symbol = symTab.lookup(*$3);
+        if (symbol == nullptr) {
+            throw SemanticError("undeclared identifier: " + *$3, yylineno);
+        }
+
+        if (symbol->type->base != BK_Int) {
+            throw SemanticError("foreach index must be int", yylineno);
+        }
+    }
     ;
 
 for_start_opt:
@@ -496,15 +610,9 @@ expression:
         $$ = expr;
         delete $2;
     }
-  |  LPAREN expression RPAREN       {
-        $$ = $2;
-    }
-  |  lvalue                         {
-        $$ = $1->getExpr();
-    }
-  |  const_expr                      {
-        $$ = $1;
-    }
+  |  LPAREN expression RPAREN       { $$ = $2; }
+  |  lvalue                         { $$ = $1->getExpr(); }
+  |  const_expr                     { $$ = $1; }
   |  func_call                      {
     
   }
@@ -594,7 +702,7 @@ type_spec
     | STRING_TOK { $$ = typePool.make(BK_String);}
     ;
 
-%% /* ---------- user C code ---------- */
+%% 
 
 int main(int argc, char* argv[])
 {
@@ -607,8 +715,7 @@ int main(int argc, char* argv[])
     try {
         return yyparse();
     } catch (SemanticError& e) {
-        std::fprintf(stderr, "Semantic error @ line %d: %s\n",
-                     e.line, e.what());
+        std::fprintf(stderr, "Semantic error @ line %d: %s\n", e.line, e.what());
         return 1;
     }
 }

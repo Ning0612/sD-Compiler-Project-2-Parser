@@ -24,7 +24,6 @@ struct Type {
 
     /* 方便除錯的小印法 */
     void dbgPrint() const {
-        printf("[");
         switch (base) {
             case BK_Int:    printf("int");    break;
             case BK_Float:  printf("float");  break;
@@ -32,9 +31,23 @@ struct Type {
             case BK_String: printf("string"); break;
             case BK_Void:   printf("void");   break;
         }
-        if (isArray()) printf(" arr(dim=%d)", dim);
-        if (isFunc())  printf(" func");
-        printf("]");
+        if (isArray()) {
+            printf(" array");
+            for (int s: sizes) printf("[%d]", s);
+        }
+        if (isFunc()){
+            printf(" function");
+            if (ret) {
+                printf(" -> ");
+                ret->dbgPrint();
+            }
+            printf(" (");
+            for (size_t i=0; i<params.size(); ++i) {
+                params[i]->dbgPrint();
+                if (i < params.size()-1) printf(", ");
+            }
+            printf(")");
+        }
     }
 };
 

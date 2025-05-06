@@ -3,7 +3,6 @@
 
 %{
 /* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
-#include "var.hpp" 
 #include "sem_utils.hpp"
 #include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
 #include <cstdio>

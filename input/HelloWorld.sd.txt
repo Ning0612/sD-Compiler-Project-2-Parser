@@ -1,9 +1,15 @@
 // Hello World Example
-void main() {
+void main(int argc, int argv[20][30]) {
   bool a = true;
   const bool b = !false;
   bool c = !b;
   a = !b;
   int ia = 0;
+  int k[40][50];
   const int cib = 35 + 35 - 23;
+
+  int i = 0;
+
+  foreach(i : -2 + 4 .. 10) 
+    i = 0;
 }

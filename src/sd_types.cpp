@@ -36,7 +36,7 @@ Type* TypeArena::makeArray(Type* elem,const std::vector<int>& sz){
 }
 
 Type* TypeArena::makeFunc(Type* ret,const std::vector<Type*>& p){
-    Type key(BK_Void); key.ret=ret; key.params=p;
+    Type key(ret->base); key.ret=ret; key.params=p;
     auto it=cache.find(key); if(it!=cache.end()) return it->second;
     Type* t=new Type(key); types.push_back(t); cache[*t]=t; return t;
 }
