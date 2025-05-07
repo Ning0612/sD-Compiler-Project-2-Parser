@@ -7,6 +7,7 @@ ExprInfo* Symbol::getExpr() const {
     switch(valueKind){
         case VK_Int:    e->setInt(iVal);       break;
         case VK_Float:  e->setFloat(fVal);     break;
+        case VK_Double: e->setDouble(dVal);    break;
         case VK_Bool:   e->setBool(bVal);      break;
         case VK_String: e->setString(sVal);    break;
         default: break;
@@ -25,6 +26,7 @@ void Symbol::dbgPrint() const {
             switch(valueKind){
                 case VK_Int:   printf("%d", iVal); break;
                 case VK_Float: printf("%f", fVal); break;
+                case VK_Double:printf("%f", dVal); break;
                 case VK_Bool:  printf("%s", bVal?"true":"false"); break;
                 case VK_String:printf("\"%s\"", sVal.c_str()); break;
                 default: break;
@@ -35,14 +37,37 @@ void Symbol::dbgPrint() const {
 }
 
 void Symbol::setConstValueFromExpr(const ExprInfo* e) {
-    switch (e->valueKind) {
-        case VK_Int: setInt(e->getInt()); break;
-        case VK_Float: setFloat(e->getFloat()); break;
-        case VK_Bool: setBool(e->getBool()); break;
-        case VK_String: setString(e->getString()); break;
+    switch (type->base) {
+        case BK_Int:
+            if (e->valueKind == VK_Int)       setInt(e->getInt());
+            else if (e->valueKind == VK_Float)  setInt(static_cast<int>(e->getFloat()));
+            else if (e->valueKind == VK_Double) setInt(static_cast<int>(e->getDouble()));
+            break;
+
+        case BK_Float:
+            if (e->valueKind == VK_Int)        setFloat(static_cast<float>(e->getInt()));
+            else if (e->valueKind == VK_Float) setFloat(e->getFloat());
+            else if (e->valueKind == VK_Double)setFloat(static_cast<float>(e->getDouble()));
+            break;
+
+        case BK_Double:
+            if (e->valueKind == VK_Int)        setDouble(static_cast<double>(e->getInt()));
+            else if (e->valueKind == VK_Float) setDouble(static_cast<double>(e->getFloat()));
+            else if (e->valueKind == VK_Double)setDouble(e->getDouble());
+            break;
+
+        case BK_Bool:
+            if (e->valueKind == VK_Bool) setBool(e->getBool());
+            break;
+
+        case BK_String:
+            if (e->valueKind == VK_String) setString(e->getString());
+            break;
+
         default: break;
     }
 }
+
 
 
 /*--------- SymbolTable ------*/
@@ -69,7 +94,8 @@ void SymbolTable::leaveScope(){
 }
 
 void SymbolTable::dbgPrintCurrentScope() const {
-    printf("\nSymbol Table in this scope:\n");
+    printf("\nSymbol Table in scope [%ld]\n", this->scopes.size()-1);
+
     for (const auto& p : scopes.back()) {
         p.second.dbgPrint();
     }

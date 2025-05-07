@@ -11,6 +11,7 @@ extern FILE* yyin;
 
 SymbolTable symTab;
 TypeArena typePool;
+std::vector<std::pair<ExprInfo, int>> returnsExpr;
 
 void yyerror(const char* s)
 {
@@ -49,16 +50,15 @@ void yyerror(const char* s)
 %type <type> type_spec
 %type <expr_info_list> arg_list
 %type <expr_info_list> arg_list_opt
-%type <expr_info> return_stmt
 %type <expr_info> func_call
 %type <expr_info> const_expr
 %type <expr_info> expression
+%type <expr_info> lvalue
 %type <symbol> const_decl
 %type <int_list> array_dims
 %type <int_list> array_ref
 %type <var_init> var_init
 %type <var_init_list> var_init_list
-%type <symbol> lvalue
 %type <symbol_list> param_list
 %type <symbol_list> param_list_opt
 %type <symbol> param
@@ -128,7 +128,7 @@ declaration:
 const_decl:
     CONST type_spec ID ASSIGN expression SEMICOLON
     {
-        if (*$2 != *$5->type) {
+        if (!$2->isCompatibleWith(*$5->type)) {
             throw SemanticError("const type mismatch", yylineno);
         }
 
@@ -196,8 +196,11 @@ var_init_list:
 var_init:
      ID                     { $$ = new varInit($1); }  
   |  ID ASSIGN expression   {
-        if (!$3->isConst) {
-            throw SemanticError("assignment to non-const", yylineno);
+        if ($3->type->isFunc()) {
+            throw SemanticError("assignment from function", yylineno);
+        }
+        if ($3->type->isArray()) {
+            throw SemanticError("assignment from array", yylineno);
         }
 
         $$ = new varInit($1, $3->type);
@@ -207,28 +210,40 @@ var_init:
 
 /* 4-c. 函式宣告 --------------------------------------------------------------*/
 func_decl:
-    type_spec ID LPAREN param_list_opt RPAREN LBRACE
-    {
+    type_spec ID LPAREN param_list_opt RPAREN LBRACE {
+        returnsExpr.clear();
         declareFunction(*$2, $1, $4, typePool, symTab, yylineno);
         delete $2;
-    }
-    block_items_opt RBRACE
-    {
+    } block_items_opt RBRACE {
+        if (returnsExpr.empty()) {
+            throw SemanticError("missing return statement", yylineno);
+        }
+
+        for (auto& expr : returnsExpr) {
+            if (expr.first.type != $1) {
+                throw SemanticError("return type mismatch !", expr.second);
+            }
+        }
         symTab.leaveScope();
     }
-  | VOID ID LPAREN param_list_opt RPAREN LBRACE{
+  | VOID ID LPAREN param_list_opt RPAREN LBRACE {
         Type* voidType = typePool.make(BK_Void);
+        returnsExpr.clear();
         declareFunction(*$2, voidType, $4, typePool, symTab, yylineno);
         delete $2;
-    }
-    block_items_opt RBRACE
-    {
+    } block_items_opt RBRACE {
+        if (!returnsExpr.empty()) {
+            throw SemanticError("void function should not return value", yylineno);
+        }
+
         symTab.leaveScope();
     };
 
 
 param_list_opt:
-    /* empty */
+    /* empty */ {
+        $$ = new std::vector<Symbol*>();
+    }
   | param_list {
         $$ = $1;
      }
@@ -299,6 +314,13 @@ simple_stmt:
         if ($2->isConst) {
             throw SemanticError("read to const", yylineno);
         }
+
+        if ($2->type->isFunc()) {
+            throw SemanticError("read to function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("read to array", yylineno);
+        }
     }
   |  lvalue INC SEMICOLON {
         checkIncDecValid($1, "increment", yylineno);
@@ -315,8 +337,22 @@ assign_stmt:
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if (!isAssignable($1->type, $3->type)) {
-            throw SemanticError("assignment type mismatch", yylineno);
+        if ($1->type->isFunc()) {
+            throw SemanticError("assignment to function", yylineno);
+        }
+        if ($1->type->isArray()) {
+            throw SemanticError("assignment to array", yylineno);
+        }
+
+        if ($3->type->isFunc()) {
+            throw SemanticError("assignment from function", yylineno);
+        }
+        if ($3->type->isArray()) {
+            throw SemanticError("assignment from array", yylineno);
+        }
+
+        if (!isBaseCompatible($1->type->base, $3->type->base) ) {
+                throw SemanticError("assignment type mismatch", yylineno);
         }
 
         delete $3;
@@ -330,15 +366,19 @@ lvalue:
             throw SemanticError("undeclared identifier: " + *$1, yylineno);
         }
 
-        if (symbol->type->isFunc()) {
-            throw SemanticError("function cannot be lvalue: " + *$1, yylineno);
+        $$ = new ExprInfo(symbol->type, symbol->isConst);
+
+        if (symbol->hasConstValue()) {
+            switch (symbol->type->base) {
+                case BK_Int:   $$->setInt(symbol->iVal); break;
+                case BK_Float: $$->setFloat(symbol->fVal); break;
+                case BK_Bool:  $$->setBool(symbol->bVal); break;
+                case BK_String: $$->setString(symbol->sVal); break;
+                default: break;
+            }
         }
 
-        if (symbol->type->isArray()) {
-            throw SemanticError("array cannot be lvalue: " + *$1, yylineno);
-        }
-
-        $$ = symbol;
+        delete $1;
      }
   | ID array_ref {
         Symbol* symbol = symTab.lookup(*$1);
@@ -352,15 +392,15 @@ lvalue:
 
         size_t given = $2->size();
         size_t expected = static_cast<size_t>(symbol->type->dim);
-        if (given != expected) {
-            printf("array index dimension: %zu, expected: %zu\n", given, expected);
-            throw SemanticError("array index dimension mismatch: " + *$1, yylineno);
-        }
+        std::vector<int> dims = symbol->type->sizes;
 
         for (size_t i = 0; i < given; ++i) {
             int index = (*$2)[i];
+            int defined = symbol->type->sizes[i];
+            printf("array index: %d, defined: %d\n", index, defined);
+
             if (index != 0) { 
-                if (index < 0 || index >= symbol->type->sizes[i]) {
+                if (index < 0 || index >= defined) {
                     throw SemanticError(
                         "array index out of bounds: " + std::to_string(index) +
                         " not in [0.." + std::to_string(symbol->type->sizes[i] - 1) + "]",
@@ -368,10 +408,16 @@ lvalue:
                     );
                 }
             }
+
+            if (!dims.empty()){
+                dims.erase(dims.begin());
+            }
         }
 
-        $$ = symbol;
-        delete $2;  
+        $$ = new ExprInfo(typePool.makeArray(typePool.make(symbol->type->base), dims), symbol->isConst);
+        $$->type->dbgPrint();
+        delete $2;
+        delete $1;
     }
     ;
 
@@ -424,15 +470,22 @@ assign_no_semi:
             throw SemanticError("assignment to const", yylineno);
         }
 
-        if (*$1->type != *$3->type) {
-            if (($1->type->base == BK_Int || $1->type->base == BK_Float) &&
-                ($3->type->base == BK_Int || $3->type->base == BK_Float)) {
-            } else {
-                throw SemanticError("assignment type mismatch: " +
-                    baseKindToStr($1->type->base) + " = " +
-                    baseKindToStr($3->type->base),
-                    yylineno);
-            }
+        if ($1->type->isFunc()) {
+            throw SemanticError("assignment to function", yylineno);
+        }
+        if ($1->type->isArray()) {
+            throw SemanticError("assignment to array", yylineno);
+        }
+
+        if ($3->type->isFunc()) {
+            throw SemanticError("assignment from function", yylineno);
+        }
+        if ($3->type->isArray()) {
+            throw SemanticError("assignment from array", yylineno);
+        }
+
+        if (!isBaseCompatible($1->type->base, $3->type->base) ) {
+                throw SemanticError("assignment type mismatch", yylineno);
         }
     };
 
@@ -440,7 +493,8 @@ assign_no_semi:
 /* 5-d. Return ----------------------------------------------------------------*/
 return_stmt:
      RETURN expression SEMICOLON {
-        $$ = $2;
+        returnsExpr.push_back(std::make_pair(*$2, yylineno));
+        delete $2;
      }
     ;
 
@@ -455,8 +509,7 @@ expression:
                 expr->setString($1->getString() + $3->getString());
             }
             $$ = expr;
-        } else if (($1->type->base == BK_Int || $1->type->base == BK_Float) &&
-                   ($3->type->base == BK_Int || $3->type->base == BK_Float)) {
+        } else if (isBaseCompatible($1->type->base, $3->type->base)) {
             $$ = numericResult(OPADD, $1, $3, typePool, yylineno);
         } else {
             throw SemanticError("invalid types for '+' operator", yylineno);
@@ -549,11 +602,9 @@ expression:
         delete $2;
     }
   | LPAREN expression RPAREN       { $$ = $2; }
-  | lvalue                         { $$ = $1->getExpr(); }
+  | lvalue                         { $$ = $1; }
   | const_expr                     { $$ = $1; }
-  | func_call                      {
-    
-  }
+  | func_call                      { $$ = $1; }
     ;
 
 /* 7. 常數 / 呼叫 -------------------------------------------------------------*/
@@ -564,7 +615,7 @@ const_expr
         $$ = expr;
     }
     | REAL_LIT    {
-        ExprInfo* expr = new ExprInfo(typePool.make(BK_Float), true);
+        ExprInfo* expr = new ExprInfo(typePool.make(BK_Double), true);
         expr->setFloat($1);
         $$ = expr;
     }
@@ -597,7 +648,9 @@ proc_call:
     }
 
 arg_list_opt:
-    /* empty */{ $$ = nullptr; }
+    /* empty */{ 
+        $$ = new std::vector<ExprInfo*>();
+    }
   | arg_list { $$ = $1; }
     ;
 
@@ -641,6 +694,7 @@ array_ref:
 type_spec
     : INT_TOK    { $$ = typePool.make(BK_Int);   }
     | FLOAT      { $$ = typePool.make(BK_Float); }
+    | DOUBLE     { $$ = typePool.make(BK_Double); }
     | BOOL       { $$ = typePool.make(BK_Bool);  }
     | STRING_TOK { $$ = typePool.make(BK_String);}
     ;

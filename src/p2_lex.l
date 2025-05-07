@@ -14,12 +14,13 @@
 
 
 #ifdef DEBUG_LEX
+#define LIST /* nothing */
 #define tokenNewline() printf("\n")
-#define token(t)          { LIST; printf("<%s> ", #t); return t; }
-#define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
-#define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
-#define tokenBool(b)      { LIST; printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
-#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
+#define token(t)          { printf("<%s> ", #t); return t; }
+#define tokenInteger(i)   { printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
+#define tokenReal(r)      { printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
+#define tokenBool(b)      { printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
+#define tokenString(str)  { printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
 #else
 #define LIST /* nothing */
 #define tokenNewline() /* nothing */

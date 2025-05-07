@@ -4,22 +4,25 @@
 #include <string>
 
 /*───────── 常數 / 值 描述 ─────────*/
-enum ValueKind { VK_None, VK_Int, VK_Float, VK_Bool, VK_String };
+enum ValueKind { VK_None, VK_Int, VK_Float, VK_Double, VK_Bool, VK_String };
 
 struct ExprInfo {
     Type*     type;
     bool      isConst;
     ValueKind valueKind;
 
-    union { int iVal; float fVal; bool bVal; };
+    union { int iVal; float fVal; double dVal; bool bVal; };
     std::string sVal;
 
     explicit ExprInfo(Type* t, bool c=false)
         : type(t), isConst(c), valueKind(VK_None) {}
 
+
+
     /* setter */
     void setInt   (int v)             { valueKind=VK_Int;   iVal=v; isConst=true; }
     void setFloat (float v)           { valueKind=VK_Float; fVal=v; isConst=true; }
+    void setDouble(double v)          { valueKind=VK_Double; dVal=v; isConst=true; }
     void setBool  (bool v)            { valueKind=VK_Bool;  bVal=v; isConst=true; }
     void setString(const std::string& s){ valueKind=VK_String; sVal=s; isConst=true; }
 
@@ -29,6 +32,8 @@ struct ExprInfo {
         switch(valueKind){
             case VK_Int:   return iVal==0;
             case VK_Float: return fVal==0.0f;
+            case VK_Double:return dVal==0.0f;
+            case VK_String:return sVal.empty();
             case VK_Bool:  return bVal==false;
             default:       return false;
         }
@@ -37,12 +42,14 @@ struct ExprInfo {
     /* getter（型別不符丟例外）*/
     int    getInt()    const { if(valueKind!=VK_Int)   throw std::runtime_error("not int");   return iVal; }
     float  getFloat()  const { if(valueKind!=VK_Float) throw std::runtime_error("not float"); return fVal; }
+    double getDouble() const { if(valueKind!=VK_Double)throw std::runtime_error("not double");return dVal; }
     bool   getBool()   const { if(valueKind!=VK_Bool)  throw std::runtime_error("not bool");  return bVal; }
     std::string getString() const{ if(valueKind!=VK_String) throw std::runtime_error("not string"); return sVal; }
     void setConstValueFromExpr(const ExprInfo* e) {
         switch (e->valueKind) {
             case VK_Int: setInt(e->getInt()); break;
             case VK_Float: setFloat(e->getFloat()); break;
+            case VK_Double: setDouble(e->getDouble()); break;
             case VK_Bool: setBool(e->getBool()); break;
             case VK_String: setString(e->getString()); break;
             default: break;

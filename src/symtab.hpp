@@ -12,7 +12,7 @@ public:
     bool  isConst;
 
     ValueKind valueKind = VK_None;
-    union { int iVal; float fVal; bool bVal; };
+    union { int iVal; float fVal; double dVal; bool bVal; };
     std::string sVal;
 
     Symbol(const std::string& n, Type* t, bool c)
@@ -21,6 +21,7 @@ public:
     /* 設常數值 */
     void setInt(int v){ valueKind=VK_Int; iVal=v; }
     void setFloat(float v){ valueKind=VK_Float; fVal=v; }
+    void setDouble(double v){ valueKind=VK_Double; dVal=v; }
     void setBool(bool v){ valueKind=VK_Bool; bVal=v; }
     void setString(const std::string& s){ valueKind=VK_String; sVal=s; }
     bool hasConstValue() const { return isConst && valueKind!=VK_None; }

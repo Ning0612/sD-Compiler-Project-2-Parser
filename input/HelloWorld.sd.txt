@@ -1,18 +1,19 @@
 // Hello World Example
-int cx;
-
-int add(int a, int b) {
-  return a + b;
+int add(int a) {
+    return 5 + 10;
 }
 
-void main(int argc, int argv[20][30]) {
-  const int j = - 34 + - + - + 3;
-  const string s = "Hello";
-  const string s2 = "World";
-  const string s3 = s + " " + s2;
-  int arr[6], c[3];
-  read arr[5];
-  int f;
-  int da; 
-  da = add(4, 5 + 2);
+void main(int k) {
+  return 2;
+  int a;
+  int arr[11][3];
+  int c;
+
+  int d;
+  const double e = (4 + 303) / 3;
+  const string h = "Hello";
+  const string i = "World";
+  const string j = h + " " + i;
+  d = add(34);
 }
+

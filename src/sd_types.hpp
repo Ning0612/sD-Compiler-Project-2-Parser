@@ -6,7 +6,11 @@
 #include <cstdio>
 
 /*───────── 型別系統 ─────────*/
-enum BaseKind { BK_Int, BK_Float, BK_Bool, BK_String, BK_Void };
+enum BaseKind { BK_Int, BK_Float, BK_Double, BK_Bool, BK_String, BK_Void };
+
+bool isBaseCompatible(BaseKind a, BaseKind b);
+BaseKind promote(BaseKind b1, BaseKind b2);
+
 
 struct Type {
     BaseKind            base;
@@ -16,17 +20,21 @@ struct Type {
     Type*               ret;          // function return
 
     explicit Type(BaseKind b) : base(b), dim(0), ret(nullptr) {}
+    bool isScalar() const { return !isArray() && !isFunc(); }
     bool isArray() const { return dim > 0; }
     bool isFunc()  const { return ret || !params.empty(); }
 
     bool operator==(const Type& o) const;
     bool operator!=(const Type& o) const { return !(*this == o); }
+    bool isCompatibleWith(const Type& o) const;
+
 
     /* 方便除錯的小印法 */
     void dbgPrint() const {
         switch (base) {
             case BK_Int:    printf("int");    break;
             case BK_Float:  printf("float");  break;
+            case BK_Double: printf("double"); break;
             case BK_Bool:   printf("bool");   break;
             case BK_String: printf("string"); break;
             case BK_Void:   printf("void");   break;
@@ -65,3 +73,5 @@ private:
     std::vector<Type*> types;
     std::unordered_map<Type, Type*, TypeHash> cache;
 };
+
+std::string baseKindToStr(BaseKind kind);
