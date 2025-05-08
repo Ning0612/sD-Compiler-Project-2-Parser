@@ -80,13 +80,11 @@ void yyerror(const char* s)
 %left   AND             /* && */
 %nonassoc IFX
 %nonassoc ELSE
-%nonassoc EQ NEQ        /* == !=  (比 && 高) */
-%nonassoc LT LE GT GE   /* < <= > >= */
+%right  NOT             /* !x */
+%nonassoc LT LE GT GE EQ NEQ  /* < <= > >= == != */
 %left   PLUS MINUS      /* + - */
 %left   MUL DIV MOD     /* * / % */
-%right  NOT             /* !x */
-%right  UPLUS UMINUS    /* +x -x */
-%right  INC DEC         /* ++ -- */
+%right  INC DEC UPLUS UMINUS /* ++ -- */
 %right  ASSIGN          /* =  */
 
 
@@ -494,7 +492,7 @@ loop_stmt:
   |  DO statement WHILE LPAREN expression RPAREN SEMICOLON {
         checkBoolExpr($5, "do while", yylineno);
     }
-  |  FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement{
+  |  FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
         checkBoolExpr($5, "for", yylineno);
     }
   |  FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
@@ -503,39 +501,54 @@ loop_stmt:
     }
     ;
 
-for_start_opt:
-    /* empty */
-  | for_start_list
+for_simple_opt:
+      /* empty */
+    | for_simple_item
+    | for_simple_opt COMMA for_simple_item
+;
+
+
+for_simple_item:
+     assign_no_semi
+  |  PRINT  expression  {
+        if ($2->type->isFunc()) {
+            throw SemanticError("print from function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("print from array", yylineno);
+        }
+
+        delete $2;
+  }
+  |  PRINTLN expression  {
+        if ($2->type->isFunc()) {
+            throw SemanticError("print from function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("print from array", yylineno);
+        }
+
+        delete $2;
+  }
+  |  READ lvalue  {
+        if ($2->isConst) {
+            throw SemanticError("read to const", yylineno);
+        }
+
+        if ($2->type->isFunc()) {
+            throw SemanticError("read to function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("read to array", yylineno);
+        }
+    }
+  |  lvalue INC  {
+        checkIncDecValid($1, "increment", yylineno);
+     }
+  |  lvalue DEC  {
+        checkIncDecValid($1, "decrement", yylineno);
+    }
     ;
-
-for_update_opt:
-    /* empty */
-  | for_update_list
-    ;
-
-for_start_list:
-      for_start_item
-    | for_start_list COMMA for_start_item
-;
-
-for_update_list:
-      for_update_item
-    | for_update_list COMMA for_update_item
-;
-
-for_start_item:
-    assign_no_semi
-;
-
-for_update_item:
-      assign_no_semi
-    | lvalue INC { checkIncDecValid($1, "increment", yylineno); }
-    | lvalue DEC { checkIncDecValid($1, "decrement", yylineno); }
-;
-
-
-
-
 
 assign_no_semi:
     lvalue ASSIGN expression {
@@ -812,7 +825,7 @@ type_spec
 %% 
 
 int main(int argc, char* argv[])
-{
+{   
     if (argc != 2) {
         std::puts("Usage: sd <source-file>");
         return 1;
