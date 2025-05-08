@@ -54,13 +54,13 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    BOOL = 258,                    /* BOOL  */
-    FLOAT = 259,                   /* FLOAT  */
-    DOUBLE = 260,                  /* DOUBLE  */
+    BOOL_TOK = 258,                /* BOOL_TOK  */
+    FLOAT_TOK = 259,               /* FLOAT_TOK  */
+    DOUBLE_TOK = 260,              /* DOUBLE_TOK  */
     INT_TOK = 261,                 /* INT_TOK  */
-    CHAR = 262,                    /* CHAR  */
+    CHAR_TOK = 262,                /* CHAR_TOK  */
     STRING_TOK = 263,              /* STRING_TOK  */
-    VOID = 264,                    /* VOID  */
+    VOID_TOK = 264,                /* VOID_TOK  */
     IF = 265,                      /* IF  */
     ELSE = 266,                    /* ELSE  */
     DO = 267,                      /* DO  */
@@ -122,13 +122,13 @@ extern int yydebug;
 #define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
-#define BOOL 258
-#define FLOAT 259
-#define DOUBLE 260
+#define BOOL_TOK 258
+#define FLOAT_TOK 259
+#define DOUBLE_TOK 260
 #define INT_TOK 261
-#define CHAR 262
+#define CHAR_TOK 262
 #define STRING_TOK 263
-#define VOID 264
+#define VOID_TOK 264
 #define IF 265
 #define ELSE 266
 #define DO 267

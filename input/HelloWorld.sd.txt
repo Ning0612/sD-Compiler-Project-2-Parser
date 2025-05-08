@@ -1,19 +1,7 @@
 // Hello World Example
-int add(int a) {
-    return 5 + 10;
-}
 
-void main(int k) {
-  return 2;
-  int a;
-  int arr[11][3];
-  int c;
-
-  int d;
-  const double e = (4 + 303) / 3;
-  const string h = "Hello";
-  const string i = "World";
-  const string j = h + " " + i;
-  d = add(34);
+void main() {
+  
+  const bool t = 24 > 34.4 && 30 + 3;
 }
 

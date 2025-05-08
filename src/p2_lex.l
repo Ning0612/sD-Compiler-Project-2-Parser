@@ -87,19 +87,19 @@
 "{"             token(LBRACE);
 "}"             token(RBRACE);
 
-"bool"          token(BOOL);
+"bool"          token(BOOL_TOK);
 "break"         token(BREAK);
 "case"          token(CASE);
-"char"          token(CHAR);
+"char"          token(CHAR_TOK);
 "const"         token(CONST);
 "continue"      token(CONTINUE);
 "default"       token(DEFAULT);
 "do"            token(DO);
-"double"        token(DOUBLE);
+"double"        token(DOUBLE_TOK);
 "else"          token(ELSE);
 "extern"        token(EXTERN);
 "false"         tokenBool(false);
-"float"         token(FLOAT);
+"float"         token(FLOAT_TOK);
 "for"           token(FOR);
 "foreach"       token(FOREACH);
 "if"            token(IF);
@@ -111,7 +111,7 @@
 "string"        token(STRING_TOK);
 "switch"        token(SWITCH);
 "true"          tokenBool(true);
-"void"          token(VOID);
+"void"          token(VOID_TOK);
 "while"         token(WHILE);
 
 [a-zA-Z_][a-zA-Z0-9_]* {

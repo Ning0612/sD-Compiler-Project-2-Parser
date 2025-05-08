@@ -1093,7 +1093,7 @@ token(RBRACE);
 case 37:
 YY_RULE_SETUP
 #line 90 "src/p2_lex.l"
-token(BOOL);
+token(BOOL_TOK);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
@@ -1108,7 +1108,7 @@ token(CASE);
 case 40:
 YY_RULE_SETUP
 #line 93 "src/p2_lex.l"
-token(CHAR);
+token(CHAR_TOK);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
@@ -1133,7 +1133,7 @@ token(DO);
 case 45:
 YY_RULE_SETUP
 #line 98 "src/p2_lex.l"
-token(DOUBLE);
+token(DOUBLE_TOK);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
@@ -1153,7 +1153,7 @@ tokenBool(false);
 case 49:
 YY_RULE_SETUP
 #line 102 "src/p2_lex.l"
-token(FLOAT);
+token(FLOAT_TOK);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
@@ -1213,7 +1213,7 @@ tokenBool(true);
 case 61:
 YY_RULE_SETUP
 #line 114 "src/p2_lex.l"
-token(VOID);
+token(VOID_TOK);
 	YY_BREAK
 case 62:
 YY_RULE_SETUP

@@ -38,7 +38,7 @@ void yyerror(const char* s)
 }
 
 /* ---------- 關鍵字 / 常數 / 識別元 ---------- */
-%token                BOOL FLOAT DOUBLE INT_TOK CHAR STRING_TOK VOID
+%token                BOOL_TOK FLOAT_TOK DOUBLE_TOK INT_TOK CHAR_TOK STRING_TOK VOID_TOK
 %token                IF ELSE DO WHILE FOR FOREACH RETURN
 %token                CONST PRINT PRINTLN READ TRUE FALSE
 %token <sval>         ID
@@ -51,7 +51,7 @@ void yyerror(const char* s)
 %type <expr_info_list> arg_list
 %type <expr_info_list> arg_list_opt
 %type <expr_info> func_call
-%type <expr_info> const_expr
+%type <expr_info> const_lit
 %type <expr_info> expression
 %type <expr_info> lvalue
 %type <symbol> const_decl
@@ -72,7 +72,7 @@ void yyerror(const char* s)
 
 %token BREAK CONTINUE SWITCH CASE DEFAULT EXTERN
 
-// DOUBLE CHAR
+// CHAR
 
 /* ---------- 運算子優先序 ---------- */
 /* 由低到高（最下面優先序最高） */
@@ -104,6 +104,10 @@ program:
 
         if (!mainFunc->type->isFunc()) {
             throw SemanticError("main function must be function", yylineno);
+        }
+
+        if (mainFunc->type->ret->base != BK_Void) {
+            throw SemanticError("main function must return void", yylineno);
         }
 
         symTab.dbgPrintCurrentScope();
@@ -148,6 +152,11 @@ const_decl:
             throw SemanticError("redeclared const: " + *$3, yylineno);
         }
 
+        if (isConvertible($2->base, $5->type->base)) {
+            printf("Warning: implicit conversion from %s to %s @ line %d\n",
+                baseKindToStr($2->base).c_str(), baseKindToStr($5->type->base).c_str(), yylineno);
+        }
+
         delete $3;
         delete $5;
     }
@@ -160,8 +169,13 @@ var_decl:
             Symbol s("", nullptr, false);
 
             if (var->constType != nullptr) {
-                if (*$1 != *var->constType) {
+                if (!$1->isCompatibleWith(*var->constType)) {
                     throw SemanticError("var type mismatch", yylineno);
+                }
+
+                if(isConvertible($1->base, var->constType->base)) {
+                    printf("Warning: implicit conversion from %s to %s @ line %d\n",
+                        baseKindToStr($1->base).c_str(), baseKindToStr(var->constType->base).c_str(), yylineno);
                 }
                 s = Symbol(*var->name, $1, false);
             } 
@@ -212,6 +226,11 @@ var_init:
 func_decl:
     type_spec ID LPAREN param_list_opt RPAREN LBRACE {
         returnsExpr.clear();
+
+        if (*$2 == "main") {
+            throw SemanticError("main function should be void", yylineno);
+        }
+
         declareFunction(*$2, $1, $4, typePool, symTab, yylineno);
         delete $2;
     } block_items_opt RBRACE {
@@ -220,13 +239,18 @@ func_decl:
         }
 
         for (auto& expr : returnsExpr) {
-            if (expr.first.type != $1) {
+            if (!$1->isCompatibleWith(*expr.first.type)) {
                 throw SemanticError("return type mismatch !", expr.second);
+            }
+
+            if (isConvertible($1->base, expr.first.type->base)) {
+                printf("Warning: implicit conversion from %s to %s @ line %d\n",
+                    baseKindToStr($1->base).c_str(), baseKindToStr(expr.first.type->base).c_str(), expr.second);
             }
         }
         symTab.leaveScope();
     }
-  | VOID ID LPAREN param_list_opt RPAREN LBRACE {
+  | VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE {
         Type* voidType = typePool.make(BK_Void);
         returnsExpr.clear();
         declareFunction(*$2, voidType, $4, typePool, symTab, yylineno);
@@ -308,8 +332,26 @@ statement:
 /* 5-a. Simple ---------------------------------------------------------------*/
 simple_stmt:
      assign_stmt
-  |  PRINT  expression SEMICOLON
-  |  PRINTLN expression SEMICOLON
+  |  PRINT  expression SEMICOLON {
+        if ($2->type->isFunc()) {
+            throw SemanticError("print from function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("print from array", yylineno);
+        }
+
+        delete $2;
+  }
+  |  PRINTLN expression SEMICOLON {
+        if ($2->type->isFunc()) {
+            throw SemanticError("print from function", yylineno);
+        }
+        if ($2->type->isArray()) {
+            throw SemanticError("print from array", yylineno);
+        }
+
+        delete $2;
+  }
   |  READ lvalue SEMICOLON {
         if ($2->isConst) {
             throw SemanticError("read to const", yylineno);
@@ -355,6 +397,11 @@ assign_stmt:
                 throw SemanticError("assignment type mismatch", yylineno);
         }
 
+        if (isConvertible($1->type->base, $3->type->base)){
+            printf("Warning: implicit conversion from %s to %s @ line %d\n",
+               baseKindToStr($3->type->base).c_str(), baseKindToStr($1->type->base).c_str(), yylineno);
+        }
+
         delete $3;
      }
 ;
@@ -391,13 +438,11 @@ lvalue:
         }
 
         size_t given = $2->size();
-        size_t expected = static_cast<size_t>(symbol->type->dim);
         std::vector<int> dims = symbol->type->sizes;
 
         for (size_t i = 0; i < given; ++i) {
             int index = (*$2)[i];
             int defined = symbol->type->sizes[i];
-            printf("array index: %d, defined: %d\n", index, defined);
 
             if (index != 0) { 
                 if (index < 0 || index >= defined) {
@@ -415,7 +460,6 @@ lvalue:
         }
 
         $$ = new ExprInfo(typePool.makeArray(typePool.make(symbol->type->base), dims), symbol->isConst);
-        $$->type->dbgPrint();
         delete $2;
         delete $1;
     }
@@ -487,6 +531,11 @@ assign_no_semi:
         if (!isBaseCompatible($1->type->base, $3->type->base) ) {
                 throw SemanticError("assignment type mismatch", yylineno);
         }
+
+        if (isConvertible($1->type->base, $3->type->base)){
+            printf("Warning: implicit conversion from %s to %s @ line %d\n",
+               baseKindToStr($1->type->base).c_str(), baseKindToStr($3->type->base).c_str(), yylineno);
+        }
     };
 
 
@@ -518,19 +567,27 @@ expression:
         delete $1;
         delete $3;
     }
-  | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); }
-  | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); }
-  | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); }
-  | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); }
+  | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); delete $1; delete $3; }
 
-  | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); }
-  | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); }
-  | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); }
-  | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); }
+  | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); delete $1; delete $3; }
 
-  | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); }
-  | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); }
+  | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+  | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); delete $1; delete $3; }
   | expression AND   expression    {
+        if (!$1->type->isScalar()){
+            throw SemanticError("and on non-scalar type", yylineno);
+        }
+
+        if (!$3->type->isScalar()){
+            throw SemanticError("and on non-scalar type", yylineno);
+        }
+
         if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
             throw SemanticError("and on non-bool type", yylineno);
         }
@@ -544,6 +601,14 @@ expression:
         delete $3;
     }
   | expression OR    expression    { 
+        if (!$1->type->isScalar()){
+            throw SemanticError("or on non-scalar type", yylineno);
+        }
+
+        if (!$3->type->isScalar()){
+            throw SemanticError("or on non-scalar type", yylineno);
+        }
+
         if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
             throw SemanticError("or on non-bool type", yylineno);
         }
@@ -557,6 +622,10 @@ expression:
         delete $3;
     }
   | NOT expression                 { 
+        if (!$2->type->isScalar()){
+            throw SemanticError("not on non-scalar type", yylineno);
+        }
+
         if ($2->type->base != BK_Bool) {
             throw SemanticError("not on non-bool type", yylineno);
         }
@@ -569,7 +638,11 @@ expression:
         delete $2;
     }
   | MINUS expression %prec UMINUS  { 
-        if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
+        if (!$2->type->isScalar()){
+            throw SemanticError("unary minus on non-scalar type", yylineno);
+        }
+
+        if ($2->type->base != BK_Float && $2->type->base != BK_Int && $2->type->base != BK_Double) {
             throw SemanticError("unary minus on non-numeric type", yylineno);
         }
 
@@ -579,13 +652,19 @@ expression:
                 expr->setFloat(-$2->getFloat());
             } else if ($2->valueKind == VK_Int) {
                 expr->setInt(-$2->getInt());
+            } else if ($2->valueKind == VK_Double) {
+                expr->setFloat(-$2->getDouble());
             }
         }
         $$ = expr;
         delete $2;
     }
   | PLUS expression %prec UPLUS    { 
-        if ($2->type->base != BK_Float && $2->type->base != BK_Int) {
+        if (!$2->type->isScalar()){
+            throw SemanticError("unary plus on non-scalar type", yylineno);
+        }
+
+        if ($2->type->base != BK_Float && $2->type->base != BK_Int && $2->type->base != BK_Double) {
             throw SemanticError("unary plus on non-numeric type", yylineno);
         }
 
@@ -595,6 +674,8 @@ expression:
                 expr->setFloat($2->getFloat());
             } else if ($2->valueKind == VK_Int) {
                 expr->setInt($2->getInt());
+            } else if ($2->valueKind == VK_Double) {
+                expr->setFloat($2->getDouble());
             }
         }
 
@@ -603,12 +684,12 @@ expression:
     }
   | LPAREN expression RPAREN       { $$ = $2; }
   | lvalue                         { $$ = $1; }
-  | const_expr                     { $$ = $1; }
+  | const_lit                     { $$ = $1; }
   | func_call                      { $$ = $1; }
     ;
 
 /* 7. 常數 / 呼叫 -------------------------------------------------------------*/
-const_expr
+const_lit
     : INT_LIT     { 
         ExprInfo* expr = new ExprInfo(typePool.make(BK_Int), true);
         expr->setInt($1);
@@ -693,9 +774,9 @@ array_ref:
 /* 9. 型別 --------------------------------------------------------------------*/
 type_spec
     : INT_TOK    { $$ = typePool.make(BK_Int);   }
-    | FLOAT      { $$ = typePool.make(BK_Float); }
-    | DOUBLE     { $$ = typePool.make(BK_Double); }
-    | BOOL       { $$ = typePool.make(BK_Bool);  }
+    | FLOAT_TOK      { $$ = typePool.make(BK_Float); }
+    | DOUBLE_TOK     { $$ = typePool.make(BK_Double); }
+    | BOOL_TOK       { $$ = typePool.make(BK_Bool);  }
     | STRING_TOK { $$ = typePool.make(BK_String);}
     ;
 

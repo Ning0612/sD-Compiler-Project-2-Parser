@@ -1,14 +1,21 @@
 #include "sd_types.hpp"
 
 /*--------- Type equality ---------*/
+bool isConvertible(BaseKind a, BaseKind b) {
+    // 定義可轉換的基本型別對應邏輯
+    if ((a == BK_Int && (b == BK_Float || b == BK_Double)) ||
+        (a == BK_Float && (b == BK_Int || b == BK_Double)) ||
+        (a == BK_Double && (b == BK_Int || b == BK_Float)))
+        return true;
+
+    return false;
+}
 
 bool isBaseCompatible(BaseKind a, BaseKind b) {
     if (a == b) return true;
 
     // 定義寬容相容的基本型別對應邏輯
-    if ((a == BK_Int && (b == BK_Float || b == BK_Double)) ||
-        (a == BK_Float && (b == BK_Int || b == BK_Double)) ||
-        (a == BK_Double && (b == BK_Int || b == BK_Float)))
+    if (isConvertible(a, b))
         return true;
 
     return false;

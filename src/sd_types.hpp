@@ -8,6 +8,7 @@
 /*───────── 型別系統 ─────────*/
 enum BaseKind { BK_Int, BK_Float, BK_Double, BK_Bool, BK_String, BK_Void };
 
+bool isConvertible(BaseKind a, BaseKind b);
 bool isBaseCompatible(BaseKind a, BaseKind b);
 BaseKind promote(BaseKind b1, BaseKind b2);
 

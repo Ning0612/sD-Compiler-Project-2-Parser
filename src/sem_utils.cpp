@@ -30,6 +30,11 @@ ExprInfo* numericResult(NumOp op, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool,
     BaseKind res = promote(b1, b2);
     ExprInfo* out=new ExprInfo(pool.make(res), isConst);
 
+    if (isConvertible(b1, res)){
+        printf("Warning: implicit conversion from %s to %s @ line %d\n",
+               baseKindToStr(b1).c_str(), baseKindToStr(res).c_str(), lineno);
+    }
+
     if(isConst){
         if(res==BK_Float){
             float a=toFloat(lhs), b=toFloat(rhs);
@@ -57,15 +62,45 @@ ExprInfo* relResult(RelOp op, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool, int
     BaseKind b1=lhs->type->base, b2=rhs->type->base;
     bool isConst = lhs->isConst && rhs->isConst;
 
-    if(!((b1==BK_Int||b1==BK_Float)&&(b2==BK_Int||b2==BK_Float)))
-        throw SemanticError("relational type mismatch", lineno);
-
-    ExprInfo* out=new ExprInfo(pool.make(BK_Bool), isConst);
-    if(isConst){
-        float a=toFloat(lhs), b=toFloat(rhs);
-        bool r=(op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
-        out->setBool(r);
+    if(!lhs->type->isScalar()){
+        throw SemanticError("left operand must be scalar", lineno);
     }
+
+    if(!rhs->type->isScalar()){
+        throw SemanticError("right operand must be scalar", lineno);
+    }
+
+    if(!(isBaseCompatible(b1, b2)))
+        throw SemanticError("numeric type mismatch", lineno);
+
+    BaseKind res = promote(b1, b2);
+    ExprInfo* out=new ExprInfo(pool.make(BK_Bool), isConst);
+
+    if (isConvertible(b1, res)){
+        printf("Warning: implicit conversion from %s to %s @ line %d\n",
+               baseKindToStr(b1).c_str(), baseKindToStr(res).c_str(), lineno);
+    }
+    if (isConvertible(b2, res)){
+        printf("Warning: implicit conversion from %s to %s @ line %d\n",
+               baseKindToStr(b2).c_str(), baseKindToStr(res).c_str(), lineno);
+    }
+
+    if(isConst){
+        if(res==BK_Float){
+            float a=toFloat(lhs), b=toFloat(rhs);
+            bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
+            out->setBool(r);
+        }else if(res==BK_Double){
+            double a=toDouble(lhs), b=toDouble(rhs);
+            bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
+            out->setBool(r);
+        }else if(res==BK_Int){
+            int a=lhs->getInt(), b=rhs->getInt();
+            bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
+            out->setBool(r);
+        }
+    }
+
     return out;
 }
 
@@ -73,14 +108,20 @@ ExprInfo* relResult(RelOp op, ExprInfo* lhs, ExprInfo* rhs, TypeArena& pool, int
 ExprInfo* eqResult(bool equal, ExprInfo* l, ExprInfo* r, TypeArena& pool, int lineno) {
     BaseKind b1=l->type->base, b2=r->type->base;
     bool isConst = l->isConst && r->isConst;
+
+    if (l->type->isArray() || r->type->isArray()) {
+        throw SemanticError("array comparison not supported", lineno);
+    }
+
+    if (l->type->isFunc() || r->type->isFunc()) {
+        throw SemanticError("function comparison not supported", lineno);
+    }
+
     ExprInfo* out=new ExprInfo(pool.make(BK_Bool), isConst);
 
     auto cmp=[&](auto a,auto b){return equal? a==b : a!=b;};
 
-    if((b1==BK_Int||b1==BK_Float)&&(b2==BK_Int||b2==BK_Float)){
-        if(isConst) out->setBool(cmp(toFloat(l),toFloat(r)));
-    }
-    else if(l->type == r->type){
+    if(l->type->isCompatibleWith(*r->type)){
         if(isConst){
             switch(b1){
                 case BK_Bool:   out->setBool(cmp(l->getBool(),   r->getBool())); break;
@@ -90,8 +131,10 @@ ExprInfo* eqResult(bool equal, ExprInfo* l, ExprInfo* r, TypeArena& pool, int li
                 default: throw SemanticError("unsupported ==/!= type", lineno);
             }
         }
-    }else
+    
+    }else{
         throw SemanticError("equal type mismatch", lineno);
+    }
 
     return out;
 }
@@ -139,8 +182,9 @@ int extractArrayIndexOrZero(ExprInfo* expr, int lineno) {
     if (expr->type->base != BK_Int) {
         throw SemanticError("array index must be int", lineno);
     }
+
     if (expr->isConst) {
-        if (expr->valueKind == VK_Float) {
+        if (expr->valueKind != VK_Int) {
             throw SemanticError("array index must be int", lineno);
         }
         return expr->getInt();
@@ -177,6 +221,9 @@ void checkBoolExpr(ExprInfo* expr, const std::string& context, int lineno) {
 }
 
 void checkForeachRange(ExprInfo* from, ExprInfo* to, int lineno) {
+    if (!from->type->isScalar() || !to->type->isScalar())
+        throw SemanticError("foreach range must be scalar", lineno);
+
     if (from->type->base != BK_Int || !from->isConst)
         throw SemanticError("foreach range must be const int", lineno);
 
@@ -228,9 +275,16 @@ void checkFuncCall(Symbol* symbol, const std::string& name, std::vector<ExprInfo
 
     if (args) {
         for (size_t i = 0; i < argCount; ++i) {
-            if (!isAssignable(symbol->type->params[i], (*args)[i]->type)) {
+            if (!(*args)[i]->type->isCompatibleWith(*symbol->type->params[i])) {
                 throw SemanticError("argument type mismatch", lineno);
             }
+
+            if (isConvertible((*args)[i]->type->base, symbol->type->params[i]->base)) {
+                printf("Warning: implicit conversion from %s to %s @ %d\n",
+                    baseKindToStr((*args)[i]->type->base).c_str(),
+                    baseKindToStr(symbol->type->params[i]->base).c_str(), lineno);
+            }
+            
             delete (*args)[i];
         }
         delete args;
