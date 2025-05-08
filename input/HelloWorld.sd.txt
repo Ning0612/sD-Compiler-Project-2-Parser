@@ -1,7 +1,9 @@
 // Hello World Example
-
+int f(){
+  return 0;
+}
 void main() {
-  
+
   const bool t = 24 > 34.4 && 30 + 3;
 }
 

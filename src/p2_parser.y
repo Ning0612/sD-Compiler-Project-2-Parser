@@ -96,7 +96,7 @@ void yyerror(const char* s)
 
 /* 2. Program  ----------------------------------------------------------------*/
 program:
-     decl_list{
+     global_decl_list {
         Symbol* mainFunc = symTab.lookup("main");
         if (mainFunc == nullptr) {
             throw SemanticError("missing main function", yylineno);
@@ -115,18 +115,26 @@ program:
      }
     ;
 
-/* 3. 可能為空的宣告序列 ------------------------------------------------------*/
-decl_list:
-    /* empty */
-  | decl_list declaration
+global_decl_list
+    : /* empty */
+    | global_decl_list global_decl
     ;
 
+
 /* 4. Declaration -------------------------------------------------------------*/
-declaration:
-     const_decl
-  |  var_decl
-  |  func_decl
+/* ──── 只能出現在檔案最外層 ────*/
+global_decl
+    : const_decl
+    | var_decl
+    | func_decl     
     ;
+
+/* ──── 只能出現在函式區塊內 ────*/
+local_decl
+    : const_decl
+    | var_decl       /* <─ 不含 func_decl */
+    ;
+
 
 /* 4-a. 常數宣告 --------------------------------------------------------------*/
 const_decl:
@@ -316,7 +324,7 @@ block_items:
     ;
 
 block_item:
-     declaration
+     local_decl        
   |  statement
     ;
 
