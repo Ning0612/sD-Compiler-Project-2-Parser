@@ -1,0 +1,3644 @@
+Terminals unused in grammar
+
+    CHAR_TOK
+    TRUE
+    FALSE
+    BREAK
+    CONTINUE
+    SWITCH
+    CASE
+    DEFAULT
+    EXTERN
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: global_decl_list
+
+    2 global_decl_list: ε
+    3                 | global_decl_list global_decl
+
+    4 global_decl: const_decl
+    5            | var_decl
+    6            | func_decl
+
+    7 local_decl: const_decl
+    8           | var_decl
+
+    9 const_decl: CONST type_spec ID ASSIGN expression SEMICOLON
+
+   10 var_decl: type_spec var_init_list SEMICOLON
+
+   11 var_init_list: var_init
+   12              | var_init_list COMMA var_init
+
+   13 var_init: ID
+   14         | ID ASSIGN expression
+   15         | ID array_dims
+
+   16 $@1: ε
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE
+
+   18 $@2: ε
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE
+
+   20 param_list_opt: ε
+   21               | param_list
+
+   22 param_list: param
+   23           | param_list COMMA param
+
+   24 param: type_spec ID
+   25      | type_spec ID array_dims
+
+   26 $@3: ε
+
+   27 block: LBRACE $@3 block_items_opt RBRACE
+
+   28 block_items_opt: ε
+   29                | block_items
+
+   30 block_items: block_items block_item
+   31            | block_item
+
+   32 block_item: local_decl
+   33           | statement
+
+   34 statement: simple_stmt
+   35          | if_stmt
+   36          | loop_stmt
+   37          | return_stmt
+   38          | proc_call SEMICOLON
+   39          | block
+
+   40 simple_stmt: assign_stmt
+   41            | PRINT expression SEMICOLON
+   42            | PRINTLN expression SEMICOLON
+   43            | READ lvalue SEMICOLON
+   44            | lvalue INC SEMICOLON
+   45            | lvalue DEC SEMICOLON
+   46            | SEMICOLON
+
+   47 assign_stmt: lvalue ASSIGN expression SEMICOLON
+
+   48 lvalue: ID
+   49       | ID array_ref
+
+   50 if_stmt: IF LPAREN expression RPAREN statement
+   51        | IF LPAREN expression RPAREN statement ELSE statement
+
+   52 loop_stmt: WHILE LPAREN expression RPAREN statement
+   53          | DO statement WHILE LPAREN expression RPAREN SEMICOLON
+   54          | FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement
+   55          | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement
+
+   56 for_start_opt: ε
+   57              | for_start_list
+
+   58 for_update_opt: ε
+   59               | for_update_list
+
+   60 for_start_list: for_start_item
+   61               | for_start_list COMMA for_start_item
+
+   62 for_update_list: for_update_item
+   63                | for_update_list COMMA for_update_item
+
+   64 for_start_item: assign_no_semi
+
+   65 for_update_item: assign_no_semi
+   66                | lvalue INC
+   67                | lvalue DEC
+
+   68 assign_no_semi: lvalue ASSIGN expression
+
+   69 return_stmt: RETURN expression SEMICOLON
+
+   70 expression: expression PLUS expression
+   71           | expression MINUS expression
+   72           | expression MUL expression
+   73           | expression DIV expression
+   74           | expression MOD expression
+   75           | expression LT expression
+   76           | expression LE expression
+   77           | expression GT expression
+   78           | expression GE expression
+   79           | expression EQ expression
+   80           | expression NEQ expression
+   81           | expression AND expression
+   82           | expression OR expression
+   83           | NOT expression
+   84           | MINUS expression
+   85           | PLUS expression
+   86           | LPAREN expression RPAREN
+   87           | lvalue
+   88           | const_lit
+   89           | func_call
+
+   90 const_lit: INT_LIT
+   91          | REAL_LIT
+   92          | STRING_LIT
+   93          | BOOL_LIT
+
+   94 func_call: ID LPAREN arg_list_opt RPAREN
+
+   95 proc_call: ID LPAREN arg_list_opt RPAREN
+
+   96 arg_list_opt: ε
+   97             | arg_list
+
+   98 arg_list: expression
+   99         | arg_list COMMA expression
+
+  100 array_dims: LBRACK expression RBRACK
+  101           | array_dims LBRACK expression RBRACK
+
+  102 array_ref: LBRACK expression RBRACK
+  103          | array_ref LBRACK expression RBRACK
+
+  104 type_spec: INT_TOK
+  105          | FLOAT_TOK
+  106          | DOUBLE_TOK
+  107          | BOOL_TOK
+  108          | STRING_TOK
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    BOOL_TOK (258) 107
+    FLOAT_TOK (259) 105
+    DOUBLE_TOK (260) 106
+    INT_TOK (261) 104
+    CHAR_TOK (262)
+    STRING_TOK (263) 108
+    VOID_TOK (264) 19
+    IF (265) 50 51
+    ELSE (266) 51
+    DO (267) 53
+    WHILE (268) 52 53
+    FOR (269) 54
+    FOREACH (270) 55
+    RETURN (271) 69
+    CONST (272) 9
+    PRINT (273) 41
+    PRINTLN (274) 42
+    READ (275) 43
+    TRUE (276)
+    FALSE (277)
+    ID <sval> (278) 9 13 14 15 17 19 24 25 48 49 55 94 95
+    INT_LIT <ival> (279) 90
+    REAL_LIT <fval> (280) 91
+    STRING_LIT <sval> (281) 92
+    BOOL_LIT <bval> (282) 93
+    LE (283) 76
+    GE (284) 78
+    EQ (285) 79
+    NEQ (286) 80
+    LT (287) 75
+    GT (288) 77
+    PLUS (289) 70 85
+    MINUS (290) 71 84
+    MUL (291) 72
+    DIV (292) 73
+    MOD (293) 74
+    ASSIGN (294) 9 14 47 68
+    NOT (295) 83
+    AND (296) 81
+    OR (297) 82
+    INC (298) 44 66
+    DEC (299) 45 67
+    DOT (300) 55
+    COMMA (301) 12 23 61 63 99
+    COLON (302) 55
+    SEMICOLON (303) 9 10 38 41 42 43 44 45 46 47 53 54 69
+    LPAREN (304) 17 19 50 51 52 53 54 55 86 94 95
+    RPAREN (305) 17 19 50 51 52 53 54 55 86 94 95
+    LBRACK (306) 100 101 102 103
+    RBRACK (307) 100 101 102 103
+    LBRACE (308) 17 19 27
+    RBRACE (309) 17 19 27
+    BREAK (310)
+    CONTINUE (311)
+    SWITCH (312)
+    CASE (313)
+    DEFAULT (314)
+    EXTERN (315)
+    IFX (316)
+    UPLUS (317)
+    UMINUS (318)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (64)
+        on left: 0
+    program (65)
+        on left: 1
+        on right: 0
+    global_decl_list (66)
+        on left: 2 3
+        on right: 1 3
+    global_decl (67)
+        on left: 4 5 6
+        on right: 3
+    local_decl (68)
+        on left: 7 8
+        on right: 32
+    const_decl <symbol> (69)
+        on left: 9
+        on right: 4 7
+    var_decl (70)
+        on left: 10
+        on right: 5 8
+    var_init_list <var_init_list> (71)
+        on left: 11 12
+        on right: 10 12
+    var_init <var_init> (72)
+        on left: 13 14 15
+        on right: 11 12
+    func_decl (73)
+        on left: 17 19
+        on right: 6
+    $@1 (74)
+        on left: 16
+        on right: 17
+    $@2 (75)
+        on left: 18
+        on right: 19
+    param_list_opt <symbol_list> (76)
+        on left: 20 21
+        on right: 17 19
+    param_list <symbol_list> (77)
+        on left: 22 23
+        on right: 21 23
+    param <symbol> (78)
+        on left: 24 25
+        on right: 22 23
+    block (79)
+        on left: 27
+        on right: 39
+    $@3 (80)
+        on left: 26
+        on right: 27
+    block_items_opt (81)
+        on left: 28 29
+        on right: 17 19 27
+    block_items (82)
+        on left: 30 31
+        on right: 29 30
+    block_item (83)
+        on left: 32 33
+        on right: 30 31
+    statement (84)
+        on left: 34 35 36 37 38 39
+        on right: 33 50 51 52 53 54 55
+    simple_stmt (85)
+        on left: 40 41 42 43 44 45 46
+        on right: 34
+    assign_stmt (86)
+        on left: 47
+        on right: 40
+    lvalue <expr_info> (87)
+        on left: 48 49
+        on right: 43 44 45 47 66 67 68 87
+    if_stmt (88)
+        on left: 50 51
+        on right: 35
+    loop_stmt (89)
+        on left: 52 53 54 55
+        on right: 36
+    for_start_opt (90)
+        on left: 56 57
+        on right: 54
+    for_update_opt (91)
+        on left: 58 59
+        on right: 54
+    for_start_list (92)
+        on left: 60 61
+        on right: 57 61
+    for_update_list (93)
+        on left: 62 63
+        on right: 59 63
+    for_start_item (94)
+        on left: 64
+        on right: 60 61
+    for_update_item (95)
+        on left: 65 66 67
+        on right: 62 63
+    assign_no_semi (96)
+        on left: 68
+        on right: 64 65
+    return_stmt (97)
+        on left: 69
+        on right: 37
+    expression <expr_info> (98)
+        on left: 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89
+        on right: 9 14 41 42 47 50 51 52 53 54 55 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 98 99 100 101 102 103
+    const_lit <expr_info> (99)
+        on left: 90 91 92 93
+        on right: 88
+    func_call <expr_info> (100)
+        on left: 94
+        on right: 89
+    proc_call (101)
+        on left: 95
+        on right: 38
+    arg_list_opt <expr_info_list> (102)
+        on left: 96 97
+        on right: 94 95
+    arg_list <expr_info_list> (103)
+        on left: 98 99
+        on right: 97 99
+    array_dims <int_list> (104)
+        on left: 100 101
+        on right: 15 25 101
+    array_ref <int_list> (105)
+        on left: 102 103
+        on right: 49 103
+    type_spec <type> (106)
+        on left: 104 105 106 107 108
+        on right: 9 10 17 24 25
+
+
+State 0
+
+    0 $accept: • program $end
+
+    $default  reduce using rule 2 (global_decl_list)
+
+    program           go to state 1
+    global_decl_list  go to state 2
+
+
+State 1
+
+    0 $accept: program • $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    1 program: global_decl_list •
+    3 global_decl_list: global_decl_list • global_decl
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+    VOID_TOK    shift, and go to state 9
+    CONST       shift, and go to state 10
+
+    $default  reduce using rule 1 (program)
+
+    global_decl  go to state 11
+    const_decl   go to state 12
+    var_decl     go to state 13
+    func_decl    go to state 14
+    type_spec    go to state 15
+
+
+State 3
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 4
+
+  107 type_spec: BOOL_TOK •
+
+    $default  reduce using rule 107 (type_spec)
+
+
+State 5
+
+  105 type_spec: FLOAT_TOK •
+
+    $default  reduce using rule 105 (type_spec)
+
+
+State 6
+
+  106 type_spec: DOUBLE_TOK •
+
+    $default  reduce using rule 106 (type_spec)
+
+
+State 7
+
+  104 type_spec: INT_TOK •
+
+    $default  reduce using rule 104 (type_spec)
+
+
+State 8
+
+  108 type_spec: STRING_TOK •
+
+    $default  reduce using rule 108 (type_spec)
+
+
+State 9
+
+   19 func_decl: VOID_TOK • ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE
+
+    ID  shift, and go to state 16
+
+
+State 10
+
+    9 const_decl: CONST • type_spec ID ASSIGN expression SEMICOLON
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+
+    type_spec  go to state 17
+
+
+State 11
+
+    3 global_decl_list: global_decl_list global_decl •
+
+    $default  reduce using rule 3 (global_decl_list)
+
+
+State 12
+
+    4 global_decl: const_decl •
+
+    $default  reduce using rule 4 (global_decl)
+
+
+State 13
+
+    5 global_decl: var_decl •
+
+    $default  reduce using rule 5 (global_decl)
+
+
+State 14
+
+    6 global_decl: func_decl •
+
+    $default  reduce using rule 6 (global_decl)
+
+
+State 15
+
+   10 var_decl: type_spec • var_init_list SEMICOLON
+   17 func_decl: type_spec • ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE
+
+    ID  shift, and go to state 18
+
+    var_init_list  go to state 19
+    var_init       go to state 20
+
+
+State 16
+
+   19 func_decl: VOID_TOK ID • LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE
+
+    LPAREN  shift, and go to state 21
+
+
+State 17
+
+    9 const_decl: CONST type_spec • ID ASSIGN expression SEMICOLON
+
+    ID  shift, and go to state 22
+
+
+State 18
+
+   13 var_init: ID •
+   14         | ID • ASSIGN expression
+   15         | ID • array_dims
+   17 func_decl: type_spec ID • LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE
+
+    ASSIGN  shift, and go to state 23
+    LPAREN  shift, and go to state 24
+    LBRACK  shift, and go to state 25
+
+    $default  reduce using rule 13 (var_init)
+
+    array_dims  go to state 26
+
+
+State 19
+
+   10 var_decl: type_spec var_init_list • SEMICOLON
+   12 var_init_list: var_init_list • COMMA var_init
+
+    COMMA      shift, and go to state 27
+    SEMICOLON  shift, and go to state 28
+
+
+State 20
+
+   11 var_init_list: var_init •
+
+    $default  reduce using rule 11 (var_init_list)
+
+
+State 21
+
+   19 func_decl: VOID_TOK ID LPAREN • param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+
+    $default  reduce using rule 20 (param_list_opt)
+
+    param_list_opt  go to state 29
+    param_list      go to state 30
+    param           go to state 31
+    type_spec       go to state 32
+
+
+State 22
+
+    9 const_decl: CONST type_spec ID • ASSIGN expression SEMICOLON
+
+    ASSIGN  shift, and go to state 33
+
+
+State 23
+
+   14 var_init: ID ASSIGN • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 44
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 24
+
+   17 func_decl: type_spec ID LPAREN • param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+
+    $default  reduce using rule 20 (param_list_opt)
+
+    param_list_opt  go to state 47
+    param_list      go to state 30
+    param           go to state 31
+    type_spec       go to state 32
+
+
+State 25
+
+  100 array_dims: LBRACK • expression RBRACK
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 48
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 26
+
+   15 var_init: ID array_dims •
+  101 array_dims: array_dims • LBRACK expression RBRACK
+
+    LBRACK  shift, and go to state 49
+
+    $default  reduce using rule 15 (var_init)
+
+
+State 27
+
+   12 var_init_list: var_init_list COMMA • var_init
+
+    ID  shift, and go to state 50
+
+    var_init  go to state 51
+
+
+State 28
+
+   10 var_decl: type_spec var_init_list SEMICOLON •
+
+    $default  reduce using rule 10 (var_decl)
+
+
+State 29
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt • RPAREN LBRACE $@2 block_items_opt RBRACE
+
+    RPAREN  shift, and go to state 52
+
+
+State 30
+
+   21 param_list_opt: param_list •
+   23 param_list: param_list • COMMA param
+
+    COMMA  shift, and go to state 53
+
+    $default  reduce using rule 21 (param_list_opt)
+
+
+State 31
+
+   22 param_list: param •
+
+    $default  reduce using rule 22 (param_list)
+
+
+State 32
+
+   24 param: type_spec • ID
+   25      | type_spec • ID array_dims
+
+    ID  shift, and go to state 54
+
+
+State 33
+
+    9 const_decl: CONST type_spec ID ASSIGN • expression SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 55
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 34
+
+   48 lvalue: ID •
+   49       | ID • array_ref
+   94 func_call: ID • LPAREN arg_list_opt RPAREN
+
+    LPAREN  shift, and go to state 56
+    LBRACK  shift, and go to state 57
+
+    $default  reduce using rule 48 (lvalue)
+
+    array_ref  go to state 58
+
+
+State 35
+
+   90 const_lit: INT_LIT •
+
+    $default  reduce using rule 90 (const_lit)
+
+
+State 36
+
+   91 const_lit: REAL_LIT •
+
+    $default  reduce using rule 91 (const_lit)
+
+
+State 37
+
+   92 const_lit: STRING_LIT •
+
+    $default  reduce using rule 92 (const_lit)
+
+
+State 38
+
+   93 const_lit: BOOL_LIT •
+
+    $default  reduce using rule 93 (const_lit)
+
+
+State 39
+
+   85 expression: PLUS • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 59
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 40
+
+   84 expression: MINUS • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 60
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 41
+
+   83 expression: NOT • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 61
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 42
+
+   86 expression: LPAREN • expression RPAREN
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 62
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 43
+
+   87 expression: lvalue •
+
+    $default  reduce using rule 87 (expression)
+
+
+State 44
+
+   14 var_init: ID ASSIGN expression •
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+    OR     shift, and go to state 75
+
+    $default  reduce using rule 14 (var_init)
+
+
+State 45
+
+   88 expression: const_lit •
+
+    $default  reduce using rule 88 (expression)
+
+
+State 46
+
+   89 expression: func_call •
+
+    $default  reduce using rule 89 (expression)
+
+
+State 47
+
+   17 func_decl: type_spec ID LPAREN param_list_opt • RPAREN LBRACE $@1 block_items_opt RBRACE
+
+    RPAREN  shift, and go to state 76
+
+
+State 48
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+  100 array_dims: LBRACK expression • RBRACK
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RBRACK  shift, and go to state 77
+
+
+State 49
+
+  101 array_dims: array_dims LBRACK • expression RBRACK
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 78
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 50
+
+   13 var_init: ID •
+   14         | ID • ASSIGN expression
+   15         | ID • array_dims
+
+    ASSIGN  shift, and go to state 23
+    LBRACK  shift, and go to state 25
+
+    $default  reduce using rule 13 (var_init)
+
+    array_dims  go to state 26
+
+
+State 51
+
+   12 var_init_list: var_init_list COMMA var_init •
+
+    $default  reduce using rule 12 (var_init_list)
+
+
+State 52
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN • LBRACE $@2 block_items_opt RBRACE
+
+    LBRACE  shift, and go to state 79
+
+
+State 53
+
+   23 param_list: param_list COMMA • param
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+
+    param      go to state 80
+    type_spec  go to state 32
+
+
+State 54
+
+   24 param: type_spec ID •
+   25      | type_spec ID • array_dims
+
+    LBRACK  shift, and go to state 25
+
+    $default  reduce using rule 24 (param)
+
+    array_dims  go to state 81
+
+
+State 55
+
+    9 const_decl: CONST type_spec ID ASSIGN expression • SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 82
+
+
+State 56
+
+   94 func_call: ID LPAREN • arg_list_opt RPAREN
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    $default  reduce using rule 96 (arg_list_opt)
+
+    lvalue        go to state 43
+    expression    go to state 83
+    const_lit     go to state 45
+    func_call     go to state 46
+    arg_list_opt  go to state 84
+    arg_list      go to state 85
+
+
+State 57
+
+  102 array_ref: LBRACK • expression RBRACK
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 86
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 58
+
+   49 lvalue: ID array_ref •
+  103 array_ref: array_ref • LBRACK expression RBRACK
+
+    LBRACK  shift, and go to state 87
+
+    $default  reduce using rule 49 (lvalue)
+
+
+State 59
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   85           | PLUS expression •
+
+    $default  reduce using rule 85 (expression)
+
+
+State 60
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   84           | MINUS expression •
+
+    $default  reduce using rule 84 (expression)
+
+
+State 61
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   83           | NOT expression •
+
+    $default  reduce using rule 83 (expression)
+
+
+State 62
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   86           | LPAREN expression • RPAREN
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RPAREN  shift, and go to state 88
+
+
+State 63
+
+   76 expression: expression LE • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 89
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 64
+
+   78 expression: expression GE • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 90
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 65
+
+   79 expression: expression EQ • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 91
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 66
+
+   80 expression: expression NEQ • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 92
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 67
+
+   75 expression: expression LT • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 93
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 68
+
+   77 expression: expression GT • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 94
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 69
+
+   70 expression: expression PLUS • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 95
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 70
+
+   71 expression: expression MINUS • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 96
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 71
+
+   72 expression: expression MUL • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 97
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 72
+
+   73 expression: expression DIV • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 98
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 73
+
+   74 expression: expression MOD • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 99
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 74
+
+   81 expression: expression AND • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 100
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 75
+
+   82 expression: expression OR • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 101
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 76
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN • LBRACE $@1 block_items_opt RBRACE
+
+    LBRACE  shift, and go to state 102
+
+
+State 77
+
+  100 array_dims: LBRACK expression RBRACK •
+
+    $default  reduce using rule 100 (array_dims)
+
+
+State 78
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+  101 array_dims: array_dims LBRACK expression • RBRACK
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RBRACK  shift, and go to state 103
+
+
+State 79
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE • $@2 block_items_opt RBRACE
+
+    $default  reduce using rule 18 ($@2)
+
+    $@2  go to state 104
+
+
+State 80
+
+   23 param_list: param_list COMMA param •
+
+    $default  reduce using rule 23 (param_list)
+
+
+State 81
+
+   25 param: type_spec ID array_dims •
+  101 array_dims: array_dims • LBRACK expression RBRACK
+
+    LBRACK  shift, and go to state 49
+
+    $default  reduce using rule 25 (param)
+
+
+State 82
+
+    9 const_decl: CONST type_spec ID ASSIGN expression SEMICOLON •
+
+    $default  reduce using rule 9 (const_decl)
+
+
+State 83
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   98 arg_list: expression •
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+    OR     shift, and go to state 75
+
+    $default  reduce using rule 98 (arg_list)
+
+
+State 84
+
+   94 func_call: ID LPAREN arg_list_opt • RPAREN
+
+    RPAREN  shift, and go to state 105
+
+
+State 85
+
+   97 arg_list_opt: arg_list •
+   99 arg_list: arg_list • COMMA expression
+
+    COMMA  shift, and go to state 106
+
+    $default  reduce using rule 97 (arg_list_opt)
+
+
+State 86
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+  102 array_ref: LBRACK expression • RBRACK
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RBRACK  shift, and go to state 107
+
+
+State 87
+
+  103 array_ref: array_ref LBRACK • expression RBRACK
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 108
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 88
+
+   86 expression: LPAREN expression RPAREN •
+
+    $default  reduce using rule 86 (expression)
+
+
+State 89
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   76           | expression LE expression •
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    LE  error (nonassociative)
+    GE  error (nonassociative)
+    LT  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 76 (expression)
+
+
+State 90
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   78           | expression GE expression •
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    LE  error (nonassociative)
+    GE  error (nonassociative)
+    LT  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 78 (expression)
+
+
+State 91
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   79           | expression EQ expression •
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    EQ   error (nonassociative)
+    NEQ  error (nonassociative)
+
+    $default  reduce using rule 79 (expression)
+
+
+State 92
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   80           | expression NEQ expression •
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    EQ   error (nonassociative)
+    NEQ  error (nonassociative)
+
+    $default  reduce using rule 80 (expression)
+
+
+State 93
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   75           | expression LT expression •
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    LE  error (nonassociative)
+    GE  error (nonassociative)
+    LT  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 75 (expression)
+
+
+State 94
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   77           | expression GT expression •
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    LE  error (nonassociative)
+    GE  error (nonassociative)
+    LT  error (nonassociative)
+    GT  error (nonassociative)
+
+    $default  reduce using rule 77 (expression)
+
+
+State 95
+
+   70 expression: expression • PLUS expression
+   70           | expression PLUS expression •
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    MUL  shift, and go to state 71
+    DIV  shift, and go to state 72
+    MOD  shift, and go to state 73
+
+    $default  reduce using rule 70 (expression)
+
+
+State 96
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   71           | expression MINUS expression •
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    MUL  shift, and go to state 71
+    DIV  shift, and go to state 72
+    MOD  shift, and go to state 73
+
+    $default  reduce using rule 71 (expression)
+
+
+State 97
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   72           | expression MUL expression •
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    $default  reduce using rule 72 (expression)
+
+
+State 98
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   73           | expression DIV expression •
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    $default  reduce using rule 73 (expression)
+
+
+State 99
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   74           | expression MOD expression •
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    $default  reduce using rule 74 (expression)
+
+
+State 100
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   81           | expression AND expression •
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+
+    $default  reduce using rule 81 (expression)
+
+
+State 101
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   82           | expression OR expression •
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+
+    $default  reduce using rule 82 (expression)
+
+
+State 102
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE • $@1 block_items_opt RBRACE
+
+    $default  reduce using rule 16 ($@1)
+
+    $@1  go to state 109
+
+
+State 103
+
+  101 array_dims: array_dims LBRACK expression RBRACK •
+
+    $default  reduce using rule 101 (array_dims)
+
+
+State 104
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 • block_items_opt RBRACE
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+    IF          shift, and go to state 110
+    DO          shift, and go to state 111
+    WHILE       shift, and go to state 112
+    FOR         shift, and go to state 113
+    FOREACH     shift, and go to state 114
+    RETURN      shift, and go to state 115
+    CONST       shift, and go to state 10
+    PRINT       shift, and go to state 116
+    PRINTLN     shift, and go to state 117
+    READ        shift, and go to state 118
+    ID          shift, and go to state 119
+    SEMICOLON   shift, and go to state 120
+    LBRACE      shift, and go to state 121
+
+    $default  reduce using rule 28 (block_items_opt)
+
+    local_decl       go to state 122
+    const_decl       go to state 123
+    var_decl         go to state 124
+    block            go to state 125
+    block_items_opt  go to state 126
+    block_items      go to state 127
+    block_item       go to state 128
+    statement        go to state 129
+    simple_stmt      go to state 130
+    assign_stmt      go to state 131
+    lvalue           go to state 132
+    if_stmt          go to state 133
+    loop_stmt        go to state 134
+    return_stmt      go to state 135
+    proc_call        go to state 136
+    type_spec        go to state 137
+
+
+State 105
+
+   94 func_call: ID LPAREN arg_list_opt RPAREN •
+
+    $default  reduce using rule 94 (func_call)
+
+
+State 106
+
+   99 arg_list: arg_list COMMA • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 138
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 107
+
+  102 array_ref: LBRACK expression RBRACK •
+
+    $default  reduce using rule 102 (array_ref)
+
+
+State 108
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+  103 array_ref: array_ref LBRACK expression • RBRACK
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RBRACK  shift, and go to state 139
+
+
+State 109
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 • block_items_opt RBRACE
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+    IF          shift, and go to state 110
+    DO          shift, and go to state 111
+    WHILE       shift, and go to state 112
+    FOR         shift, and go to state 113
+    FOREACH     shift, and go to state 114
+    RETURN      shift, and go to state 115
+    CONST       shift, and go to state 10
+    PRINT       shift, and go to state 116
+    PRINTLN     shift, and go to state 117
+    READ        shift, and go to state 118
+    ID          shift, and go to state 119
+    SEMICOLON   shift, and go to state 120
+    LBRACE      shift, and go to state 121
+
+    $default  reduce using rule 28 (block_items_opt)
+
+    local_decl       go to state 122
+    const_decl       go to state 123
+    var_decl         go to state 124
+    block            go to state 125
+    block_items_opt  go to state 140
+    block_items      go to state 127
+    block_item       go to state 128
+    statement        go to state 129
+    simple_stmt      go to state 130
+    assign_stmt      go to state 131
+    lvalue           go to state 132
+    if_stmt          go to state 133
+    loop_stmt        go to state 134
+    return_stmt      go to state 135
+    proc_call        go to state 136
+    type_spec        go to state 137
+
+
+State 110
+
+   50 if_stmt: IF • LPAREN expression RPAREN statement
+   51        | IF • LPAREN expression RPAREN statement ELSE statement
+
+    LPAREN  shift, and go to state 141
+
+
+State 111
+
+   53 loop_stmt: DO • statement WHILE LPAREN expression RPAREN SEMICOLON
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 142
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 112
+
+   52 loop_stmt: WHILE • LPAREN expression RPAREN statement
+
+    LPAREN  shift, and go to state 143
+
+
+State 113
+
+   54 loop_stmt: FOR • LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement
+
+    LPAREN  shift, and go to state 144
+
+
+State 114
+
+   55 loop_stmt: FOREACH • LPAREN ID COLON expression DOT DOT expression RPAREN statement
+
+    LPAREN  shift, and go to state 145
+
+
+State 115
+
+   69 return_stmt: RETURN • expression SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 146
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 116
+
+   41 simple_stmt: PRINT • expression SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 147
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 117
+
+   42 simple_stmt: PRINTLN • expression SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 148
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 118
+
+   43 simple_stmt: READ • lvalue SEMICOLON
+
+    ID  shift, and go to state 149
+
+    lvalue  go to state 150
+
+
+State 119
+
+   48 lvalue: ID •
+   49       | ID • array_ref
+   95 proc_call: ID • LPAREN arg_list_opt RPAREN
+
+    LPAREN  shift, and go to state 151
+    LBRACK  shift, and go to state 57
+
+    $default  reduce using rule 48 (lvalue)
+
+    array_ref  go to state 58
+
+
+State 120
+
+   46 simple_stmt: SEMICOLON •
+
+    $default  reduce using rule 46 (simple_stmt)
+
+
+State 121
+
+   27 block: LBRACE • $@3 block_items_opt RBRACE
+
+    $default  reduce using rule 26 ($@3)
+
+    $@3  go to state 152
+
+
+State 122
+
+   32 block_item: local_decl •
+
+    $default  reduce using rule 32 (block_item)
+
+
+State 123
+
+    7 local_decl: const_decl •
+
+    $default  reduce using rule 7 (local_decl)
+
+
+State 124
+
+    8 local_decl: var_decl •
+
+    $default  reduce using rule 8 (local_decl)
+
+
+State 125
+
+   39 statement: block •
+
+    $default  reduce using rule 39 (statement)
+
+
+State 126
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt • RBRACE
+
+    RBRACE  shift, and go to state 153
+
+
+State 127
+
+   29 block_items_opt: block_items •
+   30 block_items: block_items • block_item
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+    IF          shift, and go to state 110
+    DO          shift, and go to state 111
+    WHILE       shift, and go to state 112
+    FOR         shift, and go to state 113
+    FOREACH     shift, and go to state 114
+    RETURN      shift, and go to state 115
+    CONST       shift, and go to state 10
+    PRINT       shift, and go to state 116
+    PRINTLN     shift, and go to state 117
+    READ        shift, and go to state 118
+    ID          shift, and go to state 119
+    SEMICOLON   shift, and go to state 120
+    LBRACE      shift, and go to state 121
+
+    $default  reduce using rule 29 (block_items_opt)
+
+    local_decl   go to state 122
+    const_decl   go to state 123
+    var_decl     go to state 124
+    block        go to state 125
+    block_item   go to state 154
+    statement    go to state 129
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+    type_spec    go to state 137
+
+
+State 128
+
+   31 block_items: block_item •
+
+    $default  reduce using rule 31 (block_items)
+
+
+State 129
+
+   33 block_item: statement •
+
+    $default  reduce using rule 33 (block_item)
+
+
+State 130
+
+   34 statement: simple_stmt •
+
+    $default  reduce using rule 34 (statement)
+
+
+State 131
+
+   40 simple_stmt: assign_stmt •
+
+    $default  reduce using rule 40 (simple_stmt)
+
+
+State 132
+
+   44 simple_stmt: lvalue • INC SEMICOLON
+   45            | lvalue • DEC SEMICOLON
+   47 assign_stmt: lvalue • ASSIGN expression SEMICOLON
+
+    ASSIGN  shift, and go to state 155
+    INC     shift, and go to state 156
+    DEC     shift, and go to state 157
+
+
+State 133
+
+   35 statement: if_stmt •
+
+    $default  reduce using rule 35 (statement)
+
+
+State 134
+
+   36 statement: loop_stmt •
+
+    $default  reduce using rule 36 (statement)
+
+
+State 135
+
+   37 statement: return_stmt •
+
+    $default  reduce using rule 37 (statement)
+
+
+State 136
+
+   38 statement: proc_call • SEMICOLON
+
+    SEMICOLON  shift, and go to state 158
+
+
+State 137
+
+   10 var_decl: type_spec • var_init_list SEMICOLON
+
+    ID  shift, and go to state 50
+
+    var_init_list  go to state 19
+    var_init       go to state 20
+
+
+State 138
+
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+   99 arg_list: arg_list COMMA expression •
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+    OR     shift, and go to state 75
+
+    $default  reduce using rule 99 (arg_list)
+
+
+State 139
+
+  103 array_ref: array_ref LBRACK expression RBRACK •
+
+    $default  reduce using rule 103 (array_ref)
+
+
+State 140
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt • RBRACE
+
+    RBRACE  shift, and go to state 159
+
+
+State 141
+
+   50 if_stmt: IF LPAREN • expression RPAREN statement
+   51        | IF LPAREN • expression RPAREN statement ELSE statement
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 160
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 142
+
+   53 loop_stmt: DO statement • WHILE LPAREN expression RPAREN SEMICOLON
+
+    WHILE  shift, and go to state 161
+
+
+State 143
+
+   52 loop_stmt: WHILE LPAREN • expression RPAREN statement
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 162
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 144
+
+   54 loop_stmt: FOR LPAREN • for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement
+
+    ID  shift, and go to state 149
+
+    $default  reduce using rule 56 (for_start_opt)
+
+    lvalue          go to state 163
+    for_start_opt   go to state 164
+    for_start_list  go to state 165
+    for_start_item  go to state 166
+    assign_no_semi  go to state 167
+
+
+State 145
+
+   55 loop_stmt: FOREACH LPAREN • ID COLON expression DOT DOT expression RPAREN statement
+
+    ID  shift, and go to state 168
+
+
+State 146
+
+   69 return_stmt: RETURN expression • SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 169
+
+
+State 147
+
+   41 simple_stmt: PRINT expression • SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 170
+
+
+State 148
+
+   42 simple_stmt: PRINTLN expression • SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 171
+
+
+State 149
+
+   48 lvalue: ID •
+   49       | ID • array_ref
+
+    LBRACK  shift, and go to state 57
+
+    $default  reduce using rule 48 (lvalue)
+
+    array_ref  go to state 58
+
+
+State 150
+
+   43 simple_stmt: READ lvalue • SEMICOLON
+
+    SEMICOLON  shift, and go to state 172
+
+
+State 151
+
+   95 proc_call: ID LPAREN • arg_list_opt RPAREN
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    $default  reduce using rule 96 (arg_list_opt)
+
+    lvalue        go to state 43
+    expression    go to state 83
+    const_lit     go to state 45
+    func_call     go to state 46
+    arg_list_opt  go to state 173
+    arg_list      go to state 85
+
+
+State 152
+
+   27 block: LBRACE $@3 • block_items_opt RBRACE
+
+    BOOL_TOK    shift, and go to state 4
+    FLOAT_TOK   shift, and go to state 5
+    DOUBLE_TOK  shift, and go to state 6
+    INT_TOK     shift, and go to state 7
+    STRING_TOK  shift, and go to state 8
+    IF          shift, and go to state 110
+    DO          shift, and go to state 111
+    WHILE       shift, and go to state 112
+    FOR         shift, and go to state 113
+    FOREACH     shift, and go to state 114
+    RETURN      shift, and go to state 115
+    CONST       shift, and go to state 10
+    PRINT       shift, and go to state 116
+    PRINTLN     shift, and go to state 117
+    READ        shift, and go to state 118
+    ID          shift, and go to state 119
+    SEMICOLON   shift, and go to state 120
+    LBRACE      shift, and go to state 121
+
+    $default  reduce using rule 28 (block_items_opt)
+
+    local_decl       go to state 122
+    const_decl       go to state 123
+    var_decl         go to state 124
+    block            go to state 125
+    block_items_opt  go to state 174
+    block_items      go to state 127
+    block_item       go to state 128
+    statement        go to state 129
+    simple_stmt      go to state 130
+    assign_stmt      go to state 131
+    lvalue           go to state 132
+    if_stmt          go to state 133
+    loop_stmt        go to state 134
+    return_stmt      go to state 135
+    proc_call        go to state 136
+    type_spec        go to state 137
+
+
+State 153
+
+   19 func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE •
+
+    $default  reduce using rule 19 (func_decl)
+
+
+State 154
+
+   30 block_items: block_items block_item •
+
+    $default  reduce using rule 30 (block_items)
+
+
+State 155
+
+   47 assign_stmt: lvalue ASSIGN • expression SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 175
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 156
+
+   44 simple_stmt: lvalue INC • SEMICOLON
+
+    SEMICOLON  shift, and go to state 176
+
+
+State 157
+
+   45 simple_stmt: lvalue DEC • SEMICOLON
+
+    SEMICOLON  shift, and go to state 177
+
+
+State 158
+
+   38 statement: proc_call SEMICOLON •
+
+    $default  reduce using rule 38 (statement)
+
+
+State 159
+
+   17 func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE •
+
+    $default  reduce using rule 17 (func_decl)
+
+
+State 160
+
+   50 if_stmt: IF LPAREN expression • RPAREN statement
+   51        | IF LPAREN expression • RPAREN statement ELSE statement
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RPAREN  shift, and go to state 178
+
+
+State 161
+
+   53 loop_stmt: DO statement WHILE • LPAREN expression RPAREN SEMICOLON
+
+    LPAREN  shift, and go to state 179
+
+
+State 162
+
+   52 loop_stmt: WHILE LPAREN expression • RPAREN statement
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RPAREN  shift, and go to state 180
+
+
+State 163
+
+   68 assign_no_semi: lvalue • ASSIGN expression
+
+    ASSIGN  shift, and go to state 181
+
+
+State 164
+
+   54 loop_stmt: FOR LPAREN for_start_opt • SEMICOLON expression SEMICOLON for_update_opt RPAREN statement
+
+    SEMICOLON  shift, and go to state 182
+
+
+State 165
+
+   57 for_start_opt: for_start_list •
+   61 for_start_list: for_start_list • COMMA for_start_item
+
+    COMMA  shift, and go to state 183
+
+    $default  reduce using rule 57 (for_start_opt)
+
+
+State 166
+
+   60 for_start_list: for_start_item •
+
+    $default  reduce using rule 60 (for_start_list)
+
+
+State 167
+
+   64 for_start_item: assign_no_semi •
+
+    $default  reduce using rule 64 (for_start_item)
+
+
+State 168
+
+   55 loop_stmt: FOREACH LPAREN ID • COLON expression DOT DOT expression RPAREN statement
+
+    COLON  shift, and go to state 184
+
+
+State 169
+
+   69 return_stmt: RETURN expression SEMICOLON •
+
+    $default  reduce using rule 69 (return_stmt)
+
+
+State 170
+
+   41 simple_stmt: PRINT expression SEMICOLON •
+
+    $default  reduce using rule 41 (simple_stmt)
+
+
+State 171
+
+   42 simple_stmt: PRINTLN expression SEMICOLON •
+
+    $default  reduce using rule 42 (simple_stmt)
+
+
+State 172
+
+   43 simple_stmt: READ lvalue SEMICOLON •
+
+    $default  reduce using rule 43 (simple_stmt)
+
+
+State 173
+
+   95 proc_call: ID LPAREN arg_list_opt • RPAREN
+
+    RPAREN  shift, and go to state 185
+
+
+State 174
+
+   27 block: LBRACE $@3 block_items_opt • RBRACE
+
+    RBRACE  shift, and go to state 186
+
+
+State 175
+
+   47 assign_stmt: lvalue ASSIGN expression • SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 187
+
+
+State 176
+
+   44 simple_stmt: lvalue INC SEMICOLON •
+
+    $default  reduce using rule 44 (simple_stmt)
+
+
+State 177
+
+   45 simple_stmt: lvalue DEC SEMICOLON •
+
+    $default  reduce using rule 45 (simple_stmt)
+
+
+State 178
+
+   50 if_stmt: IF LPAREN expression RPAREN • statement
+   51        | IF LPAREN expression RPAREN • statement ELSE statement
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 188
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 179
+
+   53 loop_stmt: DO statement WHILE LPAREN • expression RPAREN SEMICOLON
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 189
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 180
+
+   52 loop_stmt: WHILE LPAREN expression RPAREN • statement
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 190
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 181
+
+   68 assign_no_semi: lvalue ASSIGN • expression
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 191
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 182
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON • expression SEMICOLON for_update_opt RPAREN statement
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 192
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 183
+
+   61 for_start_list: for_start_list COMMA • for_start_item
+
+    ID  shift, and go to state 149
+
+    lvalue          go to state 163
+    for_start_item  go to state 193
+    assign_no_semi  go to state 167
+
+
+State 184
+
+   55 loop_stmt: FOREACH LPAREN ID COLON • expression DOT DOT expression RPAREN statement
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 194
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 185
+
+   95 proc_call: ID LPAREN arg_list_opt RPAREN •
+
+    $default  reduce using rule 95 (proc_call)
+
+
+State 186
+
+   27 block: LBRACE $@3 block_items_opt RBRACE •
+
+    $default  reduce using rule 27 (block)
+
+
+State 187
+
+   47 assign_stmt: lvalue ASSIGN expression SEMICOLON •
+
+    $default  reduce using rule 47 (assign_stmt)
+
+
+State 188
+
+   50 if_stmt: IF LPAREN expression RPAREN statement •
+   51        | IF LPAREN expression RPAREN statement • ELSE statement
+
+    ELSE  shift, and go to state 195
+
+    $default  reduce using rule 50 (if_stmt)
+
+
+State 189
+
+   53 loop_stmt: DO statement WHILE LPAREN expression • RPAREN SEMICOLON
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RPAREN  shift, and go to state 196
+
+
+State 190
+
+   52 loop_stmt: WHILE LPAREN expression RPAREN statement •
+
+    $default  reduce using rule 52 (loop_stmt)
+
+
+State 191
+
+   68 assign_no_semi: lvalue ASSIGN expression •
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+    OR     shift, and go to state 75
+
+    $default  reduce using rule 68 (assign_no_semi)
+
+
+State 192
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression • SEMICOLON for_update_opt RPAREN statement
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE         shift, and go to state 63
+    GE         shift, and go to state 64
+    EQ         shift, and go to state 65
+    NEQ        shift, and go to state 66
+    LT         shift, and go to state 67
+    GT         shift, and go to state 68
+    PLUS       shift, and go to state 69
+    MINUS      shift, and go to state 70
+    MUL        shift, and go to state 71
+    DIV        shift, and go to state 72
+    MOD        shift, and go to state 73
+    AND        shift, and go to state 74
+    OR         shift, and go to state 75
+    SEMICOLON  shift, and go to state 197
+
+
+State 193
+
+   61 for_start_list: for_start_list COMMA for_start_item •
+
+    $default  reduce using rule 61 (for_start_list)
+
+
+State 194
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression • DOT DOT expression RPAREN statement
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE     shift, and go to state 63
+    GE     shift, and go to state 64
+    EQ     shift, and go to state 65
+    NEQ    shift, and go to state 66
+    LT     shift, and go to state 67
+    GT     shift, and go to state 68
+    PLUS   shift, and go to state 69
+    MINUS  shift, and go to state 70
+    MUL    shift, and go to state 71
+    DIV    shift, and go to state 72
+    MOD    shift, and go to state 73
+    AND    shift, and go to state 74
+    OR     shift, and go to state 75
+    DOT    shift, and go to state 198
+
+
+State 195
+
+   51 if_stmt: IF LPAREN expression RPAREN statement ELSE • statement
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 199
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 196
+
+   53 loop_stmt: DO statement WHILE LPAREN expression RPAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 200
+
+
+State 197
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON • for_update_opt RPAREN statement
+
+    ID  shift, and go to state 149
+
+    $default  reduce using rule 58 (for_update_opt)
+
+    lvalue           go to state 201
+    for_update_opt   go to state 202
+    for_update_list  go to state 203
+    for_update_item  go to state 204
+    assign_no_semi   go to state 205
+
+
+State 198
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression DOT • DOT expression RPAREN statement
+
+    DOT  shift, and go to state 206
+
+
+State 199
+
+   51 if_stmt: IF LPAREN expression RPAREN statement ELSE statement •
+
+    $default  reduce using rule 51 (if_stmt)
+
+
+State 200
+
+   53 loop_stmt: DO statement WHILE LPAREN expression RPAREN SEMICOLON •
+
+    $default  reduce using rule 53 (loop_stmt)
+
+
+State 201
+
+   66 for_update_item: lvalue • INC
+   67                | lvalue • DEC
+   68 assign_no_semi: lvalue • ASSIGN expression
+
+    ASSIGN  shift, and go to state 181
+    INC     shift, and go to state 207
+    DEC     shift, and go to state 208
+
+
+State 202
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt • RPAREN statement
+
+    RPAREN  shift, and go to state 209
+
+
+State 203
+
+   59 for_update_opt: for_update_list •
+   63 for_update_list: for_update_list • COMMA for_update_item
+
+    COMMA  shift, and go to state 210
+
+    $default  reduce using rule 59 (for_update_opt)
+
+
+State 204
+
+   62 for_update_list: for_update_item •
+
+    $default  reduce using rule 62 (for_update_list)
+
+
+State 205
+
+   65 for_update_item: assign_no_semi •
+
+    $default  reduce using rule 65 (for_update_item)
+
+
+State 206
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT • expression RPAREN statement
+
+    ID          shift, and go to state 34
+    INT_LIT     shift, and go to state 35
+    REAL_LIT    shift, and go to state 36
+    STRING_LIT  shift, and go to state 37
+    BOOL_LIT    shift, and go to state 38
+    PLUS        shift, and go to state 39
+    MINUS       shift, and go to state 40
+    NOT         shift, and go to state 41
+    LPAREN      shift, and go to state 42
+
+    lvalue      go to state 43
+    expression  go to state 211
+    const_lit   go to state 45
+    func_call   go to state 46
+
+
+State 207
+
+   66 for_update_item: lvalue INC •
+
+    $default  reduce using rule 66 (for_update_item)
+
+
+State 208
+
+   67 for_update_item: lvalue DEC •
+
+    $default  reduce using rule 67 (for_update_item)
+
+
+State 209
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN • statement
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 212
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 210
+
+   63 for_update_list: for_update_list COMMA • for_update_item
+
+    ID  shift, and go to state 149
+
+    lvalue           go to state 201
+    for_update_item  go to state 213
+    assign_no_semi   go to state 205
+
+
+State 211
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression • RPAREN statement
+   70 expression: expression • PLUS expression
+   71           | expression • MINUS expression
+   72           | expression • MUL expression
+   73           | expression • DIV expression
+   74           | expression • MOD expression
+   75           | expression • LT expression
+   76           | expression • LE expression
+   77           | expression • GT expression
+   78           | expression • GE expression
+   79           | expression • EQ expression
+   80           | expression • NEQ expression
+   81           | expression • AND expression
+   82           | expression • OR expression
+
+    LE      shift, and go to state 63
+    GE      shift, and go to state 64
+    EQ      shift, and go to state 65
+    NEQ     shift, and go to state 66
+    LT      shift, and go to state 67
+    GT      shift, and go to state 68
+    PLUS    shift, and go to state 69
+    MINUS   shift, and go to state 70
+    MUL     shift, and go to state 71
+    DIV     shift, and go to state 72
+    MOD     shift, and go to state 73
+    AND     shift, and go to state 74
+    OR      shift, and go to state 75
+    RPAREN  shift, and go to state 214
+
+
+State 212
+
+   54 loop_stmt: FOR LPAREN for_start_opt SEMICOLON expression SEMICOLON for_update_opt RPAREN statement •
+
+    $default  reduce using rule 54 (loop_stmt)
+
+
+State 213
+
+   63 for_update_list: for_update_list COMMA for_update_item •
+
+    $default  reduce using rule 63 (for_update_list)
+
+
+State 214
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN • statement
+
+    IF         shift, and go to state 110
+    DO         shift, and go to state 111
+    WHILE      shift, and go to state 112
+    FOR        shift, and go to state 113
+    FOREACH    shift, and go to state 114
+    RETURN     shift, and go to state 115
+    PRINT      shift, and go to state 116
+    PRINTLN    shift, and go to state 117
+    READ       shift, and go to state 118
+    ID         shift, and go to state 119
+    SEMICOLON  shift, and go to state 120
+    LBRACE     shift, and go to state 121
+
+    block        go to state 125
+    statement    go to state 215
+    simple_stmt  go to state 130
+    assign_stmt  go to state 131
+    lvalue       go to state 132
+    if_stmt      go to state 133
+    loop_stmt    go to state 134
+    return_stmt  go to state 135
+    proc_call    go to state 136
+
+
+State 215
+
+   55 loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement •
+
+    $default  reduce using rule 55 (loop_stmt)

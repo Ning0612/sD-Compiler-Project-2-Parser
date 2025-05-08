@@ -112,8 +112,9 @@ extern int yydebug;
     CASE = 313,                    /* CASE  */
     DEFAULT = 314,                 /* DEFAULT  */
     EXTERN = 315,                  /* EXTERN  */
-    UPLUS = 316,                   /* UPLUS  */
-    UMINUS = 317                   /* UMINUS  */
+    IFX = 316,                     /* IFX  */
+    UPLUS = 317,                   /* UPLUS  */
+    UMINUS = 318                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -180,8 +181,9 @@ extern int yydebug;
 #define CASE 313
 #define DEFAULT 314
 #define EXTERN 315
-#define UPLUS 316
-#define UMINUS 317
+#define IFX 316
+#define UPLUS 317
+#define UMINUS 318
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -203,7 +205,7 @@ union YYSTYPE
     ExprInfo* expr_info;
     std::vector<ExprInfo*>* expr_info_list;
 
-#line 207 "src/y.tab.hpp"
+#line 209 "src/y.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -1,9 +1,19 @@
 // Hello World Example
 int f(){
-  return 0;
+  return 0.35;
 }
 void main() {
 
-  const bool t = 24 > 34.4 && 30 + 3;
+  const bool t = 24 > 34.4 && 30 + 3 > 3;
+
+  int i = 0, j;
+  for ( i = 0, j = 20; i < 10; i = i + 1, i++) {
+    println(i);
+  }
+  if (i > 0) 
+    if (j > 0) 
+      println(i);
+    else
+      println(j);
 }
 

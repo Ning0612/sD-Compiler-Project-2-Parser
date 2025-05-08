@@ -78,6 +78,8 @@ void yyerror(const char* s)
 /* 由低到高（最下面優先序最高） */
 %left   OR              /* || ── 最低 */
 %left   AND             /* && */
+%nonassoc IFX
+%nonassoc ELSE
 %nonassoc EQ NEQ        /* == !=  (比 && 高) */
 %nonassoc LT LE GT GE   /* < <= > >= */
 %left   PLUS MINUS      /* + - */
@@ -475,13 +477,14 @@ lvalue:
 
 /* 5-b. If --------------------------------------------------------------------*/
 if_stmt:
-     IF LPAREN expression RPAREN statement {
+     IF LPAREN expression RPAREN statement %prec IFX {
         checkBoolExpr($3, "if", yylineno);
      }
   |  IF LPAREN expression RPAREN statement ELSE statement {
         checkBoolExpr($3, "if", yylineno);
     }
-    ;
+;
+
 
 /* 5-c. Loop ------------------------------------------------------------------*/
 loop_stmt:
@@ -502,19 +505,37 @@ loop_stmt:
 
 for_start_opt:
     /* empty */
-  | assign_no_semi
+  | for_start_list
     ;
 
 for_update_opt:
     /* empty */
-  | assign_no_semi
-  | lvalue INC {
-        checkIncDecValid($1, "increment", yylineno);
-    }
-  | lvalue DEC{
-        checkIncDecValid($1, "decrement", yylineno);
-    }   
+  | for_update_list
     ;
+
+for_start_list:
+      for_start_item
+    | for_start_list COMMA for_start_item
+;
+
+for_update_list:
+      for_update_item
+    | for_update_list COMMA for_update_item
+;
+
+for_start_item:
+    assign_no_semi
+;
+
+for_update_item:
+      assign_no_semi
+    | lvalue INC { checkIncDecValid($1, "increment", yylineno); }
+    | lvalue DEC { checkIncDecValid($1, "decrement", yylineno); }
+;
+
+
+
+
 
 assign_no_semi:
     lvalue ASSIGN expression {
