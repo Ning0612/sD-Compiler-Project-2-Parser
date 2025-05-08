@@ -4,5 +4,8 @@ void main() {
   const int a = 5 + 3 * 4 / 5 + 3;
   const double b = 5 + 3 * 4 / (5.0 + 3);
   const double c = 3.14;
+  const int d = 3 - + + + + + + + + + 3;
+  int d;
+  int i[10][20];
 }
 

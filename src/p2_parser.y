@@ -99,15 +99,15 @@ program:
      global_decl_list {
         Symbol* mainFunc = symTab.lookup("main");
         if (mainFunc == nullptr) {
-            throw SemanticError("missing main function", yylineno);
+            SemanticError("missing main function", yylineno);
         }
 
         if (!mainFunc->type->isFunc()) {
-            throw SemanticError("main function must be function", yylineno);
+            SemanticError("main function must be function", yylineno);
         }
 
         if (mainFunc->type->ret->base != BK_Void) {
-            throw SemanticError("main function must return void", yylineno);
+            SemanticError("main function must return void", yylineno);
         }
 
         symTab.dbgPrintCurrentScope();
@@ -141,11 +141,11 @@ const_decl:
     CONST type_spec ID ASSIGN expression SEMICOLON
     {
         if (!$2->isCompatibleWith(*$5->type)) {
-            throw SemanticError("const type mismatch", yylineno);
+            SemanticError("const type mismatch", yylineno);
         }
 
         if (!$5->isConst) {
-            throw SemanticError("const expression must be const", yylineno);
+            SemanticError("const expression must be const", yylineno);
         }
 
         Symbol s(*$3, $2, true);
@@ -153,11 +153,11 @@ const_decl:
 
         Symbol* exist = symTab.lookupGlobal(s.name);
         if (exist && exist->type->isFunc()) {
-            throw SemanticError("const '" + s.name + "' conflicts with function", yylineno);
+            SemanticError("const '" + s.name + "' conflicts with function", yylineno);
         }
 
         if (!symTab.insert(s)) {
-            throw SemanticError("redeclared const: " + *$3, yylineno);
+            SemanticError("redeclared const: " + *$3, yylineno);
         }
 
         if (isConvertible($2->base, $5->type->base)) {
@@ -178,7 +178,7 @@ var_decl:
 
             if (var->constType != nullptr) {
                 if (!$1->isCompatibleWith(*var->constType)) {
-                    throw SemanticError("var type mismatch", yylineno);
+                    SemanticError("var type mismatch", yylineno);
                 }
 
                 if(isConvertible($1->base, var->constType->base)) {
@@ -219,10 +219,10 @@ var_init:
      ID                     { $$ = new varInit($1); }  
   |  ID ASSIGN expression   {
         if ($3->type->isFunc()) {
-            throw SemanticError("assignment from function", yylineno);
+            SemanticError("assignment from function", yylineno);
         }
         if ($3->type->isArray()) {
-            throw SemanticError("assignment from array", yylineno);
+            SemanticError("assignment from array", yylineno);
         }
 
         $$ = new varInit($1, $3->type);
@@ -236,19 +236,19 @@ func_decl:
         returnsExpr.clear();
 
         if (*$2 == "main") {
-            throw SemanticError("main function should be void", yylineno);
+            SemanticError("main function should be void", yylineno);
         }
 
         declareFunction(*$2, $1, $4, typePool, symTab, yylineno);
         delete $2;
     } block_items_opt RBRACE {
         if (returnsExpr.empty()) {
-            throw SemanticError("missing return statement", yylineno);
+            SemanticError("missing return statement", yylineno);
         }
 
         for (auto& expr : returnsExpr) {
             if (!$1->isCompatibleWith(*expr.first.type)) {
-                throw SemanticError("return type mismatch !", expr.second);
+                SemanticError("return type mismatch !", expr.second);
             }
 
             if (isConvertible($1->base, expr.first.type->base)) {
@@ -265,7 +265,7 @@ func_decl:
         delete $2;
     } block_items_opt RBRACE {
         if (!returnsExpr.empty()) {
-            throw SemanticError("void function should not return value", yylineno);
+            SemanticError("void function should not return value", yylineno);
         }
 
         symTab.leaveScope();
@@ -342,34 +342,34 @@ simple_stmt:
      assign_stmt
   |  PRINT  expression SEMICOLON {
         if ($2->type->isFunc()) {
-            throw SemanticError("print from function", yylineno);
+            SemanticError("print from function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("print from array", yylineno);
+            SemanticError("print from array", yylineno);
         }
 
         delete $2;
   }
   |  PRINTLN expression SEMICOLON {
         if ($2->type->isFunc()) {
-            throw SemanticError("print from function", yylineno);
+            SemanticError("print from function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("print from array", yylineno);
+            SemanticError("print from array", yylineno);
         }
 
         delete $2;
   }
   |  READ lvalue SEMICOLON {
         if ($2->isConst) {
-            throw SemanticError("read to const", yylineno);
+            SemanticError("read to const", yylineno);
         }
 
         if ($2->type->isFunc()) {
-            throw SemanticError("read to function", yylineno);
+            SemanticError("read to function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("read to array", yylineno);
+            SemanticError("read to array", yylineno);
         }
     }
   |  lvalue INC SEMICOLON {
@@ -384,25 +384,25 @@ simple_stmt:
 assign_stmt:
      lvalue ASSIGN expression SEMICOLON {
         if ($1->isConst) {
-            throw SemanticError("assignment to const", yylineno);
+            SemanticError("assignment to const", yylineno);
         }
 
         if ($1->type->isFunc()) {
-            throw SemanticError("assignment to function", yylineno);
+            SemanticError("assignment to function", yylineno);
         }
         if ($1->type->isArray()) {
-            throw SemanticError("assignment to array", yylineno);
+            SemanticError("assignment to array", yylineno);
         }
 
         if ($3->type->isFunc()) {
-            throw SemanticError("assignment from function", yylineno);
+            SemanticError("assignment from function", yylineno);
         }
         if ($3->type->isArray()) {
-            throw SemanticError("assignment from array", yylineno);
+            SemanticError("assignment from array", yylineno);
         }
 
         if (!isBaseCompatible($1->type->base, $3->type->base) ) {
-                throw SemanticError("assignment type mismatch", yylineno);
+                SemanticError("assignment type mismatch", yylineno);
         }
 
         if (isConvertible($1->type->base, $3->type->base)){
@@ -418,7 +418,7 @@ lvalue:
      ID {
         Symbol* symbol = symTab.lookup(*$1);
         if (symbol == nullptr) {
-            throw SemanticError("undeclared identifier: " + *$1, yylineno);
+            SemanticError("undeclared identifier: " + *$1, yylineno);
         }
 
         $$ = new ExprInfo(symbol->type, symbol->isConst);
@@ -438,11 +438,11 @@ lvalue:
   | ID array_ref {
         Symbol* symbol = symTab.lookup(*$1);
         if (symbol == nullptr) {
-            throw SemanticError("undeclared identifier: " + *$1, yylineno);
+            SemanticError("undeclared identifier: " + *$1, yylineno);
         }
 
         if (!symbol->type->isArray()) {
-            throw SemanticError("array index to non-array type: " + *$1, yylineno);
+            SemanticError("array index to non-array type: " + *$1, yylineno);
         }
 
         size_t given = $2->size();
@@ -454,7 +454,7 @@ lvalue:
 
             if (index != 0) { 
                 if (index < 0 || index >= defined) {
-                    throw SemanticError(
+                    SemanticError(
                         "array index out of bounds: " + std::to_string(index) +
                         " not in [0.." + std::to_string(symbol->type->sizes[i] - 1) + "]",
                         yylineno
@@ -512,34 +512,34 @@ for_simple_item:
      assign_no_semi
   |  PRINT  expression  {
         if ($2->type->isFunc()) {
-            throw SemanticError("print from function", yylineno);
+            SemanticError("print from function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("print from array", yylineno);
+            SemanticError("print from array", yylineno);
         }
 
         delete $2;
   }
   |  PRINTLN expression  {
         if ($2->type->isFunc()) {
-            throw SemanticError("print from function", yylineno);
+            SemanticError("print from function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("print from array", yylineno);
+            SemanticError("print from array", yylineno);
         }
 
         delete $2;
   }
   |  READ lvalue  {
         if ($2->isConst) {
-            throw SemanticError("read to const", yylineno);
+            SemanticError("read to const", yylineno);
         }
 
         if ($2->type->isFunc()) {
-            throw SemanticError("read to function", yylineno);
+            SemanticError("read to function", yylineno);
         }
         if ($2->type->isArray()) {
-            throw SemanticError("read to array", yylineno);
+            SemanticError("read to array", yylineno);
         }
     }
   |  lvalue INC  {
@@ -553,25 +553,25 @@ for_simple_item:
 assign_no_semi:
     lvalue ASSIGN expression {
         if ($1->isConst) {
-            throw SemanticError("assignment to const", yylineno);
+            SemanticError("assignment to const", yylineno);
         }
 
         if ($1->type->isFunc()) {
-            throw SemanticError("assignment to function", yylineno);
+            SemanticError("assignment to function", yylineno);
         }
         if ($1->type->isArray()) {
-            throw SemanticError("assignment to array", yylineno);
+            SemanticError("assignment to array", yylineno);
         }
 
         if ($3->type->isFunc()) {
-            throw SemanticError("assignment from function", yylineno);
+            SemanticError("assignment from function", yylineno);
         }
         if ($3->type->isArray()) {
-            throw SemanticError("assignment from array", yylineno);
+            SemanticError("assignment from array", yylineno);
         }
 
         if (!isBaseCompatible($1->type->base, $3->type->base) ) {
-                throw SemanticError("assignment type mismatch", yylineno);
+                SemanticError("assignment type mismatch", yylineno);
         }
 
         if (isConvertible($1->type->base, $3->type->base)){
@@ -603,131 +603,35 @@ expression:
         } else if (isBaseCompatible($1->type->base, $3->type->base)) {
             $$ = numericResult(OPADD, $1, $3, typePool, yylineno);
         } else {
-            throw SemanticError("invalid types for '+' operator", yylineno);
+            SemanticError("invalid types for '+' operator", yylineno);
         }
 
         delete $1;
         delete $3;
     }
-  | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression MINUS expression   { $$ = numericResult(OPSUB,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression MUL   expression   { $$ = numericResult(OPMUL,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression DIV   expression   { $$ = numericResult(OPDIV,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression MOD   expression   { $$ = numericResult(OPMOD,  $1,$3,typePool,yylineno); delete $1; delete $3; }
 
-  | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression LT    expression   { $$ = relResult(OPLT, $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression LE    expression   { $$ = relResult(OPLE, $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression GT    expression   { $$ = relResult(OPGT, $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression GE    expression   { $$ = relResult(OPGE, $1,$3,typePool,yylineno); delete $1; delete $3; }
 
-  | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); delete $1; delete $3; }
-  | expression AND   expression    {
-        if (!$1->type->isScalar()){
-            throw SemanticError("and on non-scalar type", yylineno);
-        }
+    | expression EQ    expression   { $$ = eqResult(true,  $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression NEQ   expression   { $$ = eqResult(false, $1,$3,typePool,yylineno); delete $1; delete $3; }
+    | expression AND   expression   { $$ = evalBoolOp($1, $3, true, typePool, yylineno);delete $1; delete $3; }
+    | expression OR expression      { $$ = evalBoolOp($1, $3, false, typePool, yylineno); delete $1; delete $3; }
+    | NOT expression                { $$ = evalNot($2, typePool, yylineno); delete $2; }
 
-        if (!$3->type->isScalar()){
-            throw SemanticError("and on non-scalar type", yylineno);
-        }
+    | MINUS expression %prec UMINUS { $$ = applyUnaryOp($2, true, yylineno); delete $2; }
+    | PLUS expression %prec UPLUS   { $$ = applyUnaryOp($2, false, yylineno); delete $2; }
 
-        if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
-            throw SemanticError("and on non-bool type", yylineno);
-        }
-
-        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $1->isConst && $3->isConst);
-        if (expr->isConst){
-            expr->setBool($1->getBool() && $3->getBool());
-        }
-        $$ = expr;
-        delete $1;
-        delete $3;
-    }
-  | expression OR    expression    { 
-        if (!$1->type->isScalar()){
-            throw SemanticError("or on non-scalar type", yylineno);
-        }
-
-        if (!$3->type->isScalar()){
-            throw SemanticError("or on non-scalar type", yylineno);
-        }
-
-        if ($1->type->base != BK_Bool || $3->type->base != BK_Bool) {
-            throw SemanticError("or on non-bool type", yylineno);
-        }
-
-        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $1->isConst && $3->isConst);
-        if (expr->isConst){
-            expr->setBool($1->getBool() || $3->getBool());
-        }
-        $$ = expr;
-        delete $1;
-        delete $3;
-    }
-  | NOT expression                 { 
-        if (!$2->type->isScalar()){
-            throw SemanticError("not on non-scalar type", yylineno);
-        }
-
-        if ($2->type->base != BK_Bool) {
-            throw SemanticError("not on non-bool type", yylineno);
-        }
-
-        ExprInfo* expr = new ExprInfo(typePool.make(BK_Bool), $2->isConst);
-        if ($2->isConst){
-            expr->setBool(!$2->getBool());
-        }
-        $$ = expr;
-        delete $2;
-    }
-  | MINUS expression %prec UMINUS  { 
-        if (!$2->type->isScalar()){
-            throw SemanticError("unary minus on non-scalar type", yylineno);
-        }
-
-        if ($2->type->base != BK_Float && $2->type->base != BK_Int && $2->type->base != BK_Double) {
-            throw SemanticError("unary minus on non-numeric type", yylineno);
-        }
-
-        ExprInfo* expr = new ExprInfo($2->type, $2->isConst);
-        if ($2->isConst){
-            if ($2->valueKind == VK_Float) {
-                expr->setFloat(-$2->getFloat());
-            } else if ($2->valueKind == VK_Int) {
-                expr->setInt(-$2->getInt());
-            } else if ($2->valueKind == VK_Double) {
-                expr->setFloat(-$2->getDouble());
-            }
-        }
-        $$ = expr;
-        delete $2;
-    }
-  | PLUS expression %prec UPLUS    { 
-        if (!$2->type->isScalar()){
-            throw SemanticError("unary plus on non-scalar type", yylineno);
-        }
-
-        if ($2->type->base != BK_Float && $2->type->base != BK_Int && $2->type->base != BK_Double) {
-            throw SemanticError("unary plus on non-numeric type", yylineno);
-        }
-
-        ExprInfo* expr = new ExprInfo($2->type, $2->isConst);
-        if ($2->isConst){
-            if ($2->valueKind == VK_Float) {
-                expr->setFloat($2->getFloat());
-            } else if ($2->valueKind == VK_Int) {
-                expr->setInt($2->getInt());
-            } else if ($2->valueKind == VK_Double) {
-                expr->setFloat($2->getDouble());
-            }
-        }
-
-        $$ = expr;
-        delete $2;
-    }
-  | LPAREN expression RPAREN       { $$ = $2; }
-  | lvalue                         { $$ = $1; }
-  | const_lit                     { $$ = $1; }
-  | func_call                      { $$ = $1; }
+    | LPAREN expression RPAREN       { $$ = $2; }
+    | lvalue                         { $$ = $1; }
+    | const_lit                      { $$ = $1; }
+    | func_call                      { $$ = $1; }
     ;
 
 /* 7. 常數 / 呼叫 -------------------------------------------------------------*/
@@ -793,10 +697,12 @@ array_dims:
      LBRACK expression RBRACK {
         $$ = new std::vector<int>;
         $$->push_back(checkArrayDimExpr($2, yylineno));
+        delete $2;
      }
   |  array_dims LBRACK expression RBRACK {
         $$ = $1;
         $$->push_back(checkArrayDimExpr($3, yylineno));
+        delete $3;
      }
     ;
 
@@ -832,10 +738,11 @@ int main(int argc, char* argv[])
     }
     if (!(yyin = std::fopen(argv[1], "r"))) { perror("open"); return 1; }
 
-    try {
-        return yyparse();
-    } catch (SemanticError& e) {
-        std::fprintf(stderr, "Semantic error @ line %d: %s\n", e.line, e.what());
-        return 1;
+    int result = yyparse();
+    
+    if (SemanticError::hasError()) {
+        SemanticError::printAll();
     }
+
+    return result;
 }
