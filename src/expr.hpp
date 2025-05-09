@@ -3,55 +3,45 @@
 #include <stdexcept>
 #include <string>
 
-/*───────── 常數 / 值 描述 ─────────*/
+// Enumeration to indicate the kind of constant value stored
 enum ValueKind { VK_None, VK_Int, VK_Float, VK_Double, VK_Bool, VK_String };
 
+// Structure to represent expression information during semantic analysis
 struct ExprInfo {
-    Type*     type;
-    bool      isConst;
-    ValueKind valueKind;
+    Type* type;             // Expression's semantic type
+    bool isConst;           // Whether the expression is a constant
+    ValueKind valueKind;    // What kind of value is stored
 
-    union { int iVal; float fVal; double dVal; bool bVal; };
-    std::string sVal;
+    // Union for storing scalar constant values
+    union {
+        int iVal;
+        float fVal;
+        double dVal;
+        bool bVal;
+    };
 
-    explicit ExprInfo(Type* t, bool c=false)
-        : type(t), isConst(c), valueKind(VK_None) {}
+    std::string sVal;       // Separate member for string constants
 
-    /* setter */
-    void setInt   (int v)             { valueKind=VK_Int;   iVal=v; isConst=true; }
-    void setFloat (float v)           { valueKind=VK_Float; fVal=v; isConst=true; }
-    void setDouble(double v)          { valueKind=VK_Double; dVal=v; isConst=true; }
-    void setBool  (bool v)            { valueKind=VK_Bool;  bVal=v; isConst=true; }
-    void setString(const std::string& s){ valueKind=VK_String; sVal=s; isConst=true; }
+    // Constructor initializes the expression info
+    explicit ExprInfo(Type* t, bool c = false);
 
-    /* zero 判斷，僅對常數數值有意義 */
-    bool isZeroValue() const {
-        if(!isConst) return false;
-        switch(valueKind){
-            case VK_Int:   return iVal==0;
-            case VK_Float: return fVal==0.0f;
-            case VK_Double:return dVal==0.0f;
-            case VK_String:return sVal.empty();
-            case VK_Bool:  return bVal==false;
-            default:       return false;
-        }
-    }
+    // Setters for different constant values
+    void setInt(int v);
+    void setFloat(float v);
+    void setDouble(double v);
+    void setBool(bool v);
+    void setString(const std::string& s);
 
-    /* getter（型別不符丟例外）*/
-    int    getInt()    const { if(valueKind!=VK_Int)   throw std::runtime_error("not int");   return iVal; }
-    float  getFloat()  const { if(valueKind!=VK_Float) throw std::runtime_error("not float"); return fVal; }
-    double getDouble() const { if(valueKind!=VK_Double)throw std::runtime_error("not double");return dVal; }
-    bool   getBool()   const { if(valueKind!=VK_Bool)  throw std::runtime_error("not bool");  return bVal; }
-    std::string getString() const{ if(valueKind!=VK_String) throw std::runtime_error("not string"); return sVal; }
-    void setConstValueFromExpr(const ExprInfo* e) {
-        switch (e->valueKind) {
-            case VK_Int: setInt(e->getInt()); break;
-            case VK_Float: setFloat(e->getFloat()); break;
-            case VK_Double: setDouble(e->getDouble()); break;
-            case VK_Bool: setBool(e->getBool()); break;
-            case VK_String: setString(e->getString()); break;
-            default: break;
-        }
-    }
+    // Check if the constant value is logically "zero"
+    bool isZeroValue() const;
 
+    // Getters for constant values, will throw if type mismatched
+    int getInt() const;
+    float getFloat() const;
+    double getDouble() const;
+    bool getBool() const;
+    std::string getString() const;
+
+    // Copy constant value from another expression
+    void setConstValueFromExpr(const ExprInfo* e);
 };

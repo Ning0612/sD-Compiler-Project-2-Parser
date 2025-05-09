@@ -1,7 +1,46 @@
 #include "sem_utils.hpp"
 #include <stdexcept>
 
+// convert ExprInfo to basic types
+int toInt(const ExprInfo e){
+    return (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : (e.valueKind==VK_Double)? static_cast<int>(e.getDouble()) : 0;
+}
+float toFloat(const ExprInfo e){
+    return (e.valueKind==VK_Float)? e.getFloat() : (e.valueKind==VK_Double)? e.getDouble() : (e.valueKind==VK_Int)? e.getInt() : 0.0f;
+}
+double toDouble(const ExprInfo e){
+    return (e.valueKind==VK_Double)? e.getDouble() : (e.valueKind==VK_Float)? e.getFloat() : (e.valueKind==VK_Int)? e.getInt() : 0.0;
+}
+bool toBool(const ExprInfo e){
+    return (e.valueKind==VK_Bool)? e.getBool() : (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : (e.valueKind==VK_Double)? static_cast<int>(e.getDouble()) : false;
+}
+std::string toString(const ExprInfo e){
+    return (e.valueKind==VK_String)? e.getString() : (e.valueKind==VK_Int)? std::to_string(e.getInt()) : (e.valueKind==VK_Float)? std::to_string(e.getFloat()) : (e.valueKind==VK_Double)? std::to_string(e.getDouble()) : "";
+}
 
+/*───────── Type Compatibility ─────────*/
+std::string numOpToStr(NumOp op) {
+    switch (op) {
+        case OPADD: return "+";
+        case OPSUB: return "-";
+        case OPMUL: return "*";
+        case OPDIV: return "/";
+        case OPMOD: return "%";
+        default: return "unknown";
+    }
+}
+
+std::string relOpToStr(RelOp op) {
+    switch (op) {
+        case OPLT: return "<";
+        case OPLE: return "<=";
+        case OPGT: return ">";
+        case OPGE: return ">=";
+        default: return "unknown";
+    }
+}
+
+/*───────── String Concatenation ─────────*/
 ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
     if(!lhs.type->isScalar()){
         throw SemanticError("left operand must be scalar", lineno);
@@ -321,6 +360,7 @@ int extractArrayIndexOrZero(const ExprInfo& expr, int lineno) {
     return 0;
 }
 
+/*───────── check array dimension ─────────*/
 int checkArrayDimExpr(const ExprInfo& expr, int lineno) {
     if (!expr.isConst || !expr.type->isScalar() || expr.type->base != BK_Int || expr.valueKind != VK_Int) {
         throw SemanticError("array dimension must be const int scalar", lineno);
@@ -334,6 +374,7 @@ int checkArrayDimExpr(const ExprInfo& expr, int lineno) {
     return val;
 }
 
+/*───────── check foreach index ─────────*/
 void checkForeachIndex(Symbol* sym, int lineno) {
     if (!sym) 
         throw SemanticError("undeclared foreach variable", lineno);
@@ -342,6 +383,7 @@ void checkForeachIndex(Symbol* sym, int lineno) {
         throw SemanticError("foreach index must be int", lineno);
 }
 
+/*───────── check variable declaration ─────────*/
 void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno) {
     Symbol* exist = symTab.lookupGlobal(s.name);
     if (exist && exist->type->isFunc()) {
@@ -353,6 +395,7 @@ void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno) {
     }
 }
 
+/*───────── check function declaration ─────────*/
 void declareFunction(const std::string& name, Type* returnType, const std::vector<Symbol>& paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno) {
     std::vector<Type*> paramTypes;
     for (auto& param : paramSyms) {
@@ -376,6 +419,7 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
     }
 }
 
+/*───────── check function call ─────────*/
 void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno) {
     if (!symbol) {
         throw SemanticError("undeclared function: " + name, lineno);
@@ -412,6 +456,7 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
     }
 }
 
+/*───────── check assignment ─────────*/
 void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) {
     if (target.type->isFunc()) {
         throw SemanticError("cannot assign to function", lineno);
@@ -439,6 +484,7 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
     }
 }
 
+/*───────── check print ─────────*/
 void checkPrint(const ExprInfo& expr, int lineno) {
     if (expr.type->isFunc()) {
         throw SemanticError("cannot print function", lineno);
@@ -453,6 +499,7 @@ void checkPrint(const ExprInfo& expr, int lineno) {
     }
 }
 
+/*───────── check read ─────────*/
 void checkRead(const ExprInfo& expr, int lineno) {
     if (expr.type->isFunc()) {
         throw SemanticError("cannot read to function", lineno);
@@ -467,6 +514,7 @@ void checkRead(const ExprInfo& expr, int lineno) {
     }
 }
 
+/*───────── check variable declaration ─────────*/
 void tryDeclareVarables(SymbolTable& symTab, TypeArena& typePool, std::vector<VarInit>& varInits, Type* type, int lineno){
     for (auto& var : varInits) {
         Symbol s("", nullptr, false);
@@ -494,6 +542,7 @@ void tryDeclareVarables(SymbolTable& symTab, TypeArena& typePool, std::vector<Va
     }
 }
 
+/*───────── check constant declaration ─────────*/
 void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const ExprInfo& value, int lineno){
     if (value.type->isFunc()) {
         throw SemanticError("cannot assign function to const", lineno);

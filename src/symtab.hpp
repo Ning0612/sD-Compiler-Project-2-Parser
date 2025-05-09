@@ -1,44 +1,56 @@
 #pragma once
-#include "expr.hpp"
-#include <unordered_map>
-#include <string>
-#include <cstdio>
 
-/*───────── Symbol & SymbolTable ─────────*/
+#include "expr.hpp"
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+/* ───────────── Symbol ─────────────
+   Represents a declared symbol in the program:
+   variable, constant, or function argument.
+*/
 class Symbol {
 public:
-    std::string name;
-    Type* type;
-    bool  isConst;
+    std::string name;      // symbol name
+    Type* type;            // symbol type
+    bool isConst;          // whether the symbol is constant
 
-    ValueKind valueKind = VK_None;
-    union { int iVal; float fVal; double dVal; bool bVal; };
-    std::string sVal;
+    ValueKind valueKind = VK_None;  // constant value kind
+    union {
+        int iVal;
+        float fVal;
+        double dVal;
+        bool bVal;
+    };
+    std::string sVal; // string constants
 
-    Symbol(const std::string& n, Type* t, bool c)
-        : name(n), type(t), isConst(c) {}
+    Symbol(const std::string& n, Type* t, bool c);
 
-    /* 設常數值 */
-    void setInt(int v){ valueKind=VK_Int; iVal=v; }
-    void setFloat(float v){ valueKind=VK_Float; fVal=v; }
-    void setDouble(double v){ valueKind=VK_Double; dVal=v; }
-    void setBool(bool v){ valueKind=VK_Bool; bVal=v; }
-    void setString(const std::string& s){ valueKind=VK_String; sVal=s; }
-    bool hasConstValue() const { return isConst && valueKind!=VK_None; }
+    void setInt(int v);
+    void setFloat(float v);
+    void setDouble(double v);
+    void setBool(bool v);
+    void setString(const std::string& s);
+    bool hasConstValue() const;
     void setConstValueFromExpr(const ExprInfo* e);
 
-    ExprInfo* getExpr() const;          // 定義在 symtab.cpp
-    void      dbgPrint() const;         // 定義在 symtab.cpp
+    ExprInfo* getExpr() const;
+    void dbgPrint() const;
 };
 
+/* ───────────── SymbolTable ─────────────
+   Manages scopes and symbol declarations.
+   Supports nested scopes (stack-based).
+*/
 class SymbolTable {
-    using Bucket = std::unordered_map<std::string,Symbol>;
-    std::vector<Bucket> scopes { Bucket() };   // scopes[0] = global
+    using Bucket = std::unordered_map<std::string, Symbol>;
+    std::vector<Bucket> scopes { Bucket() }; // scopes[0] = global scope
+
 public:
-    void enterScope(){ scopes.emplace_back(); }
-    void leaveScope();
-    bool insert(const Symbol& s);              // false=duplicate
-    Symbol* lookup(const std::string& name);   // nearest
-    Symbol* lookupGlobal(const std::string& name);
+    void enterScope();                          // push new scope
+    void leaveScope();                          // pop current scope
+    bool insert(const Symbol& s);               // insert symbol into current scope
+    Symbol* lookup(const std::string& name);    // search from innermost to outermost
+    Symbol* lookupGlobal(const std::string& name); // search global scope only
     void dbgPrintCurrentScope() const;
 };

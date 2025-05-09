@@ -1,78 +1,54 @@
+// sd_types.hpp
 #pragma once
+
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include <cstddef>
-#include <cstdio>
 
-/*───────── 型別系統 ─────────*/
+// Basic built-in types
 enum BaseKind { BK_Int, BK_Float, BK_Double, BK_Bool, BK_String, BK_Void };
 
+// Type compatibility and promotion utilities
 bool isConvertible(BaseKind a, BaseKind b);
 bool isBaseCompatible(BaseKind a, BaseKind b);
 BaseKind promote(BaseKind b1, BaseKind b2);
+std::string baseKindToStr(BaseKind kind);
 
-
+// Type information structure
 struct Type {
-    BaseKind            base;
-    int                 dim;          // 0 = scalar
-    std::vector<int>    sizes;        // array dimensions
-    std::vector<Type*>  params;       // function param types
-    Type*               ret;          // function return
+    BaseKind base;
+    int dim;                        // dimension (0 for scalar)
+    std::vector<int> sizes;         // array dimensions
+    std::vector<Type*> params;      // function parameter types
+    Type* ret;                      // function return type
 
-    explicit Type(BaseKind b) : base(b), dim(0), ret(nullptr) {}
-    bool isScalar() const { return !isArray() && !isFunc(); }
-    bool isArray() const { return dim > 0; }
-    bool isFunc()  const { return ret || !params.empty(); }
+    explicit Type(BaseKind b);
+    bool isScalar() const;
+    bool isArray() const;
+    bool isFunc() const;
 
     bool operator==(const Type& o) const;
-    bool operator!=(const Type& o) const { return !(*this == o); }
+    bool operator!=(const Type& o) const;
     bool isCompatibleWith(const Type& o) const;
 
-
-    /* 方便除錯的小印法 */
-    void dbgPrint() const {
-        switch (base) {
-            case BK_Int:    printf("int");    break;
-            case BK_Float:  printf("float");  break;
-            case BK_Double: printf("double"); break;
-            case BK_Bool:   printf("bool");   break;
-            case BK_String: printf("string"); break;
-            case BK_Void:   printf("void");   break;
-        }
-        if (isArray()) {
-            printf(" array");
-            for (int s: sizes) printf("[%d]", s);
-        }
-        if (isFunc()){
-            printf(" function");
-            if (ret) {
-                printf(" -> ");
-                ret->dbgPrint();
-            }
-            printf(" (");
-            for (size_t i=0; i<params.size(); ++i) {
-                params[i]->dbgPrint();
-                if (i < params.size()-1) printf(", ");
-            }
-            printf(")");
-        }
-    }
+    void dbgPrint() const;          // Debug print
 };
 
+// Hash function for Type
 struct TypeHash {
     std::size_t operator()(const Type& t) const;
 };
 
+// Memory arena for creating and caching unique Type instances
 class TypeArena {
 public:
     ~TypeArena();
     Type* make(BaseKind kind);
     Type* makeArray(Type* elem, const std::vector<int>& sizes);
     Type* makeFunc(Type* ret, const std::vector<Type*>& params);
+
 private:
     std::vector<Type*> types;
     std::unordered_map<Type, Type*, TypeHash> cache;
 };
-
-std::string baseKindToStr(BaseKind kind);

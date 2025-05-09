@@ -1,5 +1,6 @@
 %{
 #include "sem_utils.hpp"
+#include "context.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -9,9 +10,7 @@ extern int  yylex();
 extern int  yylineno;
 extern FILE* yyin;
 
-SymbolTable symTab;
-TypeArena typePool;
-std::vector<std::pair<ExprInfo, int>> returnsExpr;
+Context* ctx = nullptr;
 
 void yyerror(const char* s){
     std::fprintf(stderr, "Syntax error @ line %d: %s\n", yylineno, s);
@@ -36,7 +35,7 @@ void yyerror(const char* s){
     std::vector<ExprInfo>* expr_info_list;
 }
 
-/* ---------- 關鍵字 / 常數 / 識別元 ---------- */
+/* ---------- Keywords / Constants / Identifiers ---------- */
 %token                BOOL_TOK FLOAT_TOK DOUBLE_TOK INT_TOK CHAR_TOK STRING_TOK VOID_TOK
 %token                IF ELSE DO WHILE FOR FOREACH RETURN
 %token                CONST PRINT PRINTLN READ TRUE FALSE
@@ -62,7 +61,7 @@ void yyerror(const char* s){
 %type <var_init> var_init
 %type <var_init_list> var_init_list
 
-/* ---------- 運算子 / 分隔符 ---------- */
+/* ---------- Operators / Delimiters ---------- */
 %token                LE GE EQ NEQ LT GT
 %token                PLUS MINUS MUL DIV MOD ASSIGN NOT
 %token                AND OR INC DEC
@@ -73,27 +72,27 @@ void yyerror(const char* s){
 
 // CHAR
 
-/* ---------- 運算子優先序 ---------- */
-/* 由低到高（最下面優先序最高） */
-%left   OR              /* || */
-%left   AND             /* && */
-%nonassoc IFX           /* IFX 是用來處理 if-else 的優先序 */
-%nonassoc ELSE          /* else */
-%right  NOT             /* !x */
-%nonassoc LT LE GT GE EQ NEQ  /* < <= > >= == != */
-%left   PLUS MINUS      /* + - */
-%left   MUL DIV MOD     /* * / % */
-%right  INC DEC UPLUS UMINUS /* ++ -- */
-%right  ASSIGN          /* =  */
+/* ---------- Operator Precedence (Lowest to Highest) ---------- */
+%left   OR                      /* || */
+%left   AND                     /* && */
+%nonassoc IFX                   /* if */
+%nonassoc ELSE                  /* else */
+%right  NOT                     /* !x */
+%nonassoc LT LE GT GE EQ NEQ    /* < <= > >= == != */
+%left   PLUS MINUS              /* + - */
+%left   MUL DIV MOD             /* * / % */
+%right  INC DEC UPLUS UMINUS    /* ++ -- */
+%right  ASSIGN                  /* =  */
 
-%start program // 起始符號
+%start program // start symbol
 
-%% /* ---------- grammar ---------- */
+%% 
+/* ---------- Grammar Rules ---------- */
 
-/* 2. Program  ----------------------------------------------------------------*/
+/* Program Rule */
 program
     : global_decl_list {
-        Symbol* mainFunc = symTab.lookup("main");
+        Symbol* mainFunc = ctx->symTab.lookup("main");
         if (mainFunc == nullptr) {
             throw SemanticError("missing main function", yylineno);
         }
@@ -106,7 +105,7 @@ program
             throw SemanticError("main function must be void", yylineno);
         }
 
-        symTab.leaveScope();
+        ctx->symTab.leaveScope();
         printf("\n");
     }
     ;
@@ -116,8 +115,7 @@ global_decl_list
     | global_decl_list global_decl
     ;
 
-
-/* 4. Declaration -------------------------------------------------------------*/
+/* Declarations */
 global_decl
     : const_decl
     | var_decl
@@ -129,20 +127,21 @@ local_decl
     | var_decl       
     ;
 
-/* 4-a. 常數宣告 --------------------------------------------------------------*/
-const_decl:
+/* Constant Declaration */
+const_decl
+    :
     CONST type_spec ID ASSIGN expression SEMICOLON {
         std::string id = *$3; delete $3;
         ExprInfo value = *$5; delete $5;
-        tryDeclareConstant(symTab, id, $2, value, yylineno);
+        tryDeclareConstant(ctx->symTab, id, $2, value, yylineno);
     }
     ;
 
-/* 4-b. 變數 / 陣列宣告 --------------------------------------------------------*/
+/* Variable / Array Declaration */
 var_decl
     : type_spec var_init_list SEMICOLON {
         std::vector<VarInit> varInits = *$2; delete $2;
-        tryDeclareVarables(symTab, typePool, varInits, $1, yylineno);
+        tryDeclareVarables(ctx->symTab, ctx->typePool, varInits, $1, yylineno);
     }
     ;
 
@@ -178,10 +177,10 @@ var_init
     | ID array_dims          { $$ = new VarInit(*$1, *$2); delete $1; delete $2; }
     ;
 
-/* 4-c. 函式宣告 --------------------------------------------------------------*/
+/* Function Declaration */
 func_decl
     : type_spec ID LPAREN param_list_opt RPAREN LBRACE {
-        returnsExpr.clear();
+        ctx->returnsExpr.clear();
 
         std::string funcName = *$2; delete $2;
         std::vector<Symbol> paramList = *$4; delete $4;
@@ -190,13 +189,13 @@ func_decl
             throw SemanticError("main function should be void", yylineno);
         }
 
-        declareFunction(funcName, $1, paramList, typePool, symTab, yylineno);
+        declareFunction(funcName, $1, paramList, ctx->typePool, ctx->symTab, yylineno);
     } block_items_opt RBRACE {
-        if (returnsExpr.empty()) {
+        if (ctx->returnsExpr.empty()) {
             throw SemanticError("missing return statement", yylineno);
         }
 
-        for (auto& expr : returnsExpr) {
+        for (auto& expr : ctx->returnsExpr) {
             if (!$1->isCompatibleWith(*expr.first.type)) {
                 throw SemanticError("return type mismatch !", expr.second);
             }
@@ -207,24 +206,25 @@ func_decl
             }
         }
 
-        symTab.leaveScope();
+        ctx->symTab.leaveScope();
     }
     | VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE {
-        returnsExpr.clear();
+        ctx->returnsExpr.clear();
 
         std::string funcName = *$2; delete $2;
         std::vector<Symbol> paramList = *$4; delete $4;
 
-        declareFunction(funcName, typePool.make(BK_Void), paramList, typePool, symTab, yylineno);
+        declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
     } block_items_opt RBRACE {
-        if (!returnsExpr.empty()) {
+        if (!ctx->returnsExpr.empty()) {
             throw SemanticError("void function should not return value", yylineno);
         }
 
-        symTab.leaveScope();
+        ctx->symTab.leaveScope();
     }
     ;
 
+/* Function Parameters */
 param_list_opt:
     /* empty */ {
         $$ = new std::vector<Symbol>();
@@ -255,16 +255,16 @@ param
     | type_spec ID array_dims{
         std::string id = *$2; delete $2;
         std::vector<int> arrayIndex = *$3; delete $3;
-        $$ = new Symbol(id, typePool.makeArray($1, arrayIndex), false);
+        $$ = new Symbol(id, ctx->typePool.makeArray($1, arrayIndex), false);
     }
     ;
 
-/* 5. Block / Statement -------------------------------------------------------*/
+/* Block and Statements */
 block
     : LBRACE {
-        symTab.enterScope();
+        ctx->symTab.enterScope();
     } block_items_opt RBRACE {
-        symTab.leaveScope();
+        ctx->symTab.leaveScope();
     }
     ;
 
@@ -292,7 +292,7 @@ statement
     | block
     ;
 
-/* 5-a. Simple ---------------------------------------------------------------*/
+/* Simple Statements */
 simple_stmt
     : assign_stmt
     | PRINT expression SEMICOLON {
@@ -326,10 +326,11 @@ assign_stmt
     }
     ;
 
+/* Lvalue Access */
 lvalue
     : ID {
         std::string id = *$1; delete $1;
-        Symbol* symbol = symTab.lookup(id);
+        Symbol* symbol = ctx->symTab.lookup(id);
 
         if (symbol == nullptr) {
             throw SemanticError("undeclared identifier: " + id, yylineno);
@@ -350,11 +351,11 @@ lvalue
     | ID array_ref {
         std::string id = *$1; delete $1;
         std::vector<int> arrayIndex = *$2; delete $2;
-        $$ = resolveArrayAccess(id, typePool, symTab, arrayIndex, yylineno);
+        $$ = resolveArrayAccess(id, ctx->typePool, ctx->symTab, arrayIndex, yylineno);
     }
     ;
 
-/* 5-b. If --------------------------------------------------------------------*/
+/* If Statement */
 if_stmt
     : IF LPAREN expression RPAREN statement %prec IFX {
         ExprInfo expr = *$3; delete $3;
@@ -366,7 +367,7 @@ if_stmt
     }
     ;
 
-/* 5-c. Loop ------------------------------------------------------------------*/
+/* Loop Statements */
 loop_stmt
     : WHILE LPAREN expression RPAREN statement{ 
         ExprInfo expr = *$3; delete $3;
@@ -384,10 +385,11 @@ loop_stmt
         ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
         std::string id = *$3; delete $3;
         checkForeachRange(from, to, yylineno);
-        checkForeachIndex(symTab.lookup(id), yylineno);
+        checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
     ;
 
+/* For Loop Optional Statements */
 for_simple_opt
     : /* empty */
     | for_simple_item
@@ -426,15 +428,15 @@ assign_no_semi
     }
     ;
 
-/* 5-d. Return ----------------------------------------------------------------*/
+/* Return Statement */
 return_stmt
     : RETURN expression SEMICOLON {
-        returnsExpr.push_back(std::make_pair(*$2, yylineno));
+        ctx->returnsExpr.push_back(std::make_pair(*$2, yylineno));
         delete $2;
      }
     ;
 
-/* 6. Expressions -------------------------------------------------------------*/
+/* Expressions */
 expression
     : expression PLUS expression {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
@@ -442,65 +444,65 @@ expression
         bool isStringConcat = (lhs.type->base == BK_String && rhs.type->base == BK_String);
 
         if (isStringConcat) {
-            $$ = concatStringResult(lhs, rhs, typePool, yylineno);
+            $$ = concatStringResult(lhs, rhs, ctx->typePool, yylineno);
         } else {
-            $$ = numericOpResult(OPADD, lhs, rhs, typePool, yylineno);
+            $$ = numericOpResult(OPADD, lhs, rhs, ctx->typePool, yylineno);
         }
     }
     | expression MINUS expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPSUB, lhs, rhs, typePool, yylineno);
+        $$ = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
     }
     | expression MUL   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPMUL, lhs, rhs, typePool, yylineno);
+        $$ = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
     }
     | expression DIV   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPDIV, lhs, rhs, typePool, yylineno);
+        $$ = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
     }
     | expression MOD   expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPMOD, lhs, rhs, typePool, yylineno);
+        $$ = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
     }
 
     | expression LT    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPLT, lhs , rhs, typePool, yylineno);
+        $$ = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
     }
     | expression LE    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPLE, lhs , rhs, typePool, yylineno);
+        $$ = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
     }
     | expression GT    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPGT, lhs , rhs, typePool, yylineno);
+        $$ = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
     }
     | expression GE    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPGE, lhs , rhs, typePool, yylineno);
+        $$ = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
     }
 
     | expression EQ    expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = eqOpResult(true, lhs, rhs, typePool, yylineno);
+        $$ = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
     }
     | expression NEQ   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = eqOpResult(false, lhs, rhs, typePool, yylineno);
+        $$ = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
     }
 
     | expression AND   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = boolOpResult(true, lhs , rhs, typePool, yylineno);
+        $$ = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
     }
     | expression OR expression      {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = boolOpResult(false, lhs , rhs, typePool, yylineno);
+        $$ = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
     }
     | NOT expression                {
         ExprInfo expr = *$2; delete $2;
-        $$ = notOpResult(expr, typePool, yylineno);
+        $$ = notOpResult(expr, ctx->typePool, yylineno);
     }
 
     | MINUS expression %prec UMINUS {
@@ -518,30 +520,31 @@ expression
     | func_call                      { $$ = $1; }
     ;
 
-/* 7. 常數 / 呼叫 -------------------------------------------------------------*/
+/* Constants */
 const_lit
     : INT_LIT     { 
-        $$ = new ExprInfo(typePool.make(BK_Int), true);
+        $$ = new ExprInfo(ctx->typePool.make(BK_Int), true);
         $$->setInt($1);
     }
     | REAL_LIT    {
-        $$ = new ExprInfo(typePool.make(BK_Double), true);
+        $$ = new ExprInfo(ctx->typePool.make(BK_Double), true);
         $$->setFloat($1);
     }
     | BOOL_LIT    {
-        $$ = new ExprInfo(typePool.make(BK_Bool), true);
+        $$ = new ExprInfo(ctx->typePool.make(BK_Bool), true);
         $$->setBool($1);
     }    
     | STRING_LIT  { 
-        $$ = new ExprInfo(typePool.make(BK_String), true);
+        $$ = new ExprInfo(ctx->typePool.make(BK_String), true);
         $$->setString(*$1);
         delete $1;
     }
     ;
 
+/* Function Calls */
 func_call
     : ID LPAREN arg_list_opt RPAREN {
-        Symbol* symbol = symTab.lookup(*$1);
+        Symbol* symbol = ctx->symTab.lookup(*$1);
         std::string funcName = *$1;
         std::vector<ExprInfo> args = *$3;
         delete $1;
@@ -552,7 +555,7 @@ func_call
 
 proc_call
     : ID LPAREN arg_list_opt RPAREN {
-        Symbol* symbol = symTab.lookup(*$1);
+        Symbol* symbol = ctx->symTab.lookup(*$1);
         std::string funcName = *$1;
         std::vector<ExprInfo> args = *$3;
         delete $1;
@@ -560,6 +563,7 @@ proc_call
         checkFuncCall(symbol, funcName, args, yylineno);
     }
 
+/* Function Arguments */
 arg_list_opt
     : /* empty */{ $$ = new std::vector<ExprInfo>();}
     | arg_list { $$ = $1; }
@@ -578,7 +582,7 @@ arg_list
     }
     ;
 
-/* 8. 陣列次方括號 ------------------------------------------------------------*/
+/* Array Dimensions */
 array_dims
     : LBRACK expression RBRACK {
         $$ = new std::vector<int>;
@@ -592,6 +596,7 @@ array_dims
     }
     ;
 
+/* Array Reference */
 array_ref
     : LBRACK expression RBRACK {
         $$ = new std::vector<int>;
@@ -607,30 +612,39 @@ array_ref
     }
     ;
 
-/* 9. 型別 --------------------------------------------------------------------*/
+/* Type Specification */
 type_spec
-    : INT_TOK    { $$ = typePool.make(BK_Int);   }
-    | FLOAT_TOK      { $$ = typePool.make(BK_Float); }
-    | DOUBLE_TOK     { $$ = typePool.make(BK_Double); }
-    | BOOL_TOK       { $$ = typePool.make(BK_Bool);  }
-    | STRING_TOK { $$ = typePool.make(BK_String);}
+    : INT_TOK    { $$ = ctx->typePool.make(BK_Int);   }
+    | FLOAT_TOK      { $$ = ctx->typePool.make(BK_Float); }
+    | DOUBLE_TOK     { $$ = ctx->typePool.make(BK_Double); }
+    | BOOL_TOK       { $$ = ctx->typePool.make(BK_Bool);  }
+    | STRING_TOK { $$ = ctx->typePool.make(BK_String);}
     ;
 
 %% 
 
-int main(int argc, char* argv[])
-{   
+int main(int argc, char* argv[]) {
+    // Check if the number of arguments is correct
     if (argc != 2) {
         std::puts("Usage: sd <source-file>");
         return 1;
     }
-    if (!(yyin = std::fopen(argv[1], "r"))) { perror("open"); return 1; }
 
+    // Try to open the input file
+    if (!(yyin = std::fopen(argv[1], "r"))) {
+        perror("open"); // Print system error message
+        return 1;
+    }
+
+    // Initialize semantic analysis context
+    Context context;
+    ctx = &context;
+
+    // Start parsing with error handling for semantic errors
     try {
-        return yyparse();
+        return yyparse(); // Run the parser
     } catch (SemanticError& e) {
         std::fprintf(stderr, "Semantic error @ line %d: %s\n", e.line, e.what());
-
         return 1;
     }
 }

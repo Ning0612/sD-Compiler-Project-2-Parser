@@ -4,7 +4,7 @@ LEX   = flex
 YACC  = bison
 
 # ────────────── Flags ──────────────────
-CXXFLAGS  = -std=c++17 -Wall -Wextra -pedantic -I./src
+CXXFLAGS  = -std=c++17 -Wall -Wextra -Wno-unused-function -pedantic -I./src
 YACCFLAGS = -y -d
 
 # ────────────── Directories ────────────
@@ -19,7 +19,9 @@ OBJS = \
   $(BUILD_DIR)/sem_utils.o \
   $(BUILD_DIR)/sd_types.o \
   $(BUILD_DIR)/symtab.o \
-  $(BUILD_DIR)/error.o
+  $(BUILD_DIR)/error.o \
+  $(BUILD_DIR)/var_init.o \
+  $(BUILD_DIR)/expr.o 
 
 TARGET = $(BIN_DIR)/sd
 
