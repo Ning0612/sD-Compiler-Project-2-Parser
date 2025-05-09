@@ -10,6 +10,7 @@ enum ValueKind { VK_None, VK_Int, VK_Float, VK_Double, VK_Bool, VK_String };
 struct ExprInfo {
     Type* type;             // Expression's semantic type
     bool isConst;           // Whether the expression is a constant
+    bool isValid;          // Whether the expression is valid
     ValueKind valueKind;    // What kind of value is stored
 
     // Union for storing scalar constant values
@@ -45,3 +46,5 @@ struct ExprInfo {
     // Copy constant value from another expression
     void setConstValueFromExpr(const ExprInfo* e);
 };
+
+ExprInfo* makeInvalidExpr();

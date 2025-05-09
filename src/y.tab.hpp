@@ -202,10 +202,9 @@ union YYSTYPE
 
     std::vector<int>* int_list;
     std::vector<Symbol>* symbol_list;
-    std::vector<VarInit>* var_init_list;
     std::vector<ExprInfo>* expr_info_list;
 
-#line 209 "src/y.tab.hpp"
+#line 208 "src/y.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

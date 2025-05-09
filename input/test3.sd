@@ -1,0 +1,38 @@
+// Test for array declarations
+// - Array size must be a constant integer expression
+// - Array size must be greater than 0
+// - No initialization is allowed
+
+void main() {
+    {
+    // Valid declarations
+    int a[5];               // 1D array with constant size
+    float b[2 + 3];         // 1D array, size = 5
+    bool c[10 - 5];         // 1D array, size = 5
+    string d[2 * 3];        // 1D array, size = 6
+
+    // Valid multi-dimensional arrays
+    int m1[3][4];           // 2D array, sizes = 3 and 4
+    float m2[1 + 2][2 * 2]; // 2D array, sizes = 3 and 4
+    bool m3[7 - 2][3 + 1];  // 2D array, sizes = 5 and 4
+    }
+    
+    {
+    // Invalid declarations (should trigger semantic errors)
+    
+    int e[0];               // Error: size must be > 0
+    int f[-1];              // Error: negative size
+    int g[2 - 2];           // Error: size = 0
+
+    int h[1.5];             // Error: non-integer expression (float)
+    int i[true];            // Error: non-integer expression (boolean)
+    int j["size"];          // Error: non-integer expression (string)
+
+    int c = 5 + "fef";
+    
+    int c = 34 + f;
+    int n[5 + "dw"];           // Error: 'x' is a variable, not a constant
+    const int s = 0;
+    int p[s];               // Error: even though 's' is const, value is 0
+    }
+}

@@ -1,11 +1,4 @@
 // Hello World Example
-
-void main() {
-  const int a = 5 + 3 * 4 / 5 + 3;
-  const double b = 5 + 3 * 4 / (5.0 + 3);
-  const double c = 3.14;
-  const int d = 3 - + + + + + + + + + 3 + 5;
-  int e = 3;
-  int i[10][20];
+void main () {
+  print "Hello World";
 }
-

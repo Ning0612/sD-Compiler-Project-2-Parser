@@ -1,0 +1,42 @@
+// Test for variable declarations with constant expression initialization
+// - Variables can be initialized with constant expressions at declaration.
+// - Array declarations are allowed.
+// - Variables are not subject to constant folding.
+
+void main() {
+    // Integer variable initialization with constant expressions
+    const int a = 1 + 2 * 3;          // 7
+    int b = a + 5 - 2, c = 34 + 2;          // valid : a is constant
+    int d;
+    d = a * 2;                  
+
+    // Float variable with constant initialization
+    float f = (1.5 + 2.5) * 2;  // 8.0
+
+    // Boolean variable with constant initialization
+    bool flag = true || false; // true
+
+    // String variable with constant initialization
+    string msg = "Test" + " Case"; // "Test Case"
+
+    // Array declarations
+    int arr[10];                // valid array of 10 integers
+    float table[5];             // valid array of 5 floats
+    bool flags[3];              // valid array of 3 booleans
+    string names[34][20 + 34]; // valid array of strings
+
+    // Multiple variable declarations in one line
+    int x = 5, y = x + 1, z = y * 2; // x is const-initialized, but y and z depend on variables
+    // Should issue semantic error or warning for y and z if only constant expressions are allowed
+    
+
+    
+    // This block is to test error cases (invalid constant expression on initialization)
+    
+    int invalid1 = a + c;       // Error: a and c are variables, not constants
+    float invalid2 = f * x;     // Error: f and x are variables
+    bool invalid3 = flag && false; // Error: flag is a variable
+    string invalid4 = msg + "!";   // Error: msg is a variable
+    
+
+}

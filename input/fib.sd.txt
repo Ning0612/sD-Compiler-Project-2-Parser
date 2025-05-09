@@ -23,7 +23,7 @@ int itFibonacci (int n) {
 }
 
 /* main program */
-main()
+void main()
 { 
   print "N: ";
   print n;

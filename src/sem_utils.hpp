@@ -6,88 +6,99 @@
 #include "sd_types.hpp"
 #include "symtab.hpp"
 
-/*─────────────── Type Conversion ───────────────*/
-// Convert constant expressions to raw base types
+/* ─────────────── Value Extraction ─────────────── */
+
+// Convert expression value to int (for const expr)
 int toInt(const ExprInfo e);
+
+// Convert expression value to float (for const expr)
 float toFloat(const ExprInfo e);
+
+// Convert expression value to double (for const expr)
 double toDouble(const ExprInfo e);
+
+// Convert expression value to bool (for const expr)
 bool toBool(const ExprInfo e);
+
+// Convert expression value to string (for const expr)
 std::string toString(const ExprInfo e);
 
-/*─────────────── Operators ─────────────────────*/
-enum NumOp { OPADD, OPSUB, OPMUL, OPDIV, OPMOD };
-enum RelOp { OPLT, OPLE, OPGT, OPGE };
+/* ─────────────── Operator Types ─────────────── */
 
-// Convert enum to operator symbol string
-std::string numOpToStr(NumOp op);
-std::string relOpToStr(RelOp op);
+enum NumOp { OPADD, OPSUB, OPMUL, OPDIV, OPMOD }; // Numeric ops
+enum RelOp { OPLT, OPLE, OPGT, OPGE };            // Relational ops
 
-/*─────────────── Expression Evaluation ─────────*/
-// Concatenates two string expressions
+std::string numOpToStr(NumOp op); // Return string form of numeric op
+std::string relOpToStr(RelOp op); // Return string form of relational op
+
+/* ─────────────── Expression Evaluation ─────────────── */
+
+// Handle string concatenation (+ operator between strings)
 ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
-// Arithmetic operation (+ - * / %) with type promotion and constant folding
+// Evaluate numeric binary operations (e.g., +, -, *, /)
 ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
-// Relational comparison (< <= > >=) with constant folding
+// Evaluate relational binary operations (e.g., <, >=)
 ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
-// Equality comparison (== !=) with constant folding
+// Evaluate equality/inequality (==, !=)
 ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
-// Logical and/or expression (&& ||)
+// Evaluate boolean binary operations (&&, ||)
 ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
-// Logical not expression (!)
+// Evaluate unary logical NOT (!)
 ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno);
 
-// Unary plus/minus (+x / -x)
+// Evaluate unary + or - (sign operator)
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno);
 
-// Handle array indexing expressions
+// Handle array access (e.g., arr[2][3])
 ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolTable& symTab, const std::vector<int>& arrayIndex, int lineno);
 
-/*─────────────── Semantic Checks ───────────────*/
-// Ensure the expression is a boolean scalar (used in if, while, etc.)
+/* ─────────────── Semantic Checks ─────────────── */
+
+// Ensure an expression is boolean in a given context (if, while, etc.)
 void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno);
 
-// Check if increment/decrement operation is valid on the given lvalue
+// Validate ++ or -- target is modifiable and not const
 void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno);
 
-// Check if foreach range values are valid (both must be constant int scalars, from < to)
+// Validate foreach range (start..end)
 void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno);
 
-// Extract array index value if constant, return 0 otherwise
-int extractArrayIndexOrZero(const ExprInfo& expr, int lineno);
-
-// Ensure the given expression is a positive constant integer for array dimension
-int checkArrayDimExpr(const ExprInfo& expr, int lineno);
-
-// Check if foreach loop index is declared and of int type
+// Ensure foreach index is declared and mutable
 void checkForeachIndex(Symbol* sym, int lineno);
 
-// Validate variable declaration (check redeclaration, conflict with functions, etc.)
+// Extract int index from an array subscript expression
+int extractArrayIndexOrZero(const ExprInfo& expr, int lineno);
+
+// Check array dimension value is valid and constant
+int checkArrayDimExpr(const ExprInfo& expr, int lineno);
+
+/* ─────────────── Declarations and Checks ─────────────── */
+
+// Try inserting a variable symbol into current scope
 void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno);
 
-/*─────────────── Function Handling ─────────────*/
-// Declare a function in the symbol table and enter its parameter scope
+// Declare a new function and insert into symbol table
 void declareFunction(const std::string& name, Type* returnType, const std::vector<Symbol>& paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno);
 
-// Check function call correctness: existence, parameter count and type compatibility
+// Check function call is valid (existence, args match)
 void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno);
 
-/*─────────────── Variable / Const Check ─────────*/
-// Check if an assignment is valid between types
+// Check if assignment is valid (type compatibility)
 void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno);
 
-// Validate whether the expression is allowed to be printed (no arrays/functions/void)
+// Check if expression is printable (valid type)
 void checkPrint(const ExprInfo& expr, int lineno);
 
-// Validate whether the expression is a valid target for read operation
+// Check if expression is readable (i.e., writable location)
 void checkRead(const ExprInfo& expr, int lineno);
 
-// Handle multiple variable declarations, check type compatibility and duplicates
-void tryDeclareVarables(SymbolTable& symTab, TypeArena& typePool, std::vector<VarInit>& varInits, Type* type, int lineno);
+// Try declaring a list of variables (normal or arrays)
+void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& varInit, Type* type, int lineno);
 
-// Declare a constant, verify value is valid and insert into symbol table
+// Try declaring a constant (must have a literal value)
 void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const ExprInfo& value, int lineno);

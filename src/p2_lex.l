@@ -2,9 +2,9 @@
 %option yylineno                   
 
 %{
-/* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
+/*──────────── C Declarations ─────────────*/
 #include "sem_utils.hpp"
-#include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
+#include "y.tab.hpp"
 #include <cstdio>
 #include <cstdlib>
 
@@ -14,15 +14,13 @@
 
 
 #ifdef DEBUG_LEX
-#define LIST strcat(buf,yytext)
 #define tokenNewline() printf("\n")
-#define token(t)          { LIST; printf("<%s> ", #t); return t; }
-#define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
-#define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
-#define tokenBool(b)      { LIST; printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
-#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
+#define token(t)          { printf("<%s> ", #t); return t; }
+#define tokenInteger(i)   { printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
+#define tokenReal(r)      { printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
+#define tokenBool(b)      { printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
+#define tokenString(str)  { printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
 #else
-#define LIST /* nothing */
 #define tokenNewline() /* nothing */
 #define token(t)          { return t; }
 #define tokenInteger(i)   { yylval.ival = (i); return INT_LIT; }
@@ -43,17 +41,17 @@
 "/*"             { BEGIN(C_COMMENT);   }
 
 <CPP_COMMENT>{
-    "\n"         { BEGIN(INITIAL); /* 自動累計行號 */ }
+    "\n"         { BEGIN(INITIAL); }
     .            ;
 }
 
 <C_COMMENT>{
     "*/"         { BEGIN(INITIAL); }
-    "\n"         ;                 /* 仍要累計行號 */
+    "\n"         ;
     .            ;
 }
 
-[ \t\r]+        ;                  /* 捨棄空白 */
+[ \t\r]+        ;
 \n { tokenNewline(); }
 
 "++"            token(INC);
@@ -129,7 +127,7 @@
 }
 
 \"([^\"\\]|\\.)*\" {
-    size_t len = yyleng - 2;                /* 去掉兩邊引號 */
+    size_t len = yyleng - 2;
     char *s = (char*)malloc(len + 1);
     strncpy(s, yytext + 1, len);
     s[len] = '\0';

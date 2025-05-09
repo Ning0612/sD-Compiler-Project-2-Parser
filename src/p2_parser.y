@@ -31,7 +31,6 @@ void yyerror(const char* s){
 
     std::vector<int>* int_list;
     std::vector<Symbol>* symbol_list;
-    std::vector<VarInit>* var_init_list;
     std::vector<ExprInfo>* expr_info_list;
 }
 
@@ -59,7 +58,6 @@ void yyerror(const char* s){
 %type <int_list> array_dims
 %type <int_list> array_ref
 %type <var_init> var_init
-%type <var_init_list> var_init_list
 
 /* ---------- Operators / Delimiters ---------- */
 %token                LE GE EQ NEQ LT GT
@@ -94,15 +92,15 @@ program
     : global_decl_list {
         Symbol* mainFunc = ctx->symTab.lookup("main");
         if (mainFunc == nullptr) {
-            throw SemanticError("missing main function", yylineno);
+            SemanticError("missing main function", yylineno);
         }
 
         if (!mainFunc->type->isFunc()) {
-            throw SemanticError("main function must be function", yylineno);
+            SemanticError("main function must be function", yylineno);
         }
 
         if (mainFunc->type->ret->base != BK_Void) {
-            throw SemanticError("main function must be void", yylineno);
+            SemanticError("main function must be void", yylineno);
         }
 
         ctx->symTab.leaveScope();
@@ -139,22 +137,19 @@ const_decl
 
 /* Variable / Array Declaration */
 var_decl
-    : type_spec var_init_list SEMICOLON {
-        std::vector<VarInit> varInits = *$2; delete $2;
-        tryDeclareVarables(ctx->symTab, ctx->typePool, varInits, $1, yylineno);
-    }
+    : type_spec {
+        ctx->nowType = $1;
+    } var_init_list SEMICOLON 
     ;
 
 var_init_list
     : var_init{
-        $$ = new std::vector<VarInit>;
-        $$->push_back(*$1);
-        delete $1;
+        VarInit varInit = *$1; delete $1;
+        tryDeclareVarable(ctx->symTab, ctx->typePool, varInit, ctx->nowType, yylineno);
     }
     | var_init_list COMMA var_init {
-        $$ = $1;
-        $$->push_back(*$3);
-        delete $3;
+        VarInit varInit = *$3; delete $3;
+        tryDeclareVarable(ctx->symTab, ctx->typePool, varInit, ctx->nowType, yylineno);
     }
     ;
 
@@ -163,18 +158,42 @@ var_init
     | ID ASSIGN expression   {
         std::string id = *$1; delete $1;
         ExprInfo expr = *$3; delete $3;
-        
-        if (expr.type->isFunc()) {
-            throw SemanticError("assignment from function", yylineno);
-        }
 
-        if (expr.type->isArray()) {
-            throw SemanticError("assignment from array", yylineno);
-        }
+        if (!expr.isValid) {
+            $$ = makeInvalidVar();
+        }else{
+            if (expr.type->isFunc()) {
+                SemanticError("assignment from function", yylineno);
+            }
 
-        $$ = new VarInit(id, expr.type);
+            if (expr.type->isArray()) {
+                SemanticError("assignment from array", yylineno);
+            }
+
+            if (!expr.isConst) {
+                SemanticError("assignment from non-constant", yylineno);
+            }
+            $$ = new VarInit(id, expr.type);
+        }
     }
-    | ID array_dims          { $$ = new VarInit(*$1, *$2); delete $1; delete $2; }
+    | ID array_dims          { 
+        std::string id = *$1; delete $1;
+        std::vector<int> arrayIndex = *$2; delete $2;
+
+        bool isValid = true;
+        for (auto& index : arrayIndex) {
+            if (index <= 0) {
+                isValid = false;
+                break;
+            }
+        }
+
+        if (!isValid) {
+            $$ = makeInvalidVar();
+        }else{
+            $$ = new VarInit(id, arrayIndex);
+        }
+    }
     ;
 
 /* Function Declaration */
@@ -186,18 +205,18 @@ func_decl
         std::vector<Symbol> paramList = *$4; delete $4;
 
         if (funcName == "main") {
-            throw SemanticError("main function should be void", yylineno);
+            SemanticError("main function should be void", yylineno);
         }
 
         declareFunction(funcName, $1, paramList, ctx->typePool, ctx->symTab, yylineno);
     } block_items_opt RBRACE {
         if (ctx->returnsExpr.empty()) {
-            throw SemanticError("missing return statement", yylineno);
+            SemanticError("missing return statement", yylineno);
         }
 
         for (auto& expr : ctx->returnsExpr) {
             if (!$1->isCompatibleWith(*expr.first.type)) {
-                throw SemanticError("return type mismatch !", expr.second);
+                SemanticError("return type mismatch !", expr.second);
             }
 
             if (isConvertible($1->base, expr.first.type->base)) {
@@ -217,7 +236,7 @@ func_decl
         declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
     } block_items_opt RBRACE {
         if (!ctx->returnsExpr.empty()) {
-            throw SemanticError("void function should not return value", yylineno);
+            SemanticError("void function should not return value", yylineno);
         }
 
         ctx->symTab.leaveScope();
@@ -333,18 +352,20 @@ lvalue
         Symbol* symbol = ctx->symTab.lookup(id);
 
         if (symbol == nullptr) {
-            throw SemanticError("undeclared identifier: " + id, yylineno);
-        }
+            SemanticError("undeclared identifier: " + id, yylineno);
+            $$ = makeInvalidExpr();
+        } else {
+            $$ = new ExprInfo(symbol->type, symbol->isConst);
 
-        $$ = new ExprInfo(symbol->type, symbol->isConst);
-
-        if (symbol->hasConstValue()) {
-            switch (symbol->type->base) {
-                case BK_Int:   $$->setInt(symbol->iVal); break;
-                case BK_Float: $$->setFloat(symbol->fVal); break;
-                case BK_Bool:  $$->setBool(symbol->bVal); break;
-                case BK_String: $$->setString(symbol->sVal); break;
-                default: break;
+            if (symbol->hasConstValue()) {
+                switch (symbol->type->base) {
+                    case BK_Int:   $$->setInt(symbol->iVal); break;
+                    case BK_Float: $$->setFloat(symbol->fVal); break;
+                    case BK_Double: $$->setFloat(symbol->dVal); break;
+                    case BK_Bool:  $$->setBool(symbol->bVal); break;
+                    case BK_String: $$->setString(symbol->sVal); break;
+                    default: break;
+                }
             }
         }
     }
@@ -440,13 +461,16 @@ return_stmt
 expression
     : expression PLUS expression {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }else {
+            bool isStringConcat = (lhs.type->base == BK_String && rhs.type->base == BK_String);
 
-        bool isStringConcat = (lhs.type->base == BK_String && rhs.type->base == BK_String);
-
-        if (isStringConcat) {
-            $$ = concatStringResult(lhs, rhs, ctx->typePool, yylineno);
-        } else {
-            $$ = numericOpResult(OPADD, lhs, rhs, ctx->typePool, yylineno);
+            if (isStringConcat) {
+                $$ = concatStringResult(lhs, rhs, ctx->typePool, yylineno);
+            } else {
+                $$ = numericOpResult(OPADD, lhs, rhs, ctx->typePool, yylineno);
+            }
         }
     }
     | expression MINUS expression   { 
@@ -641,10 +665,12 @@ int main(int argc, char* argv[]) {
     ctx = &context;
 
     // Start parsing with error handling for semantic errors
-    try {
-        return yyparse(); // Run the parser
-    } catch (SemanticError& e) {
-        std::fprintf(stderr, "Semantic error @ line %d: %s\n", e.line, e.what());
+    int result = yyparse();
+    
+    if (SemanticError::hasError()) {
+        SemanticError::printAll();
         return 1;
     }
+
+    return result;
 }

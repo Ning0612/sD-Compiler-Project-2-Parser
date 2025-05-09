@@ -1,10 +1,10 @@
 int a;
-int add (int a, b)
+int add (int a, int b)
 {
   return a+b;
 }
 
-main()
+void main()
 {
   int c;
   a = 5;

@@ -2,7 +2,7 @@
 
 // Constructor: initialize type and constness
 ExprInfo::ExprInfo(Type* t, bool c)
-    : type(t), isConst(c), valueKind(VK_None) {}
+    : type(t), isConst(c), isValid(true), valueKind(VK_None) {}
 
 // Set integer value and mark as constant
 void ExprInfo::setInt(int v) {
@@ -54,31 +54,31 @@ bool ExprInfo::isZeroValue() const {
 
 // Getter: returns int value or throws if not int
 int ExprInfo::getInt() const {
-    if (valueKind != VK_Int) throw std::runtime_error("not int");
+    if (valueKind != VK_Int) return 0;
     return iVal;
 }
 
 // Getter: returns float value or throws if not float
 float ExprInfo::getFloat() const {
-    if (valueKind != VK_Float) throw std::runtime_error("not float");
+    if (valueKind != VK_Float) return 0.0f;
     return fVal;
 }
 
 // Getter: returns double value or throws if not double
 double ExprInfo::getDouble() const {
-    if (valueKind != VK_Double) throw std::runtime_error("not double");
+    if (valueKind != VK_Double) return 0.0f;
     return dVal;
 }
 
 // Getter: returns bool value or throws if not bool
 bool ExprInfo::getBool() const {
-    if (valueKind != VK_Bool) throw std::runtime_error("not bool");
+    if (valueKind != VK_Bool) return false;
     return bVal;
 }
 
 // Getter: returns string value or throws if not string
 std::string ExprInfo::getString() const {
-    if (valueKind != VK_String) throw std::runtime_error("not string");
+    if (valueKind != VK_String) return "";
     return sVal;
 }
 
@@ -92,4 +92,11 @@ void ExprInfo::setConstValueFromExpr(const ExprInfo* e) {
         case VK_String: setString(e->getString()); break;
         default: break;
     }
+}
+
+ExprInfo* makeInvalidExpr(){
+    ExprInfo* e = new ExprInfo(nullptr);
+    e->isValid = false;
+    e->isConst = false;
+    return e;
 }

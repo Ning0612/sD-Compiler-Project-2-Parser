@@ -581,9 +581,9 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "src/p2_lex.l"
 #line 5 "src/p2_lex.l"
-/* ---------- C 區段：宣告巨集、標頭、全域 ---------- */
+/*──────────── C Declarations ─────────────*/
 #include "sem_utils.hpp"
-#include "y.tab.hpp"          /* Bison 產生；副檔名 hpp */
+#include "y.tab.hpp"
 #include <cstdio>
 #include <cstdlib>
 
@@ -593,15 +593,13 @@ char *yytext;
 
 
 #ifdef DEBUG_LEX
-#define LIST strcat(buf,yytext)
 #define tokenNewline() printf("\n")
-#define token(t)          { LIST; printf("<%s> ", #t); return t; }
-#define tokenInteger(i)   { LIST; printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
-#define tokenReal(r)      { LIST; printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
-#define tokenBool(b)      { LIST; printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
-#define tokenString(str)  { LIST; printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
+#define token(t)          { printf("<%s> ", #t); return t; }
+#define tokenInteger(i)   { printf("<INT_LIT> "); yylval.ival = (i); return INT_LIT; }
+#define tokenReal(r)      { printf("<REAL_LIT> "); yylval.fval = (r); return REAL_LIT; }
+#define tokenBool(b)      { printf("<BOOL_LIT> "); yylval.bval = (b); return BOOL_LIT; }
+#define tokenString(str)  { printf("<STRING_LIT> "); yylval.sval = new std::string(str); return STRING_LIT; }
 #else
-#define LIST /* nothing */
 #define tokenNewline() /* nothing */
 #define token(t)          { return t; }
 #define tokenInteger(i)   { yylval.ival = (i); return INT_LIT; }
@@ -612,9 +610,9 @@ char *yytext;
 
 
 
-#line 616 "src/lex.yy.cpp"
+#line 614 "src/lex.yy.cpp"
        
-#line 618 "src/lex.yy.cpp"
+#line 616 "src/lex.yy.cpp"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -833,10 +831,10 @@ YY_DECL
 		}
 
 	{
-#line 40 "src/p2_lex.l"
+#line 38 "src/p2_lex.l"
 
 
-#line 840 "src/lex.yy.cpp"
+#line 838 "src/lex.yy.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -905,341 +903,341 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 42 "src/p2_lex.l"
+#line 40 "src/p2_lex.l"
 { BEGIN(CPP_COMMENT); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 43 "src/p2_lex.l"
+#line 41 "src/p2_lex.l"
 { BEGIN(C_COMMENT);   }
 	YY_BREAK
 
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 46 "src/p2_lex.l"
-{ BEGIN(INITIAL); /* 自動累計行號 */ }
+#line 44 "src/p2_lex.l"
+{ BEGIN(INITIAL); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 47 "src/p2_lex.l"
+#line 45 "src/p2_lex.l"
 ;
 	YY_BREAK
 
 
 case 5:
 YY_RULE_SETUP
-#line 51 "src/p2_lex.l"
+#line 49 "src/p2_lex.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 52 "src/p2_lex.l"
-;                 /* 仍要累計行號 */
+#line 50 "src/p2_lex.l"
+;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 53 "src/p2_lex.l"
+#line 51 "src/p2_lex.l"
 ;
 	YY_BREAK
 
 case 8:
 YY_RULE_SETUP
-#line 56 "src/p2_lex.l"
-;                  /* 捨棄空白 */
+#line 54 "src/p2_lex.l"
+;
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 57 "src/p2_lex.l"
+#line 55 "src/p2_lex.l"
 { tokenNewline(); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 59 "src/p2_lex.l"
+#line 57 "src/p2_lex.l"
 token(INC);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 60 "src/p2_lex.l"
+#line 58 "src/p2_lex.l"
 token(DEC);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 61 "src/p2_lex.l"
+#line 59 "src/p2_lex.l"
 token(LE);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 62 "src/p2_lex.l"
+#line 60 "src/p2_lex.l"
 token(GE);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 63 "src/p2_lex.l"
+#line 61 "src/p2_lex.l"
 token(EQ);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 64 "src/p2_lex.l"
+#line 62 "src/p2_lex.l"
 token(NEQ);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 65 "src/p2_lex.l"
+#line 63 "src/p2_lex.l"
 token(AND);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 66 "src/p2_lex.l"
+#line 64 "src/p2_lex.l"
 token(OR);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 68 "src/p2_lex.l"
+#line 66 "src/p2_lex.l"
 token(PLUS);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 69 "src/p2_lex.l"
+#line 67 "src/p2_lex.l"
 token(MINUS);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 70 "src/p2_lex.l"
+#line 68 "src/p2_lex.l"
 token(MUL);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 71 "src/p2_lex.l"
+#line 69 "src/p2_lex.l"
 token(DIV);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 72 "src/p2_lex.l"
+#line 70 "src/p2_lex.l"
 token(MOD);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 73 "src/p2_lex.l"
+#line 71 "src/p2_lex.l"
 token(LT);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 74 "src/p2_lex.l"
+#line 72 "src/p2_lex.l"
 token(GT);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 75 "src/p2_lex.l"
+#line 73 "src/p2_lex.l"
 token(ASSIGN);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 76 "src/p2_lex.l"
+#line 74 "src/p2_lex.l"
 token(NOT);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 78 "src/p2_lex.l"
+#line 76 "src/p2_lex.l"
 token(DOT);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 79 "src/p2_lex.l"
+#line 77 "src/p2_lex.l"
 token(COMMA);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 80 "src/p2_lex.l"
+#line 78 "src/p2_lex.l"
 token(COLON);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 81 "src/p2_lex.l"
+#line 79 "src/p2_lex.l"
 token(SEMICOLON);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 83 "src/p2_lex.l"
+#line 81 "src/p2_lex.l"
 token(LPAREN);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 84 "src/p2_lex.l"
+#line 82 "src/p2_lex.l"
 token(RPAREN);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 85 "src/p2_lex.l"
+#line 83 "src/p2_lex.l"
 token(LBRACK);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 86 "src/p2_lex.l"
+#line 84 "src/p2_lex.l"
 token(RBRACK);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 87 "src/p2_lex.l"
+#line 85 "src/p2_lex.l"
 token(LBRACE);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 88 "src/p2_lex.l"
+#line 86 "src/p2_lex.l"
 token(RBRACE);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 90 "src/p2_lex.l"
+#line 88 "src/p2_lex.l"
 token(BOOL_TOK);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 91 "src/p2_lex.l"
+#line 89 "src/p2_lex.l"
 token(BREAK);
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 92 "src/p2_lex.l"
+#line 90 "src/p2_lex.l"
 token(CASE);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 93 "src/p2_lex.l"
+#line 91 "src/p2_lex.l"
 token(CHAR_TOK);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 94 "src/p2_lex.l"
+#line 92 "src/p2_lex.l"
 token(CONST);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 95 "src/p2_lex.l"
+#line 93 "src/p2_lex.l"
 token(CONTINUE);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 96 "src/p2_lex.l"
+#line 94 "src/p2_lex.l"
 token(DEFAULT);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 97 "src/p2_lex.l"
+#line 95 "src/p2_lex.l"
 token(DO);
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 98 "src/p2_lex.l"
+#line 96 "src/p2_lex.l"
 token(DOUBLE_TOK);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 99 "src/p2_lex.l"
+#line 97 "src/p2_lex.l"
 token(ELSE);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 100 "src/p2_lex.l"
+#line 98 "src/p2_lex.l"
 token(EXTERN);
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 101 "src/p2_lex.l"
+#line 99 "src/p2_lex.l"
 tokenBool(false);
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 102 "src/p2_lex.l"
+#line 100 "src/p2_lex.l"
 token(FLOAT_TOK);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 103 "src/p2_lex.l"
+#line 101 "src/p2_lex.l"
 token(FOR);
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 104 "src/p2_lex.l"
+#line 102 "src/p2_lex.l"
 token(FOREACH);
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 105 "src/p2_lex.l"
+#line 103 "src/p2_lex.l"
 token(IF);
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 106 "src/p2_lex.l"
+#line 104 "src/p2_lex.l"
 token(INT_TOK);
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 107 "src/p2_lex.l"
+#line 105 "src/p2_lex.l"
 token(PRINT);
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 108 "src/p2_lex.l"
+#line 106 "src/p2_lex.l"
 token(PRINTLN);
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 109 "src/p2_lex.l"
+#line 107 "src/p2_lex.l"
 token(READ);
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 110 "src/p2_lex.l"
+#line 108 "src/p2_lex.l"
 token(RETURN);
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 111 "src/p2_lex.l"
+#line 109 "src/p2_lex.l"
 token(STRING_TOK);
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 112 "src/p2_lex.l"
+#line 110 "src/p2_lex.l"
 token(SWITCH);
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 113 "src/p2_lex.l"
+#line 111 "src/p2_lex.l"
 tokenBool(true);
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 114 "src/p2_lex.l"
+#line 112 "src/p2_lex.l"
 token(VOID_TOK);
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 115 "src/p2_lex.l"
+#line 113 "src/p2_lex.l"
 token(WHILE);
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 117 "src/p2_lex.l"
+#line 115 "src/p2_lex.l"
 {
     yylval.sval = new std::string(yytext);
     token(ID);
 }
 	YY_BREAK
 case 64:
-#line 123 "src/p2_lex.l"
+#line 121 "src/p2_lex.l"
 case 65:
 YY_RULE_SETUP
-#line 123 "src/p2_lex.l"
+#line 121 "src/p2_lex.l"
 {
     tokenReal(atof(yytext));
 }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 127 "src/p2_lex.l"
+#line 125 "src/p2_lex.l"
 {
     tokenInteger(atoi(yytext));
 }
@@ -1247,9 +1245,9 @@ YY_RULE_SETUP
 case 67:
 /* rule 67 can match eol */
 YY_RULE_SETUP
-#line 131 "src/p2_lex.l"
+#line 129 "src/p2_lex.l"
 {
-    size_t len = yyleng - 2;                /* 去掉兩邊引號 */
+    size_t len = yyleng - 2;
     char *s = (char*)malloc(len + 1);
     strncpy(s, yytext + 1, len);
     s[len] = '\0';
@@ -1258,7 +1256,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 139 "src/p2_lex.l"
+#line 137 "src/p2_lex.l"
 {
     fprintf(stderr, "line %d: illegal character '%s'\n", yylineno, yytext);
     exit(1);
@@ -1266,10 +1264,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 144 "src/p2_lex.l"
+#line 142 "src/p2_lex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1273 "src/lex.yy.cpp"
+#line 1271 "src/lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C_COMMENT):
 case YY_STATE_EOF(CPP_COMMENT):
@@ -2288,5 +2286,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 144 "src/p2_lex.l"
+#line 142 "src/p2_lex.l"
 

@@ -1,5 +1,6 @@
 #include "sem_utils.hpp"
 #include <stdexcept>
+#include <algorithm> 
 
 // convert ExprInfo to basic types
 int toInt(const ExprInfo e){
@@ -42,12 +43,18 @@ std::string relOpToStr(RelOp op) {
 
 /*───────── String Concatenation ─────────*/
 ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
+    if (!lhs.isValid || !rhs.isValid) {
+        return makeInvalidExpr();
+    }
+    
     if(!lhs.type->isScalar()){
-        throw SemanticError("left operand must be scalar", lineno);
+        SemanticError("left operand must be string scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!rhs.type->isScalar()){
-        throw SemanticError("right operand must be scalar", lineno);
+        SemanticError("right operand must be string scalar", lineno);
+        return makeInvalidExpr();
     }
 
     ExprInfo* result = new ExprInfo(pool.make(BK_String), lhs.isConst && rhs.isConst);
@@ -61,28 +68,37 @@ ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena
 /*───────── numeric (+ - * / %) ─────────*/
 ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno){
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
+    if(!lhs.isValid || !rhs.isValid){
+        return makeInvalidExpr();
+    }
 
     if(!lhs.type->isScalar()){
-        throw SemanticError("left operand must be scalar", lineno);
+        SemanticError("left operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!rhs.type->isScalar()){
-        throw SemanticError("right operand must be scalar", lineno);
+        SemanticError("right operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!(isBaseCompatible(b1, b2))){
-        throw SemanticError("numeric type mismatch " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
+        SemanticError("numeric type mismatch " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
+        return makeInvalidExpr();
     }
 
     if(op==OPMOD && (b1!=BK_Int||b2!=BK_Int)){
-        throw SemanticError("modulus type must be int but got " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
+        SemanticError("modulus type must be int but got " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
+        return makeInvalidExpr();
     }
 
     if((op==OPDIV||op==OPMOD) && rhs.isZeroValue()){
         if (op==OPDIV) {
-            throw SemanticError("division by zero", lineno);
+            SemanticError("division by zero", lineno);
+            return makeInvalidExpr();
         } else {
-            throw SemanticError("modulus by zero", lineno);
+            SemanticError("modulus by zero", lineno);
+            return makeInvalidExpr();
         }
     }
 
@@ -124,17 +140,23 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
 /*───────── relational (< <= > >=) ─────────*/
 ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
+    if (!lhs.isValid || !rhs.isValid) {
+        return makeInvalidExpr();
+    }
 
     if(!lhs.type->isScalar()){
-        throw SemanticError("left operand must be scalar", lineno);
+        SemanticError("left operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!rhs.type->isScalar()){
-        throw SemanticError("right operand must be scalar", lineno);
+        SemanticError("right operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!(isBaseCompatible(b1, b2))){
-        throw SemanticError("relational type mismatch " + baseKindToStr(b1) + relOpToStr(op) + baseKindToStr(b2), lineno);
+        SemanticError("relational type mismatch " + baseKindToStr(b1) + relOpToStr(op) + baseKindToStr(b2), lineno);
+        return makeInvalidExpr();
     }
 
     BaseKind resultBase = promote(b1, b2);
@@ -172,17 +194,23 @@ ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeAr
 /*───────── equal / not‑equal ─────────*/
 ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
+    if (!lhs.isValid || !rhs.isValid) {
+        return makeInvalidExpr();
+    }
 
     if(!lhs.type->isScalar()){
-        throw SemanticError("left operand must be scalar", lineno);
+        SemanticError("left operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!rhs.type->isScalar()){
-        throw SemanticError("right operand must be scalar", lineno);
+        SemanticError("right operand must be scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if(!(isBaseCompatible(b1, b2))){
-        throw SemanticError("equal type mismatch " + baseKindToStr(b1) + (equal?"==":"!=") + baseKindToStr(b2), lineno);
+        SemanticError("equal type mismatch " + baseKindToStr(b1) + (equal?"==":"!=") + baseKindToStr(b2), lineno);
+        return makeInvalidExpr();
     }
 
     bool isConst = lhs.isConst && rhs.isConst;
@@ -214,12 +242,18 @@ ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeA
 
 /*───────── and / or ─────────*/
 ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
+    if (!lhs.isValid || !rhs.isValid) {
+        return makeInvalidExpr();
+    }
+
     if (!lhs.type->isScalar() || lhs.type->base != BK_Bool) {
-        throw SemanticError("left operand must be bool scalar", lineno);
+        SemanticError("left operand must be bool scalar", lineno);
+        return makeInvalidExpr();
     }
 
     if (!rhs.type->isScalar() || rhs.type->base != BK_Bool) {
-        throw SemanticError("right operand must be bool scalar", lineno);
+        SemanticError("right operand must be bool scalar", lineno);
+        return makeInvalidExpr();
     }
 
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), lhs.isConst && rhs.isConst);
@@ -232,8 +266,13 @@ ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, Typ
 
 /*───────── not ─────────*/
 ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno) {
+    if (!expr.isValid) {
+        return makeInvalidExpr();
+    }
+
     if (!expr.type->isScalar() || expr.type->base != BK_Bool) {
-        throw SemanticError("operand must be bool scalar", lineno);
+        SemanticError("operand must be bool scalar", lineno);
+        return makeInvalidExpr();
     }
 
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), expr.isConst);
@@ -245,12 +284,18 @@ ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno) {
 
 /*───────── unary + / - ─────────*/
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
+    if (!expr.isValid) {
+        return makeInvalidExpr();
+    }
+
     if (!expr.type->isScalar()){
-        throw SemanticError("unary op on non-scalar type", lineno);
+        SemanticError("unary op on non-scalar type", lineno);
+        return makeInvalidExpr();
     }
 
     if (expr.type->base != BK_Int && expr.type->base != BK_Float && expr.type->base != BK_Double){
-        throw SemanticError("unary op on non-numeric type", lineno);
+        SemanticError("unary op on non-numeric type", lineno);
+        return makeInvalidExpr();
     }
 
     ExprInfo* result = new ExprInfo(expr.type, expr.isConst);
@@ -266,7 +311,8 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
                 result->setDouble(isMinus ? -expr.getDouble() : expr.getDouble());
                 break;
             default:
-                throw SemanticError("unsupported unary constant type", lineno);
+                SemanticError("unsupported unary constant type", lineno);
+                return makeInvalidExpr();
         }
     }
     return result;
@@ -277,13 +323,13 @@ ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolT
     Symbol* symbol = symTab.lookup(id);
 
     if (!symbol) {
-        throw SemanticError("undeclared identifier: " + id, lineno);
-        return nullptr;
+        SemanticError("undeclared identifier: " + id, lineno);
+        return makeInvalidExpr();
     }
 
     if (!symbol->type->isArray()) {
-        throw SemanticError("array index to non-array type: " + id, lineno);
-        return nullptr;
+        SemanticError("array index to non-array type: " + id, lineno);
+        return makeInvalidExpr();
     }
 
     size_t given = arrayIndex.size();
@@ -294,11 +340,12 @@ ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolT
         int defined = symbol->type->sizes[i];
 
         if (index != 0 && (index < 0 || index >= defined)) {
-            throw SemanticError(
+            SemanticError(
                 "array index out of bounds: " + std::to_string(index) +
                 " not in [0.." + std::to_string(defined - 1) + "]",
                 lineno
             );
+            return makeInvalidExpr();
         }
 
         if (!dims.empty()) {
@@ -313,47 +360,74 @@ ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolT
 
 /*───────── check is the expression a bool scalar ─────────*/
 void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno) {
-if (expr.type->base != BK_Bool || !expr.type->isScalar()) {
-        throw SemanticError(context + " condition must be bool scalar", lineno);
+    if (!expr.isValid) {
+        return;
+    }
+
+    if (expr.type->base != BK_Bool || !expr.type->isScalar()) {
+        SemanticError(context + " condition must be bool scalar", lineno);
+        return;
     }
 }
 
 /*───────── check is the expression a numeric scalar ─────────*/
 void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno) {
-    if (expr.isConst)
-        throw SemanticError(op + " cannot be applied to const", lineno);
+    if (!expr.isValid) {
+        return;
+    }
 
-    if (expr.type->isArray())
-        throw SemanticError(op + " cannot be applied to array", lineno);
+    if (expr.isConst){
+        SemanticError(op + " cannot be applied to const", lineno);
+        return;
+    }
 
-    if (expr.type->isFunc())
-        throw SemanticError(op + " cannot be applied to function", lineno);
+    if (expr.type->isArray()){
+        SemanticError(op + " cannot be applied to array", lineno);
+        return;
+    }
 
-    if (expr.type->base != BK_Int && expr.type->base != BK_Float && expr.type->base != BK_Double)
-        throw SemanticError(op + " requires int/float/double, got: " + baseKindToStr(expr.type->base), lineno);
+    if (expr.type->isFunc()){
+        SemanticError(op + " cannot be applied to function", lineno);
+        return;
+    }
+
+    if (expr.type->base != BK_Int && expr.type->base != BK_Float && expr.type->base != BK_Double){
+        SemanticError(op + " requires int/float/double, got: " + baseKindToStr(expr.type->base), lineno);
+        return;
+    }
 }
 
 /*───────── check foreach range ─────────*/
 void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno) {
+    if (!from.isValid || !to.isValid) {
+        return;
+    }
+
     if (from.type->base != BK_Int || !from.isConst || !from.type->isScalar())
-        throw SemanticError("foreach range start must be const int scalar", lineno);
+        SemanticError("foreach range start must be const int scalar", lineno);
 
     if (to.type->base != BK_Int || !to.isConst || !to.type->isScalar())
-        throw SemanticError("foreach range end must be const int scalar", lineno);
+        SemanticError("foreach range end must be const int scalar", lineno);
 
     if (from.getInt() >= to.getInt())
-        throw SemanticError("foreach range start must be less than end", lineno);
+        SemanticError("foreach range start must be less than end", lineno);
 }
 
 /*───────── check array index ─────────*/
 int extractArrayIndexOrZero(const ExprInfo& expr, int lineno) {
+    if (!expr.isValid) {
+        return -1;
+    }
+
     if (expr.type->base != BK_Int) {
-        throw SemanticError("array index must be int", lineno);
+        SemanticError("array index must be int", lineno);
+        return -1;
     }
 
     if (expr.isConst) {
         if (expr.valueKind != VK_Int) {
-            throw SemanticError("array index must be int", lineno);
+            SemanticError("array index must be int", lineno);
+            return -1;
         }
         return expr.getInt();
     }
@@ -362,13 +436,19 @@ int extractArrayIndexOrZero(const ExprInfo& expr, int lineno) {
 
 /*───────── check array dimension ─────────*/
 int checkArrayDimExpr(const ExprInfo& expr, int lineno) {
+    if (!expr.isValid) {
+        return -1;
+    }
+
     if (!expr.isConst || !expr.type->isScalar() || expr.type->base != BK_Int || expr.valueKind != VK_Int) {
-        throw SemanticError("array dimension must be const int scalar", lineno);
+        SemanticError("array dimension must be const int scalar", lineno);
+        return -1;
     }
 
     int val = expr.getInt();
     if (val <= 0){
-        throw SemanticError("array dimension must be positive", lineno);
+        SemanticError("array dimension must be positive", lineno);
+        return -1;
     }
 
     return val;
@@ -376,22 +456,28 @@ int checkArrayDimExpr(const ExprInfo& expr, int lineno) {
 
 /*───────── check foreach index ─────────*/
 void checkForeachIndex(Symbol* sym, int lineno) {
-    if (!sym) 
-        throw SemanticError("undeclared foreach variable", lineno);
+    if (!sym){
+        SemanticError("undeclared foreach variable", lineno);
+        return;
+    }
 
-    if (sym->type->base != BK_Int)
-        throw SemanticError("foreach index must be int", lineno);
+    if (sym->type->base != BK_Int){
+        SemanticError("foreach index must be int", lineno);
+        return;
+    }
 }
 
 /*───────── check variable declaration ─────────*/
 void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno) {
     Symbol* exist = symTab.lookupGlobal(s.name);
     if (exist && exist->type->isFunc()) {
-        throw SemanticError("variable '" + s.name + "' conflicts with function", lineno);
+        SemanticError("variable '" + s.name + "' conflicts with function", lineno);
+        return;
     }
 
     if (!symTab.insert(s)) {
-        throw SemanticError("redeclared variable: " + s.name, lineno);
+        SemanticError("redeclared variable: " + s.name, lineno);
+        return;
     }
 }
 
@@ -406,7 +492,8 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
     Symbol funcSym(name, funcType, false);
 
     if (!symTab.insert(funcSym)) {
-        throw SemanticError("redeclared func: " + name, lineno);
+        SemanticError("redeclared func: " + name, lineno);
+        return;
     }
 
     symTab.enterScope();
@@ -414,7 +501,8 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
     
     for (auto& param : paramSyms) {
         if (!symTab.insert(param)) {
-            throw SemanticError("redeclared param: " + param.name, lineno);
+            SemanticError("redeclared param: " + param.name, lineno);
+            return;
         }
     }
 }
@@ -422,20 +510,23 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
 /*───────── check function call ─────────*/
 void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno) {
     if (!symbol) {
-        throw SemanticError("undeclared function: " + name, lineno);
+        SemanticError("undeclared function: " + name, lineno);
+        return;
     }
 
     if (!symbol->type->isFunc()) {
-        throw SemanticError("not a function: " + name, lineno);
+        SemanticError("not a function: " + name, lineno);
+        return;
     }
 
     size_t argCount = args.size();
     size_t expected = symbol->type->params.size();
 
     if (argCount != expected) {
-        throw SemanticError("function '" + name + "' expects " +
+        SemanticError("function '" + name + "' expects " +
             std::to_string(expected) + " arguments, but got " +
             std::to_string(argCount), lineno);
+        return;
     }
 
     if (!args.empty()) {
@@ -443,7 +534,8 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
             const ExprInfo& arg = args.at(i);
 
             if (!arg.type->isCompatibleWith(*symbol->type->params[i])) {
-                throw SemanticError("argument type mismatch", lineno);
+                SemanticError("argument type mismatch", lineno);
+                return;
             }
 
             if (isConvertible(arg.type->base, symbol->type->params[i]->base)) {
@@ -458,24 +550,33 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
 
 /*───────── check assignment ─────────*/
 void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) {
+    if (!target.isValid || !value.isValid) {
+        return;
+    }
+
     if (target.type->isFunc()) {
-        throw SemanticError("cannot assign to function", lineno);
+        SemanticError("cannot assign to function", lineno);
+        return;
     }
 
     if (target.type->isArray()) {
-        throw SemanticError("cannot assign to array", lineno);
+        SemanticError("cannot assign to array", lineno);
+        return;
     }
 
     if (target.isConst) {
-        throw SemanticError("cannot assign to const variable", lineno);
+        SemanticError("cannot assign to const variable", lineno);
+        return;
     }
 
     if (value.type->isFunc()) {
-        throw SemanticError("cannot assign function to variable", lineno);
+        SemanticError("cannot assign function to variable", lineno);
+        return;
     }
 
     if (value.type->isArray()) {
-        throw SemanticError("cannot assign array to variable", lineno);
+        SemanticError("cannot assign array to variable", lineno);
+        return;
     }
 
     if (isConvertible(value.type->base, target.type->base)) {
@@ -486,78 +587,104 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
 
 /*───────── check print ─────────*/
 void checkPrint(const ExprInfo& expr, int lineno) {
+    if (!expr.isValid) {
+        return;
+    }
+
     if (expr.type->isFunc()) {
-        throw SemanticError("cannot print function", lineno);
+        SemanticError("cannot print function", lineno);
+        return;
     }
 
     if (expr.type->isArray()) {
-        throw SemanticError("cannot print array", lineno);
+        SemanticError("cannot print array", lineno);
+        return;
     }
 
     if (expr.type->base == BK_Void) {
-        throw SemanticError("cannot print void type", lineno);
+        SemanticError("cannot print void type", lineno);
+        return;
     }
 }
 
 /*───────── check read ─────────*/
 void checkRead(const ExprInfo& expr, int lineno) {
+    if (!expr.isValid) {
+        return;
+    }
+
     if (expr.type->isFunc()) {
-        throw SemanticError("cannot read to function", lineno);
+        SemanticError("cannot read to function", lineno);
+        return;
     }
 
     if (expr.type->isArray()) {
-        throw SemanticError("cannot read to array", lineno);
+        SemanticError("cannot read to array", lineno);
+        return;
     }
 
     if (expr.type->base == BK_Void) {
-        throw SemanticError("cannot read to void type", lineno);
+        SemanticError("cannot read to void type", lineno);
+        return;
     }
 }
 
 /*───────── check variable declaration ─────────*/
-void tryDeclareVarables(SymbolTable& symTab, TypeArena& typePool, std::vector<VarInit>& varInits, Type* type, int lineno){
-    for (auto& var : varInits) {
-        Symbol s("", nullptr, false);
+void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& varInit, Type* type, int lineno){
+    if (!varInit.isValid) {
+        return;
+    }
 
-        if (var.constType != nullptr) {
-            if (!type->isCompatibleWith(*var.constType)) {
-                throw SemanticError("var type mismatch", lineno);
-            }
+    Symbol s("", nullptr, false);
 
-            if(isConvertible(type->base, var.constType->base)) {
-                printf("Warning: implicit conversion from %s to %s @ line %d\n",
-                    baseKindToStr(type->base).c_str(), baseKindToStr(var.constType->base).c_str(), lineno);
-            }
-            s = Symbol(var.name, type, false);
-        } 
-        else if (!var.arrayDims.empty()) {
-            Type* arrType = typePool.makeArray(type, var.arrayDims);
-            s = Symbol(var.name, arrType, false);
-        } 
-        else {
-            s = Symbol(var.name, type, false);
+    if (varInit.constType != nullptr) {
+        if (!type->isCompatibleWith(*varInit.constType)) {
+            SemanticError("var type mismatch", lineno);
+            return;
         }
 
-        tryInsertVar(symTab, s, lineno);
+        if(isConvertible(type->base, varInit.constType->base)) {
+            printf("Warning: implicit conversion from %s to %s @ line %d\n",
+                baseKindToStr(type->base).c_str(), baseKindToStr(varInit.constType->base).c_str(), lineno);
+        }
+        s = Symbol(varInit.name, type, false);
+    } 
+    else if (!varInit.arrayDims.empty()) {
+        Type* arrType = typePool.makeArray(type, varInit.arrayDims);
+        s = Symbol(varInit.name, arrType, false);
+    } 
+    else {
+        s = Symbol(varInit.name, type, false);
     }
+
+    tryInsertVar(symTab, s, lineno);
+    
 }
 
 /*───────── check constant declaration ─────────*/
 void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const ExprInfo& value, int lineno){
+    if (!value.isValid) {
+        return;
+    }
+
     if (value.type->isFunc()) {
-        throw SemanticError("cannot assign function to const", lineno);
+        SemanticError("cannot assign function to const", lineno);
+        return;
     }
 
     if (value.type->isArray()) {
-        throw SemanticError("cannot assign array to const", lineno);
+        SemanticError("cannot assign array to const", lineno);
+        return;
     }
 
     if (!isBaseCompatible(type->base, value.type->base)) {
-        throw SemanticError("const type mismatch " + baseKindToStr(type->base) + " = " + baseKindToStr(value.type->base), lineno);
+        SemanticError("const type mismatch " + baseKindToStr(type->base) + " = " + baseKindToStr(value.type->base), lineno);
+        return;
     }
 
     if (!value.isConst) {
-        throw SemanticError("const expression must be const", lineno);
+        SemanticError("const expression must be const", lineno);
+        return;
     }
 
     Symbol s(id, type, true);
@@ -565,11 +692,13 @@ void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const 
 
     Symbol* exist = symTab.lookupGlobal(s.name);
     if (exist && exist->type->isFunc()) {
-        throw SemanticError("const '" + s.name + "' conflicts with function", lineno);
+        SemanticError("const '" + s.name + "' conflicts with function", lineno);
+        return;
     }
 
     if (!symTab.insert(s)) {
-        throw SemanticError("redeclared const: " + id, lineno);
+        SemanticError("redeclared const: " + id, lineno);
+        return;
     }
 
     if (isConvertible(type->base, value.type->base)) {
