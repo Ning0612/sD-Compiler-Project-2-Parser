@@ -17,8 +17,6 @@ struct ExprInfo {
     explicit ExprInfo(Type* t, bool c=false)
         : type(t), isConst(c), valueKind(VK_None) {}
 
-
-
     /* setter */
     void setInt   (int v)             { valueKind=VK_Int;   iVal=v; isConst=true; }
     void setFloat (float v)           { valueKind=VK_Float; fVal=v; isConst=true; }

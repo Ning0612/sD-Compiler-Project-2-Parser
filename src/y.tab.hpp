@@ -189,7 +189,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 24 "src/p2_parser.y"
+#line 23 "src/p2_parser.y"
 
     int ival;
     float fval;
@@ -197,13 +197,13 @@ union YYSTYPE
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    std::vector<Type*>* type_list;
-    std::vector<Symbol *>* symbol_list;
-    std::vector<int>* int_list;
-    varInit* var_init;
-    std::vector<varInit*>* var_init_list;
+    VarInit* var_init;
     ExprInfo* expr_info;
-    std::vector<ExprInfo*>* expr_info_list;
+
+    std::vector<int>* int_list;
+    std::vector<Symbol>* symbol_list;
+    std::vector<VarInit>* var_init_list;
+    std::vector<ExprInfo>* expr_info_list;
 
 #line 209 "src/y.tab.hpp"
 
