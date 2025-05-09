@@ -46,7 +46,11 @@ void main() {
     const string str2 = "World!";
     const string str3 = str1 + str2;              // "Hello, World!"
     const string str4 = str3 + " How are you?";  // "Hello, World! How are you?"
+    const string str5 = "The result is: " + "what"; // "The result is: Hello, World! How are you?"
     }
 
-    const int a = 3 + 3 + "rer";
+    const int a = 3 + 3 + "rer"; // Error: "rer" is a string, not an integer
+    const int b = 3 * 3 / 0; // Error: division by zero
+    const int c = 3 + 3 % 0; // Error: division by zero
+    const int d = 34 / (23 * 3 * 0);  // Error: division by zero
 }

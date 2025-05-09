@@ -140,4 +140,5 @@ void SymbolTable::dbgPrintCurrentScope() const {
     for (const auto& p : scopes.back()) {
         p.second.dbgPrint();
     }
+    printf("\n");
 }

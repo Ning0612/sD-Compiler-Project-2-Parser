@@ -4,7 +4,7 @@ LEX   = flex
 YACC  = bison
 
 # ────────────── Flags ──────────────────
-CXXFLAGS  = -std=c++17 -Wall -Wextra -Wno-unused-function -pedantic -I./src
+CXXFLAGS = -std=c++17 -g -Wall -Wextra -Wno-unused-function -pedantic -I./src
 YACCFLAGS = -y -d
 
 # ────────────── Directories ────────────
@@ -38,6 +38,16 @@ $(SRC_DIR)/y.tab.cpp $(SRC_DIR)/y.tab.hpp: $(SRC_DIR)/p2_parser.y
 
 $(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/p2_lex.l $(SRC_DIR)/y.tab.hpp
 	$(LEX) --outfile=$@ $<
+
+# ────────────── Conflict Check ──────────────
+checkconflict:
+	$(YACC) $(YACCFLAGS) -v -o $(SRC_DIR)/y.tab.cpp $(SRC_DIR)/p2_parser.y
+	@echo "=== Conflicts Report ==="
+	@if grep -q 'conflict' y.output; then \
+		grep 'conflict' y.output; \
+	else \
+		echo "No shift/reduce or reduce/reduce conflicts found."; \
+	fi
 
 # ────────────── Compilation Rules ──────
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp

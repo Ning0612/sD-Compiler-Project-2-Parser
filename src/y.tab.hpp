@@ -189,7 +189,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "src/p2_parser.y"
+#line 21 "src/p2_parser.y"
 
     int ival;
     float fval;
@@ -197,7 +197,7 @@ union YYSTYPE
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    VarInit* var_init;
+    VarInit* var_init_;
     ExprInfo* expr_info;
 
     std::vector<int>* int_list;

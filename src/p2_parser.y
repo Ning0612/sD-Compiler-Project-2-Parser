@@ -17,7 +17,6 @@ void yyerror(const char* s){
     std::exit(1);
 }
 %}
-
 /* ---------- token type ---------- */
 %union{
     int ival;
@@ -26,7 +25,7 @@ void yyerror(const char* s){
     std::string* sval;
     Type* type;
     Symbol* symbol;
-    VarInit* var_init;
+    VarInit* var_init_;
     ExprInfo* expr_info;
 
     std::vector<int>* int_list;
@@ -57,7 +56,7 @@ void yyerror(const char* s){
 %type <expr_info_list> arg_list_opt
 %type <int_list> array_dims
 %type <int_list> array_ref
-%type <var_init> var_init
+%type <var_init_> var_init
 
 /* ---------- Operators / Delimiters ---------- */
 %token                LE GE EQ NEQ LT GT
@@ -137,9 +136,7 @@ const_decl
 
 /* Variable / Array Declaration */
 var_decl
-    : type_spec {
-        ctx->nowType = $1;
-    } var_init_list SEMICOLON 
+    : type_spec var_init_list SEMICOLON 
     ;
 
 var_init_list
@@ -220,8 +217,8 @@ func_decl
             }
 
             if (isConvertible($1->base, expr.first.type->base)) {
-                printf("Warning: implicit conversion from %s to %s @ line %d\n",
-                    baseKindToStr($1->base).c_str(), baseKindToStr(expr.first.type->base).c_str(), expr.second);
+                printf("[Warning] Line %d:  implicit conversion from %s to %s\n", expr.second,
+                    baseKindToStr($1->base).c_str(), baseKindToStr(expr.first.type->base).c_str());
             }
         }
 
@@ -569,10 +566,8 @@ const_lit
 func_call
     : ID LPAREN arg_list_opt RPAREN {
         Symbol* symbol = ctx->symTab.lookup(*$1);
-        std::string funcName = *$1;
-        std::vector<ExprInfo> args = *$3;
-        delete $1;
-        delete $3;
+        std::string funcName = *$1; delete $1;
+        std::vector<ExprInfo> args = *$3; delete $3;
         checkFuncCall(symbol, funcName, args, yylineno);
         $$ = new ExprInfo(symbol->type->ret);
     }
@@ -580,10 +575,8 @@ func_call
 proc_call
     : ID LPAREN arg_list_opt RPAREN {
         Symbol* symbol = ctx->symTab.lookup(*$1);
-        std::string funcName = *$1;
-        std::vector<ExprInfo> args = *$3;
-        delete $1;
-        delete $3;
+        std::string funcName = *$1; delete $1;
+        std::vector<ExprInfo> args = *$3; delete $3;
         checkFuncCall(symbol, funcName, args, yylineno);
     }
 
@@ -626,23 +619,21 @@ array_ref
         $$ = new std::vector<int>;
         ExprInfo expr = *$2; delete $2;
         $$->push_back(extractArrayIndexOrZero(expr, yylineno));
-        delete $2;
     }
     | array_ref LBRACK expression RBRACK {
         $$ = $1;
         ExprInfo expr = *$3; delete $3;
         $$->push_back(extractArrayIndexOrZero(expr, yylineno));
-        delete $3;
     }
     ;
 
 /* Type Specification */
 type_spec
-    : INT_TOK    { $$ = ctx->typePool.make(BK_Int);   }
-    | FLOAT_TOK      { $$ = ctx->typePool.make(BK_Float); }
-    | DOUBLE_TOK     { $$ = ctx->typePool.make(BK_Double); }
-    | BOOL_TOK       { $$ = ctx->typePool.make(BK_Bool);  }
-    | STRING_TOK { $$ = ctx->typePool.make(BK_String);}
+    : INT_TOK    { $$ = ctx->typePool.make(BK_Int); ctx->nowType = $$; }
+    | FLOAT_TOK      { $$ = ctx->typePool.make(BK_Float); ctx->nowType = $$; }
+    | DOUBLE_TOK     { $$ = ctx->typePool.make(BK_Double); ctx->nowType = $$; }
+    | BOOL_TOK       { $$ = ctx->typePool.make(BK_Bool);  ctx->nowType = $$; }
+    | STRING_TOK { $$ = ctx->typePool.make(BK_String); ctx->nowType = $$;}
     ;
 
 %% 
@@ -669,7 +660,7 @@ int main(int argc, char* argv[]) {
     
     if (SemanticError::hasError()) {
         SemanticError::printAll();
-        return 1;
+        return 2;
     }
 
     return result;

@@ -22,21 +22,21 @@ std::string toString(const ExprInfo e){
 /*───────── Type Compatibility ─────────*/
 std::string numOpToStr(NumOp op) {
     switch (op) {
-        case OPADD: return "+";
-        case OPSUB: return "-";
-        case OPMUL: return "*";
-        case OPDIV: return "/";
-        case OPMOD: return "%";
+        case OPADD: return " + ";
+        case OPSUB: return " - ";
+        case OPMUL: return " * ";
+        case OPDIV: return " / ";
+        case OPMOD: return " % ";
         default: return "unknown";
     }
 }
 
 std::string relOpToStr(RelOp op) {
     switch (op) {
-        case OPLT: return "<";
-        case OPLE: return "<=";
-        case OPGT: return ">";
-        case OPGE: return ">=";
+        case OPLT: return " < ";
+        case OPLE: return " <= ";
+        case OPGT: return " > ";
+        case OPGE: return " >= ";
         default: return "unknown";
     }
 }
@@ -107,12 +107,12 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
     ExprInfo* result = new ExprInfo(pool.make(resultBase), isConst);
 
     if (isConvertible(b1, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
     }
     if (isConvertible(b2, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
     }
 
     if(isConst){
@@ -164,12 +164,12 @@ ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeAr
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), isConst);
 
     if (isConvertible(b1, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
     }
     if (isConvertible(b2, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
     }
 
     if(isConst){
@@ -218,12 +218,12 @@ ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeA
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), isConst);
     
     if (isConvertible(b1, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
     }
     if (isConvertible(b2, resultBase)){
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
     }
     auto cmp=[&](auto a,auto b){return equal? a==b : a!=b;};
 
@@ -539,9 +539,9 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
             }
 
             if (isConvertible(arg.type->base, symbol->type->params[i]->base)) {
-                printf("Warning: implicit conversion from %s to %s @ %d\n",
+                printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
                     baseKindToStr(arg.type->base).c_str(),
-                    baseKindToStr(symbol->type->params[i]->base).c_str(), lineno);
+                    baseKindToStr(symbol->type->params[i]->base).c_str());
             }
             
         }
@@ -580,8 +580,8 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
     }
 
     if (isConvertible(value.type->base, target.type->base)) {
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-               baseKindToStr(value.type->base).c_str(), baseKindToStr(target.type->base).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+               baseKindToStr(value.type->base).c_str(), baseKindToStr(target.type->base).c_str());
     }
 }
 
@@ -644,8 +644,8 @@ void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& 
         }
 
         if(isConvertible(type->base, varInit.constType->base)) {
-            printf("Warning: implicit conversion from %s to %s @ line %d\n",
-                baseKindToStr(type->base).c_str(), baseKindToStr(varInit.constType->base).c_str(), lineno);
+            printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+                baseKindToStr(type->base).c_str(), baseKindToStr(varInit.constType->base).c_str());
         }
         s = Symbol(varInit.name, type, false);
     } 
@@ -702,7 +702,7 @@ void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const 
     }
 
     if (isConvertible(type->base, value.type->base)) {
-        printf("Warning: implicit conversion from %s to %s @ line %d\n",
-            baseKindToStr(type->base).c_str(), baseKindToStr(value.type->base).c_str(), lineno);
+        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
+            baseKindToStr(type->base).c_str(), baseKindToStr(value.type->base).c_str());
     }
 }

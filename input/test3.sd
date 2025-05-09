@@ -15,9 +15,24 @@ void main() {
     int m1[3][4];           // 2D array, sizes = 3 and 4
     float m2[1 + 2][2 * 2]; // 2D array, sizes = 3 and 4
     bool m3[7 - 2][3 + 1];  // 2D array, sizes = 5 and 4
+
+    int ival;
+    float fval;
+    bool bval;
+    string sval;
+
+    ival = a[0];         // Accessing first element of array 'a'
+    fval = b[2];        // Accessing third element of array 'b'
+    bval = c[ival];      // Accessing fifth element of array 'c'
+    sval = d[ival];     // Accessing element of array 'd' using variable 'ival'
     }
     
     {
+    int arr[5];           // Valid array declaration
+    const int r = 2 + 5; // Constant expression
+
+    arr[r] = 30; // Error: out of bounds access
+    
     // Invalid declarations (should trigger semantic errors)
     
     int e[0];               // Error: size must be > 0
