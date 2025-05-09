@@ -70,13 +70,21 @@ ExprInfo* eqOpResult     (bool equal, const ExprInfo& lhs, const ExprInfo& rhs, 
 ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno);
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno);
+ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolTable& symTab, const std::vector<int>& arrayIndex, int lineno);
 
-void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno);
-void declareFunction(const std::string& name, Type* returnType, const std::vector<Symbol>& paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno);
-int extractArrayIndexOrZero(ExprInfo* expr, int lineno);
-void checkIncDecValid(ExprInfo* sym, const std::string& op, int lineno);
-void checkBoolExpr(ExprInfo* expr, const std::string& context, int lineno);
-void checkForeachRange(ExprInfo* from, ExprInfo* to, int lineno);
+void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno);
+void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno);
+void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno);
+int extractArrayIndexOrZero(const ExprInfo& expr, int lineno);
+int checkArrayDimExpr(const ExprInfo& expr, int lineno);
+
 void checkForeachIndex(Symbol* sym, int lineno);
-int checkArrayDimExpr(ExprInfo* e, int lineno);
+void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno);
+
+void declareFunction(const std::string& name, Type* returnType, const std::vector<Symbol>& paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno);
 void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno);
+void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno);
+void checkPrint(const ExprInfo& expr, int lineno);
+void checkRead(const ExprInfo& expr, int lineno);
+void tryDeclareVarables(SymbolTable& symTab, TypeArena& typePool, std::vector<VarInit>& varInits, Type* type, int lineno);
+void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const ExprInfo& value, int lineno);
