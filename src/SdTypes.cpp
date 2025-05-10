@@ -1,5 +1,5 @@
-// sd_types.cpp
-#include "sd_types.hpp"
+// SdTypes.cpp
+#include "SdTypes.hpp"
 #include <cstdio>
 
 /*--------- Type Equality and Compatibility ---------*/

@@ -16,12 +16,14 @@ BIN_DIR   = bin
 OBJS = \
   $(BUILD_DIR)/y.tab.o \
   $(BUILD_DIR)/lex.yy.o \
-  $(BUILD_DIR)/sem_utils.o \
-  $(BUILD_DIR)/sd_types.o \
-  $(BUILD_DIR)/symtab.o \
-  $(BUILD_DIR)/error.o \
-  $(BUILD_DIR)/var_init.o \
-  $(BUILD_DIR)/expr.o 
+  $(BUILD_DIR)/SemanticAnalyzer.o \
+  $(BUILD_DIR)/SdTypes.o \
+  $(BUILD_DIR)/Symbol.o \
+  $(BUILD_DIR)/SymbolTable.o \
+  $(BUILD_DIR)/SemanticError.o \
+  $(BUILD_DIR)/SemanticWarning.o \
+  $(BUILD_DIR)/VarInit.o \
+  $(BUILD_DIR)/ExprInfo.o 
 
 TARGET = $(BIN_DIR)/sd
 

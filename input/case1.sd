@@ -1,0 +1,25 @@
+void main(){
+    int condition = 1;
+
+    if (condition == 1) {
+        const int c = 1 + 2 * 3;          // 7
+        const int b = c + 5 - 2;          // valid : a is constant 10
+        const int a = ((5 + 3) * 20 + -3 - -5 + 20 % 3) / 3; // 54
+    }
+    else if (condition == 2) {
+        const float a = 1.5 + 2.5;          // 4.0
+        const float b = a * 2;              // valid : a is constant 8.0
+        const float c = (5.0 + 3.0) * 20.0 + -3.0 - -5.0; // 162.0
+    }
+    else if (condition == 3) {
+        const int a = 1 + 2 * 3;          // 7
+        const int b = a + 5 - 2;          // valid : a is constant
+        const int c = (5 + 3) * 20 + -3 - -5 + 20 % 3; // 164
+    }
+    else if (condition == 4) {
+        const int a = 1 + 2 * 3;          // 7
+        const int b = a + 5 - 2;          // valid : a is constant
+        const int c = (5 + 3) * 20 + -3 - -5 + 20 % 3; // 164
+    }
+    int a = 34 + 35.4;
+}

@@ -3,7 +3,7 @@
 
 %{
 /*──────────── C Declarations ─────────────*/
-#include "sem_utils.hpp"
+#include "SemanticAnalyzer.hpp"
 #include "y.tab.hpp"
 #include <cstdio>
 #include <cstdlib>

@@ -1,4 +1,4 @@
-#include "sem_utils.hpp"
+#include "SemanticAnalyzer.hpp"
 #include <stdexcept>
 #include <algorithm> 
 
@@ -107,12 +107,10 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
     ExprInfo* result = new ExprInfo(pool.make(resultBase), isConst);
 
     if (isConvertible(b1, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b1) + " to " + baseKindToStr(resultBase), lineno);
     }
     if (isConvertible(b2, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b2) + " to " + baseKindToStr(resultBase), lineno);
     }
 
     if(isConst){
@@ -164,12 +162,10 @@ ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeAr
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), isConst);
 
     if (isConvertible(b1, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b1) + " to " + baseKindToStr(resultBase), lineno);
     }
     if (isConvertible(b2, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b2) + " to " + baseKindToStr(resultBase), lineno);
     }
 
     if(isConst){
@@ -218,12 +214,10 @@ ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeA
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), isConst);
     
     if (isConvertible(b1, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b1).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b1) + " to " + baseKindToStr(resultBase), lineno);
     }
     if (isConvertible(b2, resultBase)){
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(b2).c_str(), baseKindToStr(resultBase).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(b2) + " to " + baseKindToStr(resultBase), lineno);
     }
     auto cmp=[&](auto a,auto b){return equal? a==b : a!=b;};
 
@@ -539,11 +533,8 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
             }
 
             if (isConvertible(arg.type->base, symbol->type->params[i]->base)) {
-                printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-                    baseKindToStr(arg.type->base).c_str(),
-                    baseKindToStr(symbol->type->params[i]->base).c_str());
+                SemanticWarning("implicit conversion from " + baseKindToStr(arg.type->base) + " to " + baseKindToStr(symbol->type->params[i]->base), lineno);
             }
-            
         }
     }
 }
@@ -580,8 +571,7 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
     }
 
     if (isConvertible(value.type->base, target.type->base)) {
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-               baseKindToStr(value.type->base).c_str(), baseKindToStr(target.type->base).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(value.type->base) + " to " + baseKindToStr(target.type->base), lineno); 
     }
 }
 
@@ -644,8 +634,7 @@ void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& 
         }
 
         if(isConvertible(type->base, varInit.constType->base)) {
-            printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-                baseKindToStr(type->base).c_str(), baseKindToStr(varInit.constType->base).c_str());
+            SemanticWarning("implicit conversion from " + baseKindToStr(varInit.constType->base) + " to " + baseKindToStr(type->base), lineno);
         }
         s = Symbol(varInit.name, type, false);
     } 
@@ -702,7 +691,6 @@ void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const 
     }
 
     if (isConvertible(type->base, value.type->base)) {
-        printf("[Warning] Line %d:  implicit conversion from %s to %s\n", lineno,
-            baseKindToStr(type->base).c_str(), baseKindToStr(value.type->base).c_str());
+        SemanticWarning("implicit conversion from " + baseKindToStr(value.type->base) + " to " + baseKindToStr(type->base), lineno);
     }
 }

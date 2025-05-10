@@ -582,7 +582,7 @@ char *yytext;
 #line 1 "src/p2_lex.l"
 #line 5 "src/p2_lex.l"
 /*──────────── C Declarations ─────────────*/
-#include "sem_utils.hpp"
+#include "SemanticAnalyzer.hpp"
 #include "y.tab.hpp"
 #include <cstdio>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 // context.hpp
 #pragma once
-#include "sem_utils.hpp"
+#include "SemanticAnalyzer.hpp"
 
 struct Context {
     SymbolTable symTab;

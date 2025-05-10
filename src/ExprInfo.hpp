@@ -1,5 +1,5 @@
 #pragma once
-#include "sd_types.hpp"
+#include "SdTypes.hpp"
 #include <stdexcept>
 #include <string>
 

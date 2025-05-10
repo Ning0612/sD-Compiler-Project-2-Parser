@@ -1,9 +1,9 @@
-// var_init.cpp
+// VarInit.cpp
 #pragma once
 
 #include <string>
 #include <vector>
-#include "sd_types.hpp"
+#include "SdTypes.hpp"
 
 // Represents a variable declaration, which may be a scalar or an array
 struct VarInit {

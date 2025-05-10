@@ -1,6 +1,6 @@
 %{
-#include "sem_utils.hpp"
-#include "context.hpp"
+#include "SemanticAnalyzer.hpp"
+#include "Context.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -217,8 +217,7 @@ func_decl
             }
 
             if (isConvertible($1->base, expr.first.type->base)) {
-                printf("[Warning] Line %d:  implicit conversion from %s to %s\n", expr.second,
-                    baseKindToStr($1->base).c_str(), baseKindToStr(expr.first.type->base).c_str());
+                SemanticWarning("implicit conversion from " + baseKindToStr(expr.first.type->base) + " to " + baseKindToStr($1->base), expr.second);
             }
         }
 
@@ -657,9 +656,12 @@ int main(int argc, char* argv[]) {
 
     // Start parsing with error handling for semantic errors
     int result = yyparse();
+    if (SemanticWarning::hasWarning()) {
+        SemanticWarning::printAllWarning();
+    }
     
     if (SemanticError::hasError()) {
-        SemanticError::printAll();
+        SemanticError::printAllError();
         return 2;
     }
 

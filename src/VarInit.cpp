@@ -1,5 +1,5 @@
-// var_init.cpp
-#include "var_init.hpp"
+// VarInit.cpp
+#include "VarInit.hpp"
 
 // Constructor for variable without type (used for basic declaration)
 VarInit::VarInit(std::string n)

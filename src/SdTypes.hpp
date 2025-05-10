@@ -1,4 +1,4 @@
-// sd_types.hpp
+// SdTypes.hpp
 #pragma once
 
 #include <vector>

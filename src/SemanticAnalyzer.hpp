@@ -1,10 +1,11 @@
 #pragma once
 
-#include "var_init.hpp"
-#include "error.hpp"
-#include "expr.hpp"
-#include "sd_types.hpp"
-#include "symtab.hpp"
+#include "VarInit.hpp"
+#include "SemanticError.hpp"
+#include "SemanticWarning.hpp"
+#include "SymbolTable.hpp"
+#include "ExprInfo.hpp"
+#include "SdTypes.hpp"
 
 /* ─────────────── Value Extraction ─────────────── */
 
