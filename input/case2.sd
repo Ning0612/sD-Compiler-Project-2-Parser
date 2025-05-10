@@ -1,0 +1,50 @@
+// Test for 
+// - Array declarations
+// - Array size must be a constant integer expression
+// - Array size must be greater than 0
+// - No initialization is allowed
+// - Array references and index validation
+
+void main(){
+    int condition = 1;
+
+    // Test 1: Valid declarations and array accesses
+    if (condition == 1) {
+        // Valid 1D array declarations with constant expressions
+        int a[5];               // size = 5
+        float b[2 + 3];         // size = 5
+        bool c[10 - 5];         // size = 5
+        string d[2 * 3];        // size = 6
+
+        // Valid multi-dimensional array declarations
+        int m1[3][4];           // sizes = 3 and 4
+        float m2[1 + 2][2 * 2]; // sizes = 3 and 4
+        bool m3[7 - 2][3 + 1];  // sizes = 5 and 4
+
+        // Variable declarations
+        int ival;
+        float fval;
+        bool bval;
+        string sval;
+
+        // Valid array accesses using constant and variable indices
+        ival = a[0];         // accessing first element of array 'a'
+        fval = b[2];         // accessing third element of array 'b'
+        bval = c[ival];      // accessing element of 'c' using value of 'ival'
+        sval = d[ival];      // accessing element of 'd' using value of 'ival'
+        bval = m1[2][3];    // accessing element of 'm1' using constant indices
+    } 
+    // Test 2: Invalid array declarations and index errors
+    else {
+        int arr[5];           // valid array declaration
+        int arrs[0];          // Error: size must be greater than 0
+
+        const int r = 2 + 5;  // constant expression, value = 7
+        int c = 6;            // variable used as index
+
+        arr[-1] = 30;         // Error: index is negative
+        arr[r] = 30;          // Error: index 7 out of bounds for array size 5
+        arr[c] = 30;          // Valid: c is a variable, check deferred to runtime
+        arr["dfaf"] = 30;     // Error: index is a string, not an integer
+    }
+}

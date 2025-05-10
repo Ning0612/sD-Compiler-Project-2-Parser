@@ -1,1 +1,12 @@
-int a ;
+int x;
+int c;
+void main(){
+    int x;
+
+    if (x == 1){
+
+        x = 4;
+        int x = 3;
+        c = c + 3;
+    }
+}

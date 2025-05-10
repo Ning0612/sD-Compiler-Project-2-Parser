@@ -1,0 +1,45 @@
+// Test for
+// - for loops with multiple expressions in initialization and update sections
+// - do-while loop syntax and semantics
+// - foreach loop with constant range
+//   - foreach range must satisfy: start < end
+
+void main(){
+    int i, j;
+    const int range = 9;
+    int a[range][range]; // 9x9 integer array
+
+    // do-while loop (executes at least once)
+    do {
+        print i;
+    } while (i < range);
+
+    // nested for-loops with single init/update expressions
+    for (i = 0; i < range; i++) {
+        for (j = 0; j < range; j++) {
+            a[i][j] = i * j;
+            print a[i][j];
+        }
+    }
+
+    // for-loop with multiple init and update expressions
+    for (i = 0, j = 0; i < range; i++, j++) {
+        a[i][j] = i + j;
+        print a[i][j];
+    }
+
+    // foreach with valid constant range: 0 to 9 (inclusive of start, exclusive of end)
+    foreach (i : 0 .. range) {
+        print i;
+    }
+
+    // foreach with valid constant expression range: -90 to 60
+    foreach (i : -3 * 30 .. 30 * 2) {
+        print i;
+    }
+
+    // Error: foreach range start is not less than end (start == end)
+    foreach (i : range .. range) {
+        print i;
+    }
+}

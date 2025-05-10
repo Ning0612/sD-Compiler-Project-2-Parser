@@ -1,25 +1,56 @@
+// Test for 
+// Constant folding
+// Implicit conversions 
+// String concatenation
+// Division-by-zero errors
+
 void main(){
     int condition = 1;
 
+    // Test 1: Integer constant folding
     if (condition == 1) {
-        const int c = 1 + 2 * 3;          // 7
-        const int b = c + 5 - 2;          // valid : a is constant 10
-        const int a = ((5 + 3) * 20 + -3 - -5 + 20 % 3) / 3; // 54
+        const int a = 1 + 2 * 3;                                // 7
+        const int b = a + 5 - 2;                                // 10
+        const int c = -((5 + 3) * 20 + -3 - -5 + 20 % 3) / 5;    // -32
     }
+
+    // Test 2: Float constant folding and implicit type conversion (double -> float)
     else if (condition == 2) {
-        const float a = 1.5 + 2.5;          // 4.0
-        const float b = a * 2;              // valid : a is constant 8.0
-        const float c = (5.0 + 3.0) * 20.0 + -3.0 - -5.0; // 162.0
+        const float b = a * 2;                                  // 8.0
+        const float c = -((5.0 + 3.0) * 20.0 + -3.0 - -5.0) / 5; // -32.4
+        // Warning: implicit conversion from double to float
     }
+
+    // Test 3: Double constant folding and implicit type conversion
     else if (condition == 3) {
-        const int a = 1 + 2 * 3;          // 7
-        const int b = a + 5 - 2;          // valid : a is constant
-        const int c = (5 + 3) * 20 + -3 - -5 + 20 % 3; // 164
+        const double a = 1.5 + 2.5;                              // 4.0
+        const double b = a * 2;                                  // 8.0
+        const double c = -((5.0 + 3.0) * 20.0 + -3.0 - -5.0) / 5; // -32.4
     }
+
+    // Test 4: Boolean logic folding
     else if (condition == 4) {
-        const int a = 1 + 2 * 3;          // 7
-        const int b = a + 5 - 2;          // valid : a is constant
-        const int c = (5 + 3) * 20 + -3 - -5 + 20 % 3; // 164
+        const bool a = true || false;                          // true
+        const bool b = a && false;                             // false
+        const bool c = !a || b;                                // false
     }
-    int a = 34 + 35.4;
+
+    // Test 5: String constant folding via concatenation
+    else if (condition == 5) {
+        const string a = "Test" + " Case";                     // "Test Case"
+        const string b = a + " is valid";                      // "Test Case is valid"
+        const string c = b + " !";                             // "Test Case is valid !"
+    }
+
+    // Test 6: Runtime variables and illegal constant expressions (division/mod by zero)
+    else if (condition == 6) {
+        int a = 1 + 2 * 3;
+        const int zc = 0;
+        int z = 0;
+        int b = 24 / 0;         // Error: division by constant zero
+        int c = 3 + 3 % 0;      // Error: modulus by constant zero
+        a = 34 / (23 * 3 * 0);  // Error: division by constant zero in expression
+        a = 42 / zc;            // Error: division by const zero
+        a = 42 / z;             // OK: runtime check (z is a variable)
+    }
 }
