@@ -81,7 +81,7 @@ This document summarizes the purpose and semantic checks performed by each indiv
 
 Each file can be compiled and tested independently:
 ```bash
-./sc case1.sd
-./sc case2.sd
-./sc case3.sd
-./sc case4.sd
+./sd case1.sd
+./sd case2.sd
+./sd case3.sd
+./sd case4.sd

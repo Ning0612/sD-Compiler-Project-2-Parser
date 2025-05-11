@@ -61,6 +61,7 @@ void main() {
     // Array parameter usage
     sumInt = sumOfArr(arr);         // Valid
     sumInt = sumOfArr(darr[2][0]);  // Valid: selecting a 1D int[10] array
+    sumInt = sumOfArr(darr[a][a]);  // Valid: selecting a 1D int[10] array
     sumInt = sumOfArr(warr[0]);     // Error: passed int[21] instead of int[10]
     sumInt = errorTest();           // Error: assigning string to int
 

@@ -87,7 +87,7 @@ void tryInsertVar(SymbolTable& symTab, const Symbol& s, int lineno);
 void declareFunction(const std::string& name, Type* returnType, const std::vector<Symbol>& paramSyms, TypeArena& typePool, SymbolTable& symTab, int lineno);
 
 // Check function call is valid (existence, args match)
-void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno);
+bool checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno);
 
 // Check if assignment is valid (type compatibility)
 void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno);

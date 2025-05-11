@@ -16,6 +16,7 @@ void main(){
 
     // Test 2: Float constant folding and implicit type conversion (double -> float)
     else if (condition == 2) {
+        const float a = 1.5 + 2.5;                              // 4.0
         const float b = a * 2;                                  // 8.0
         const float c = -((5.0 + 3.0) * 20.0 + -3.0 - -5.0) / 5; // -32.4
         // Warning: implicit conversion from double to float

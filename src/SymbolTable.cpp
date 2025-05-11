@@ -40,7 +40,7 @@ Symbol* SymbolTable::lookupGlobal(const std::string& n) {
 // Debug print the current scope's symbols
 // Prints the scope index and each symbol's details
 void SymbolTable::dbgPrintCurrentScope() const {
-    printf("\nSymbol Table in scope [%ld]\n", scopes.size() - 1);
+    printf("\n======= Symbol Table in scope [%ld] =======\n", scopes.size() - 1);
     for (const auto& p : scopes.back()) {
         p.second.dbgPrint();
     }

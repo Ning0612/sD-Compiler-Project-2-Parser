@@ -201,10 +201,6 @@ func_decl
         std::string funcName = *$2; delete $2;
         std::vector<Symbol> paramList = *$4; delete $4;
 
-        if (funcName == "main") {
-            SemanticError("main function should be void", yylineno);
-        }
-
         declareFunction(funcName, $1, paramList, ctx->typePool, ctx->symTab, yylineno);
     } block_items_opt RBRACE {
         if (ctx->returnsExpr.empty()) {
@@ -368,7 +364,15 @@ lvalue
     | ID array_ref {
         std::string id = *$1; delete $1;
         std::vector<int> arrayIndex = *$2; delete $2;
-        $$ = resolveArrayAccess(id, ctx->typePool, ctx->symTab, arrayIndex, yylineno);
+
+        Symbol* symbol = ctx->symTab.lookup(id);
+
+        if (symbol == nullptr) {
+            SemanticError("undeclared identifier: " + id, yylineno);
+            $$ = makeInvalidExpr();
+        } else {
+            $$ = resolveArrayAccess(id, ctx->typePool, ctx->symTab, arrayIndex, yylineno);
+        }
     }
     ;
 
@@ -441,7 +445,6 @@ assign_no_semi
     : lvalue ASSIGN expression {
         ExprInfo target = *$1; delete $1;
         ExprInfo value = *$3; delete $3;
-        checkAssignment(target, value, yylineno);
     }
     ;
 
@@ -471,73 +474,174 @@ expression
     }
     | expression MINUS expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
     | expression MUL   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
     | expression DIV   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
     | expression MOD   expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
-
     | expression LT    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
+        }
     }
     | expression LE    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
+        }
     }
     | expression GT    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
+        }
     }
     | expression GE    expression   { 
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
+        }
     }
 
     | expression EQ    expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
     | expression NEQ   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
+        }
     }
 
     | expression AND   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
+        }   
     }
     | expression OR expression      {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
-        $$ = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
+        if(!lhs.isValid || !rhs.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
+        }
     }
     | NOT expression                {
         ExprInfo expr = *$2; delete $2;
-        $$ = notOpResult(expr, ctx->typePool, yylineno);
+        if(!expr.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = notOpResult(expr, ctx->typePool, yylineno);
+        }
     }
-
     | MINUS expression %prec UMINUS {
         ExprInfo expr = *$2; delete $2;
-        $$ = unaryOpResult(true, expr, yylineno);
+        if(!expr.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = unaryOpResult(true, expr, yylineno);
+        }
     }
     | PLUS expression %prec UPLUS   {
         ExprInfo expr = *$2; delete $2;
-        $$ = unaryOpResult(false, expr, yylineno);
+        if(!expr.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = unaryOpResult(false, expr, yylineno);
+        }
     }
 
-    | LPAREN expression RPAREN       { $$ = $2; }
-    | lvalue                         { $$ = $1; }
-    | const_lit                      { $$ = $1; }
-    | func_call                      { $$ = $1; }
+    | LPAREN expression RPAREN       { 
+        if (!$2->isValid) {
+            delete $2;
+            $$ = makeInvalidExpr();
+        }else{
+            $$ = $2;
+        }
+    }
+    | lvalue                         { 
+        if (!$1->isValid) {
+            delete $1;
+            $$ = makeInvalidExpr();
+        }else{
+            $$ = $1;
+        }
+    }
+    | const_lit                      { 
+        if (!$1->isValid) {
+            delete $1;
+            $$ = makeInvalidExpr();
+        }else{
+            $$ = $1;
+        }
+    }
+    | func_call                      { 
+        if (!$1->isValid) {
+            delete $1;
+            $$ = makeInvalidExpr();
+        }else{
+            $$ = $1;
+        }
+    }
     ;
 
 /* Constants */
@@ -567,8 +671,22 @@ func_call
         Symbol* symbol = ctx->symTab.lookup(*$1);
         std::string funcName = *$1; delete $1;
         std::vector<ExprInfo> args = *$3; delete $3;
-        checkFuncCall(symbol, funcName, args, yylineno);
-        $$ = new ExprInfo(symbol->type->ret);
+
+        if (symbol != nullptr) {
+            if (symbol->type->base == BK_Void) {
+                SemanticError("function " + funcName + " should not return value", yylineno);
+                $$ = makeInvalidExpr();
+            }else{
+                if (checkFuncCall(symbol, funcName, args, yylineno)){
+                    $$ = new ExprInfo(symbol->type->ret);
+                }else{
+                    $$ = makeInvalidExpr();
+                }
+            }
+        }else {
+            SemanticError("undeclared function: " + funcName, yylineno);
+            $$ = makeInvalidExpr();
+        }
     }
 
 proc_call
@@ -576,7 +694,11 @@ proc_call
         Symbol* symbol = ctx->symTab.lookup(*$1);
         std::string funcName = *$1; delete $1;
         std::vector<ExprInfo> args = *$3; delete $3;
-        checkFuncCall(symbol, funcName, args, yylineno);
+        if (symbol != nullptr){
+            checkFuncCall(symbol, funcName, args, yylineno);
+        }else{
+            SemanticError("undeclared function: " + funcName, yylineno);
+        }
     }
 
 /* Function Arguments */

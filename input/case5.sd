@@ -1,0 +1,56 @@
+int awd;
+
+int awd(int a, int b) {
+    int c;
+    c = a + b;
+    return c;
+}
+
+int add(int c){
+    int a = 20;
+    a = a + 4;
+    return c + 1;
+}
+
+int te(){
+    int a;
+    a = 20;
+    return a;  
+}
+
+int ppp(int a) {
+    print a;
+}
+
+void main() {
+    const int h = 34 + 2;
+    int a;
+    a = add(add(add(add(1 + 32 + h))));
+    add(add(add(add(1 + 32 + h))));
+    int arr[ppp(1 + 2)]["dw"];
+
+    a = ppp(1 + 2);
+    a = te();
+    int b[10];
+    print b[b[b[b[0]]]];
+    
+
+    bool d;
+    int cou; 
+    cou = c[3] + 4;     // Error : undeclared c
+    d = c[3] == 4;      // Error : undeclared c
+    read c[3];          // Error : undeclared c
+    print c[3];         // Error : undeclared c
+    c[3]++;             // Error : undeclared c
+    c[3]--;             // Error : undeclared c
+    // int c = ();  // syntax
+    // d = ();  // syntax
+
+    const int i = 20;
+    
+    println dwa(2334);
+    
+    foreach (i : 0 . . 10) {
+        print i;
+    }
+}

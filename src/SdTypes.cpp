@@ -76,10 +76,10 @@ void Type::dbgPrint() const {
     if (isFunc()) {
         std::printf(" function");
         if (ret) {
-            std::printf(" -> ");
+            std::printf(" -> return ");
             ret->dbgPrint();
         }
-        std::printf(" (");
+        std::printf(", params: (");
         for (size_t i = 0; i < params.size(); ++i) {
             params[i]->dbgPrint();
             if (i + 1 < params.size()) std::printf(", ");

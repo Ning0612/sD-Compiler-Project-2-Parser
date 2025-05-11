@@ -77,7 +77,7 @@ ExprInfo* Symbol::getExpr() const {
 // If the symbol is a numeric type, it will print the value as is
 // If the symbol is a boolean, it will print "true" or "false"
 void Symbol::dbgPrint() const {
-    printf("Symbol: %s, Type: ", name.c_str());
+    printf("ID: %s, Type: ", name.c_str());
     type->dbgPrint();
 
     if (isConst) {

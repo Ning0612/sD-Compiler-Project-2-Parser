@@ -410,18 +410,18 @@ void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno) {
 /*───────── check array index ─────────*/
 int extractArrayIndexOrZero(const ExprInfo& expr, int lineno) {
     if (!expr.isValid) {
-        return -1;
+        return 0;
     }
 
     if (expr.type->base != BK_Int) {
         SemanticError("array index must be int", lineno);
-        return -1;
+        return 0;
     }
 
     if (expr.isConst) {
         if (expr.valueKind != VK_Int) {
             SemanticError("array index must be int", lineno);
-            return -1;
+            return 0;
         }
         return expr.getInt();
     }
@@ -459,6 +459,11 @@ void checkForeachIndex(Symbol* sym, int lineno) {
         SemanticError("foreach index must be int", lineno);
         return;
     }
+
+    if (sym->isConst){
+        SemanticError("foreach index cannot be const", lineno);
+        return;
+    }
 }
 
 /*───────── check variable declaration ─────────*/
@@ -482,12 +487,17 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
         paramTypes.push_back(param.type);
     }
 
-    Type* funcType = typePool.makeFunc(returnType, paramTypes);
-    Symbol funcSym(name, funcType, false);
+    Symbol* exist = symTab.lookupGlobal(name);
+    if (exist) {
+        SemanticError(" '" + name + "' already declared", lineno);
+    } else {
+        Type* funcType = typePool.makeFunc(returnType, paramTypes);
+        Symbol funcSym(name, funcType, false);
 
-    if (!symTab.insert(funcSym)) {
-        SemanticError("redeclared func: " + name, lineno);
-        return;
+        if (!symTab.insert(funcSym)) {
+            SemanticError("redeclared func: " + name, lineno);
+            return;
+        }
     }
 
     symTab.enterScope();
@@ -502,15 +512,15 @@ void declareFunction(const std::string& name, Type* returnType, const std::vecto
 }
 
 /*───────── check function call ─────────*/
-void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno) {
+bool checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<ExprInfo>& args, int lineno) {
     if (!symbol) {
         SemanticError("undeclared function: " + name, lineno);
-        return;
+        return false;
     }
 
     if (!symbol->type->isFunc()) {
         SemanticError("not a function: " + name, lineno);
-        return;
+        return false;
     }
 
     size_t argCount = args.size();
@@ -520,7 +530,7 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
         SemanticError("function '" + name + "' expects " +
             std::to_string(expected) + " arguments, but got " +
             std::to_string(argCount), lineno);
-        return;
+        return false;
     }
 
     if (!args.empty()) {
@@ -529,7 +539,7 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
 
             if (!arg.type->isCompatibleWith(*symbol->type->params[i])) {
                 SemanticError("argument type mismatch", lineno);
-                return;
+                return false;
             }
 
             if (isConvertible(arg.type->base, symbol->type->params[i]->base)) {
@@ -537,6 +547,8 @@ void checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
             }
         }
     }
+
+    return true;
 }
 
 /*───────── check assignment ─────────*/
