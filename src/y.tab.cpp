@@ -610,16 +610,16 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    91,    91,   111,   112,   117,   118,   119,   123,   124,
-     130,   139,   143,   147,   154,   155,   176,   198,   198,   222,
-     222,   240,   243,   249,   254,   262,   266,   275,   275,   283,
-     284,   288,   289,   293,   294,   298,   299,   300,   301,   302,
-     303,   308,   309,   313,   317,   321,   325,   329,   333,   342,
-     364,   381,   385,   393,   397,   401,   405,   415,   416,   417,
-     421,   422,   426,   430,   434,   438,   445,   453,   461,   475,
-     484,   493,   502,   511,   520,   529,   538,   548,   557,   567,
-     576,   585,   594,   603,   613,   621,   629,   637,   649,   653,
-     657,   661,   670,   693,   706,   707,   711,   716,   725,   730,
-     739,   744,   753,   754,   755,   756,   757
+     130,   139,   143,   147,   154,   155,   176,   198,   198,   226,
+     226,   244,   247,   253,   258,   266,   270,   279,   279,   287,
+     288,   292,   293,   297,   298,   302,   303,   304,   305,   306,
+     307,   312,   313,   317,   321,   325,   329,   333,   337,   348,
+     370,   387,   391,   399,   403,   407,   411,   423,   424,   425,
+     429,   430,   434,   438,   442,   446,   453,   464,   472,   486,
+     495,   504,   513,   522,   531,   540,   549,   559,   568,   578,
+     587,   596,   605,   614,   624,   632,   640,   648,   660,   664,
+     668,   672,   681,   704,   717,   718,   722,   727,   736,   741,
+     750,   755,   764,   765,   766,   767,   768
 };
 #endif
 
@@ -1529,6 +1529,10 @@ yyreduce:
         }
 
         for (auto& expr : ctx->returnsExpr) {
+            if (!expr.first.isValid) {
+                break;
+            }
+
             if (!(yyvsp[-8].type)->isCompatibleWith(*expr.first.type)) {
                 SemanticError("return type mismatch !", expr.second);
             }
@@ -1540,11 +1544,11 @@ yyreduce:
 
         ctx->symTab.leaveScope();
     }
-#line 1544 "src/y.tab.cpp"
+#line 1548 "src/y.tab.cpp"
     break;
 
   case 19: /* $@2: %empty  */
-#line 222 "src/p2_parser.y"
+#line 226 "src/p2_parser.y"
                                                       {
         ctx->returnsExpr.clear();
 
@@ -1553,11 +1557,11 @@ yyreduce:
 
         declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
     }
-#line 1557 "src/y.tab.cpp"
+#line 1561 "src/y.tab.cpp"
     break;
 
   case 20: /* func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE  */
-#line 229 "src/p2_parser.y"
+#line 233 "src/p2_parser.y"
                              {
         if (!ctx->returnsExpr.empty()) {
             SemanticError("void function should not return value", yylineno);
@@ -1565,137 +1569,139 @@ yyreduce:
 
         ctx->symTab.leaveScope();
     }
-#line 1569 "src/y.tab.cpp"
+#line 1573 "src/y.tab.cpp"
     break;
 
   case 21: /* param_list_opt: %empty  */
-#line 240 "src/p2_parser.y"
+#line 244 "src/p2_parser.y"
                 {
         (yyval.symbol_list) = new std::vector<Symbol>();
     }
-#line 1577 "src/y.tab.cpp"
+#line 1581 "src/y.tab.cpp"
     break;
 
   case 22: /* param_list_opt: param_list  */
-#line 243 "src/p2_parser.y"
+#line 247 "src/p2_parser.y"
                  {
         (yyval.symbol_list) = (yyvsp[0].symbol_list);
     }
-#line 1585 "src/y.tab.cpp"
+#line 1589 "src/y.tab.cpp"
     break;
 
   case 23: /* param_list: param  */
-#line 249 "src/p2_parser.y"
+#line 253 "src/p2_parser.y"
             {
         (yyval.symbol_list) = new std::vector<Symbol>;
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1595 "src/y.tab.cpp"
+#line 1599 "src/y.tab.cpp"
     break;
 
   case 24: /* param_list: param_list COMMA param  */
-#line 254 "src/p2_parser.y"
+#line 258 "src/p2_parser.y"
                              {
         (yyval.symbol_list) = (yyvsp[-2].symbol_list);
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1605 "src/y.tab.cpp"
+#line 1609 "src/y.tab.cpp"
     break;
 
   case 25: /* param: type_spec ID  */
-#line 262 "src/p2_parser.y"
+#line 266 "src/p2_parser.y"
                    {
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         (yyval.symbol) = new Symbol(id, (yyvsp[-1].type), false);
     }
-#line 1614 "src/y.tab.cpp"
+#line 1618 "src/y.tab.cpp"
     break;
 
   case 26: /* param: type_spec ID array_dims  */
-#line 266 "src/p2_parser.y"
+#line 270 "src/p2_parser.y"
                              {
         std::string id = *(yyvsp[-1].sval); delete (yyvsp[-1].sval);
         std::vector<int> arrayIndex = *(yyvsp[0].int_list); delete (yyvsp[0].int_list);
         (yyval.symbol) = new Symbol(id, ctx->typePool.makeArray((yyvsp[-2].type), arrayIndex), false);
     }
-#line 1624 "src/y.tab.cpp"
+#line 1628 "src/y.tab.cpp"
     break;
 
   case 27: /* $@3: %empty  */
-#line 275 "src/p2_parser.y"
+#line 279 "src/p2_parser.y"
              {
         ctx->symTab.enterScope();
     }
-#line 1632 "src/y.tab.cpp"
+#line 1636 "src/y.tab.cpp"
     break;
 
   case 28: /* block: LBRACE $@3 block_items_opt RBRACE  */
-#line 277 "src/p2_parser.y"
+#line 281 "src/p2_parser.y"
                              {
         ctx->symTab.leaveScope();
     }
-#line 1640 "src/y.tab.cpp"
+#line 1644 "src/y.tab.cpp"
     break;
 
   case 42: /* simple_stmt: PRINT expression SEMICOLON  */
-#line 309 "src/p2_parser.y"
+#line 313 "src/p2_parser.y"
                                  {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
-#line 1649 "src/y.tab.cpp"
+#line 1653 "src/y.tab.cpp"
     break;
 
   case 43: /* simple_stmt: PRINTLN expression SEMICOLON  */
-#line 313 "src/p2_parser.y"
+#line 317 "src/p2_parser.y"
                                    {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
-#line 1658 "src/y.tab.cpp"
+#line 1662 "src/y.tab.cpp"
     break;
 
   case 44: /* simple_stmt: READ lvalue SEMICOLON  */
-#line 317 "src/p2_parser.y"
+#line 321 "src/p2_parser.y"
                             {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkRead(expr, yylineno);
+        if (expr.isValid) checkRead(expr, yylineno);
     }
-#line 1667 "src/y.tab.cpp"
+#line 1671 "src/y.tab.cpp"
     break;
 
   case 45: /* simple_stmt: lvalue INC SEMICOLON  */
-#line 321 "src/p2_parser.y"
-                           {
-        ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
-        checkIncDecValid("increment", expr, yylineno);
-     }
-#line 1676 "src/y.tab.cpp"
-    break;
-
-  case 46: /* simple_stmt: lvalue DEC SEMICOLON  */
 #line 325 "src/p2_parser.y"
                            {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
-        checkIncDecValid("decrement", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+     }
+#line 1680 "src/y.tab.cpp"
+    break;
+
+  case 46: /* simple_stmt: lvalue DEC SEMICOLON  */
+#line 329 "src/p2_parser.y"
+                           {
+        ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
-#line 1685 "src/y.tab.cpp"
+#line 1689 "src/y.tab.cpp"
     break;
 
   case 48: /* assign_stmt: lvalue ASSIGN expression SEMICOLON  */
-#line 333 "src/p2_parser.y"
+#line 337 "src/p2_parser.y"
                                          {
         ExprInfo target = *(yyvsp[-3].expr_info); delete (yyvsp[-3].expr_info);
         ExprInfo value = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkAssignment(target, value, yylineno);
+        if (target.isValid && value.isValid) {
+            checkAssignment(target, value, yylineno);
+        }
     }
-#line 1695 "src/y.tab.cpp"
+#line 1701 "src/y.tab.cpp"
     break;
 
   case 49: /* lvalue: ID  */
-#line 342 "src/p2_parser.y"
+#line 348 "src/p2_parser.y"
          {
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         Symbol* symbol = ctx->symTab.lookup(id);
@@ -1718,11 +1724,11 @@ yyreduce:
             }
         }
     }
-#line 1722 "src/y.tab.cpp"
+#line 1728 "src/y.tab.cpp"
     break;
 
   case 50: /* lvalue: ID array_ref  */
-#line 364 "src/p2_parser.y"
+#line 370 "src/p2_parser.y"
                    {
         std::string id = *(yyvsp[-1].sval); delete (yyvsp[-1].sval);
         std::vector<int> arrayIndex = *(yyvsp[0].int_list); delete (yyvsp[0].int_list);
@@ -1736,130 +1742,135 @@ yyreduce:
             (yyval.expr_info) = resolveArrayAccess(id, ctx->typePool, ctx->symTab, arrayIndex, yylineno);
         }
     }
-#line 1740 "src/y.tab.cpp"
+#line 1746 "src/y.tab.cpp"
     break;
 
   case 51: /* if_stmt: IF LPAREN expression RPAREN statement  */
-#line 381 "src/p2_parser.y"
+#line 387 "src/p2_parser.y"
                                                       {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
-        checkBoolExpr("if", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 1749 "src/y.tab.cpp"
+#line 1755 "src/y.tab.cpp"
     break;
 
   case 52: /* if_stmt: IF LPAREN expression RPAREN statement ELSE statement  */
-#line 385 "src/p2_parser.y"
+#line 391 "src/p2_parser.y"
                                                            {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
-        checkBoolExpr("if", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 1758 "src/y.tab.cpp"
+#line 1764 "src/y.tab.cpp"
     break;
 
   case 53: /* loop_stmt: WHILE LPAREN expression RPAREN statement  */
-#line 393 "src/p2_parser.y"
+#line 399 "src/p2_parser.y"
                                               { 
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
-        checkBoolExpr("while", expr, yylineno); 
+        if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
     }
-#line 1767 "src/y.tab.cpp"
+#line 1773 "src/y.tab.cpp"
     break;
 
   case 54: /* loop_stmt: DO statement WHILE LPAREN expression RPAREN SEMICOLON  */
-#line 397 "src/p2_parser.y"
+#line 403 "src/p2_parser.y"
                                                             {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
-        checkBoolExpr("do while", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
     }
-#line 1776 "src/y.tab.cpp"
+#line 1782 "src/y.tab.cpp"
     break;
 
   case 55: /* loop_stmt: FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement  */
-#line 401 "src/p2_parser.y"
+#line 407 "src/p2_parser.y"
                                                                                               {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
-        checkBoolExpr("for", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("for", expr, yylineno);
     }
-#line 1785 "src/y.tab.cpp"
+#line 1791 "src/y.tab.cpp"
     break;
 
   case 56: /* loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement  */
-#line 405 "src/p2_parser.y"
+#line 411 "src/p2_parser.y"
                                                                             {
         ExprInfo from = *(yyvsp[-5].expr_info); ExprInfo to = *(yyvsp[-2].expr_info); delete (yyvsp[-5].expr_info); delete (yyvsp[-2].expr_info);
         std::string id = *(yyvsp[-7].sval); delete (yyvsp[-7].sval);
-        checkForeachRange(from, to, yylineno);
+        if (from.isValid && to.isValid) {
+            checkForeachRange(from, to, yylineno);
+        }
         checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
-#line 1796 "src/y.tab.cpp"
+#line 1804 "src/y.tab.cpp"
     break;
 
   case 61: /* for_simple_item: PRINT expression  */
-#line 422 "src/p2_parser.y"
+#line 430 "src/p2_parser.y"
                          {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
-#line 1805 "src/y.tab.cpp"
+#line 1813 "src/y.tab.cpp"
     break;
 
   case 62: /* for_simple_item: PRINTLN expression  */
-#line 426 "src/p2_parser.y"
+#line 434 "src/p2_parser.y"
                           {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
-#line 1814 "src/y.tab.cpp"
+#line 1822 "src/y.tab.cpp"
     break;
 
   case 63: /* for_simple_item: READ lvalue  */
-#line 430 "src/p2_parser.y"
+#line 438 "src/p2_parser.y"
                    {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
-        checkRead(expr, yylineno);
+        if (expr.isValid) checkRead(expr, yylineno);
     }
-#line 1823 "src/y.tab.cpp"
+#line 1831 "src/y.tab.cpp"
     break;
 
   case 64: /* for_simple_item: lvalue INC  */
-#line 434 "src/p2_parser.y"
+#line 442 "src/p2_parser.y"
                   {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkIncDecValid("increment", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
      }
-#line 1832 "src/y.tab.cpp"
+#line 1840 "src/y.tab.cpp"
     break;
 
   case 65: /* for_simple_item: lvalue DEC  */
-#line 438 "src/p2_parser.y"
+#line 446 "src/p2_parser.y"
                   {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        checkIncDecValid("decrement", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
-#line 1841 "src/y.tab.cpp"
+#line 1849 "src/y.tab.cpp"
     break;
 
   case 66: /* assign_no_semi: lvalue ASSIGN expression  */
-#line 445 "src/p2_parser.y"
+#line 453 "src/p2_parser.y"
                                {
         ExprInfo target = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         ExprInfo value = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
+        if (target.isValid && value.isValid) {
+            checkAssignment(target, value, yylineno);
+        }
     }
-#line 1850 "src/y.tab.cpp"
+#line 1861 "src/y.tab.cpp"
     break;
 
   case 67: /* return_stmt: RETURN expression SEMICOLON  */
-#line 453 "src/p2_parser.y"
+#line 464 "src/p2_parser.y"
                                   {
         ctx->returnsExpr.push_back(std::make_pair(*(yyvsp[-1].expr_info), yylineno));
         delete (yyvsp[-1].expr_info);
      }
-#line 1859 "src/y.tab.cpp"
+#line 1870 "src/y.tab.cpp"
     break;
 
   case 68: /* expression: expression PLUS expression  */
-#line 461 "src/p2_parser.y"
+#line 472 "src/p2_parser.y"
                                  {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1874,11 +1885,11 @@ yyreduce:
             }
         }
     }
-#line 1878 "src/y.tab.cpp"
+#line 1889 "src/y.tab.cpp"
     break;
 
   case 69: /* expression: expression MINUS expression  */
-#line 475 "src/p2_parser.y"
+#line 486 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1888,11 +1899,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1892 "src/y.tab.cpp"
+#line 1903 "src/y.tab.cpp"
     break;
 
   case 70: /* expression: expression MUL expression  */
-#line 484 "src/p2_parser.y"
+#line 495 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1902,11 +1913,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1906 "src/y.tab.cpp"
+#line 1917 "src/y.tab.cpp"
     break;
 
   case 71: /* expression: expression DIV expression  */
-#line 493 "src/p2_parser.y"
+#line 504 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1916,11 +1927,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1920 "src/y.tab.cpp"
+#line 1931 "src/y.tab.cpp"
     break;
 
   case 72: /* expression: expression MOD expression  */
-#line 502 "src/p2_parser.y"
+#line 513 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1930,11 +1941,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1934 "src/y.tab.cpp"
+#line 1945 "src/y.tab.cpp"
     break;
 
   case 73: /* expression: expression LT expression  */
-#line 511 "src/p2_parser.y"
+#line 522 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1944,11 +1955,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1948 "src/y.tab.cpp"
+#line 1959 "src/y.tab.cpp"
     break;
 
   case 74: /* expression: expression LE expression  */
-#line 520 "src/p2_parser.y"
+#line 531 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1958,11 +1969,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1962 "src/y.tab.cpp"
+#line 1973 "src/y.tab.cpp"
     break;
 
   case 75: /* expression: expression GT expression  */
-#line 529 "src/p2_parser.y"
+#line 540 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1972,11 +1983,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1976 "src/y.tab.cpp"
+#line 1987 "src/y.tab.cpp"
     break;
 
   case 76: /* expression: expression GE expression  */
-#line 538 "src/p2_parser.y"
+#line 549 "src/p2_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1986,11 +1997,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1990 "src/y.tab.cpp"
+#line 2001 "src/y.tab.cpp"
     break;
 
   case 77: /* expression: expression EQ expression  */
-#line 548 "src/p2_parser.y"
+#line 559 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2000,11 +2011,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 2004 "src/y.tab.cpp"
+#line 2015 "src/y.tab.cpp"
     break;
 
   case 78: /* expression: expression NEQ expression  */
-#line 557 "src/p2_parser.y"
+#line 568 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2014,11 +2025,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 2018 "src/y.tab.cpp"
+#line 2029 "src/y.tab.cpp"
     break;
 
   case 79: /* expression: expression AND expression  */
-#line 567 "src/p2_parser.y"
+#line 578 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2028,11 +2039,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
         }   
     }
-#line 2032 "src/y.tab.cpp"
+#line 2043 "src/y.tab.cpp"
     break;
 
   case 80: /* expression: expression OR expression  */
-#line 576 "src/p2_parser.y"
+#line 587 "src/p2_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2042,11 +2053,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2046 "src/y.tab.cpp"
+#line 2057 "src/y.tab.cpp"
     break;
 
   case 81: /* expression: NOT expression  */
-#line 585 "src/p2_parser.y"
+#line 596 "src/p2_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2056,11 +2067,11 @@ yyreduce:
             (yyval.expr_info) = notOpResult(expr, ctx->typePool, yylineno);
         }
     }
-#line 2060 "src/y.tab.cpp"
+#line 2071 "src/y.tab.cpp"
     break;
 
   case 82: /* expression: MINUS expression  */
-#line 594 "src/p2_parser.y"
+#line 605 "src/p2_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2070,11 +2081,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(true, expr, yylineno);
         }
     }
-#line 2074 "src/y.tab.cpp"
+#line 2085 "src/y.tab.cpp"
     break;
 
   case 83: /* expression: PLUS expression  */
-#line 603 "src/p2_parser.y"
+#line 614 "src/p2_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2084,11 +2095,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(false, expr, yylineno);
         }
     }
-#line 2088 "src/y.tab.cpp"
+#line 2099 "src/y.tab.cpp"
     break;
 
   case 84: /* expression: LPAREN expression RPAREN  */
-#line 613 "src/p2_parser.y"
+#line 624 "src/p2_parser.y"
                                      { 
         if (!(yyvsp[-1].expr_info)->isValid) {
             delete (yyvsp[-1].expr_info);
@@ -2097,11 +2108,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[-1].expr_info);
         }
     }
-#line 2101 "src/y.tab.cpp"
+#line 2112 "src/y.tab.cpp"
     break;
 
   case 85: /* expression: lvalue  */
-#line 621 "src/p2_parser.y"
+#line 632 "src/p2_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2110,11 +2121,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2114 "src/y.tab.cpp"
+#line 2125 "src/y.tab.cpp"
     break;
 
   case 86: /* expression: const_lit  */
-#line 629 "src/p2_parser.y"
+#line 640 "src/p2_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2123,11 +2134,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2127 "src/y.tab.cpp"
+#line 2138 "src/y.tab.cpp"
     break;
 
   case 87: /* expression: func_call  */
-#line 637 "src/p2_parser.y"
+#line 648 "src/p2_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2136,48 +2147,48 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2140 "src/y.tab.cpp"
+#line 2151 "src/y.tab.cpp"
     break;
 
   case 88: /* const_lit: INT_LIT  */
-#line 649 "src/p2_parser.y"
+#line 660 "src/p2_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Int), true);
         (yyval.expr_info)->setInt((yyvsp[0].ival));
     }
-#line 2149 "src/y.tab.cpp"
+#line 2160 "src/y.tab.cpp"
     break;
 
   case 89: /* const_lit: REAL_LIT  */
-#line 653 "src/p2_parser.y"
+#line 664 "src/p2_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Double), true);
         (yyval.expr_info)->setFloat((yyvsp[0].fval));
     }
-#line 2158 "src/y.tab.cpp"
+#line 2169 "src/y.tab.cpp"
     break;
 
   case 90: /* const_lit: BOOL_LIT  */
-#line 657 "src/p2_parser.y"
+#line 668 "src/p2_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Bool), true);
         (yyval.expr_info)->setBool((yyvsp[0].bval));
     }
-#line 2167 "src/y.tab.cpp"
+#line 2178 "src/y.tab.cpp"
     break;
 
   case 91: /* const_lit: STRING_LIT  */
-#line 661 "src/p2_parser.y"
+#line 672 "src/p2_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_String), true);
         (yyval.expr_info)->setString(*(yyvsp[0].sval));
         delete (yyvsp[0].sval);
     }
-#line 2177 "src/y.tab.cpp"
+#line 2188 "src/y.tab.cpp"
     break;
 
   case 92: /* func_call: ID LPAREN arg_list_opt RPAREN  */
-#line 670 "src/p2_parser.y"
+#line 681 "src/p2_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2199,11 +2210,11 @@ yyreduce:
             (yyval.expr_info) = makeInvalidExpr();
         }
     }
-#line 2203 "src/y.tab.cpp"
+#line 2214 "src/y.tab.cpp"
     break;
 
   case 93: /* proc_call: ID LPAREN arg_list_opt RPAREN  */
-#line 693 "src/p2_parser.y"
+#line 704 "src/p2_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2214,113 +2225,113 @@ yyreduce:
             SemanticError("undeclared function: " + funcName, yylineno);
         }
     }
-#line 2218 "src/y.tab.cpp"
+#line 2229 "src/y.tab.cpp"
     break;
 
   case 94: /* arg_list_opt: %empty  */
-#line 706 "src/p2_parser.y"
+#line 717 "src/p2_parser.y"
                  { (yyval.expr_info_list) = new std::vector<ExprInfo>();}
-#line 2224 "src/y.tab.cpp"
+#line 2235 "src/y.tab.cpp"
     break;
 
   case 95: /* arg_list_opt: arg_list  */
-#line 707 "src/p2_parser.y"
+#line 718 "src/p2_parser.y"
                { (yyval.expr_info_list) = (yyvsp[0].expr_info_list); }
-#line 2230 "src/y.tab.cpp"
+#line 2241 "src/y.tab.cpp"
     break;
 
   case 96: /* arg_list: expression  */
-#line 711 "src/p2_parser.y"
+#line 722 "src/p2_parser.y"
                  {
         (yyval.expr_info_list) = new std::vector<ExprInfo>();
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2240 "src/y.tab.cpp"
+#line 2251 "src/y.tab.cpp"
     break;
 
   case 97: /* arg_list: arg_list COMMA expression  */
-#line 716 "src/p2_parser.y"
+#line 727 "src/p2_parser.y"
                                {
         (yyval.expr_info_list) = (yyvsp[-2].expr_info_list);
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2250 "src/y.tab.cpp"
+#line 2261 "src/y.tab.cpp"
     break;
 
   case 98: /* array_dims: LBRACK expression RBRACK  */
-#line 725 "src/p2_parser.y"
+#line 736 "src/p2_parser.y"
                                {
         (yyval.int_list) = new std::vector<int>;
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         (yyval.int_list)->push_back(checkArrayDimExpr(expr, yylineno));
     }
-#line 2260 "src/y.tab.cpp"
+#line 2271 "src/y.tab.cpp"
     break;
 
   case 99: /* array_dims: array_dims LBRACK expression RBRACK  */
-#line 730 "src/p2_parser.y"
+#line 741 "src/p2_parser.y"
                                           {
         (yyval.int_list) = (yyvsp[-3].int_list);
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         (yyval.int_list)->push_back(checkArrayDimExpr(expr, yylineno));
     }
-#line 2270 "src/y.tab.cpp"
+#line 2281 "src/y.tab.cpp"
     break;
 
   case 100: /* array_ref: LBRACK expression RBRACK  */
-#line 739 "src/p2_parser.y"
+#line 750 "src/p2_parser.y"
                                {
         (yyval.int_list) = new std::vector<int>;
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         (yyval.int_list)->push_back(extractArrayIndexOrZero(expr, yylineno));
     }
-#line 2280 "src/y.tab.cpp"
+#line 2291 "src/y.tab.cpp"
     break;
 
   case 101: /* array_ref: array_ref LBRACK expression RBRACK  */
-#line 744 "src/p2_parser.y"
+#line 755 "src/p2_parser.y"
                                          {
         (yyval.int_list) = (yyvsp[-3].int_list);
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         (yyval.int_list)->push_back(extractArrayIndexOrZero(expr, yylineno));
     }
-#line 2290 "src/y.tab.cpp"
+#line 2301 "src/y.tab.cpp"
     break;
 
   case 102: /* type_spec: INT_TOK  */
-#line 753 "src/p2_parser.y"
+#line 764 "src/p2_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_Int); ctx->nowType = (yyval.type); }
-#line 2296 "src/y.tab.cpp"
+#line 2307 "src/y.tab.cpp"
     break;
 
   case 103: /* type_spec: FLOAT_TOK  */
-#line 754 "src/p2_parser.y"
+#line 765 "src/p2_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Float); ctx->nowType = (yyval.type); }
-#line 2302 "src/y.tab.cpp"
+#line 2313 "src/y.tab.cpp"
     break;
 
   case 104: /* type_spec: DOUBLE_TOK  */
-#line 755 "src/p2_parser.y"
+#line 766 "src/p2_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Double); ctx->nowType = (yyval.type); }
-#line 2308 "src/y.tab.cpp"
+#line 2319 "src/y.tab.cpp"
     break;
 
   case 105: /* type_spec: BOOL_TOK  */
-#line 756 "src/p2_parser.y"
+#line 767 "src/p2_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Bool);  ctx->nowType = (yyval.type); }
-#line 2314 "src/y.tab.cpp"
+#line 2325 "src/y.tab.cpp"
     break;
 
   case 106: /* type_spec: STRING_TOK  */
-#line 757 "src/p2_parser.y"
+#line 768 "src/p2_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_String); ctx->nowType = (yyval.type);}
-#line 2320 "src/y.tab.cpp"
+#line 2331 "src/y.tab.cpp"
     break;
 
 
-#line 2324 "src/y.tab.cpp"
+#line 2335 "src/y.tab.cpp"
 
       default: break;
     }
@@ -2513,7 +2524,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 760 "src/p2_parser.y"
+#line 771 "src/p2_parser.y"
  
 
 int main(int argc, char* argv[]) {

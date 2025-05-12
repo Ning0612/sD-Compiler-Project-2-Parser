@@ -4,9 +4,9 @@
 
 std::vector<std::pair<int, std::string>> SemanticError::errors;
 
-SemanticError::SemanticError(const std::string& msg, int ln)
-    : std::runtime_error(msg), line(ln) {
+SemanticError::SemanticError(const std::string& msg, int ln) : std::runtime_error(msg), line(ln) {
     errors.emplace_back(ln, msg);
+    // printf("[Error] Line %d: %s\n", ln, msg.c_str());
 }
 
 // 是否有錯誤

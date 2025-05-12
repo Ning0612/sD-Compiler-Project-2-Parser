@@ -316,7 +316,7 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
 ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolTable& symTab, const std::vector<int>& arrayIndex, int lineno) {
     Symbol* symbol = symTab.lookup(id);
 
-    if (!symbol) {
+    if (symbol) {
         SemanticError("undeclared identifier: " + id, lineno);
         return makeInvalidExpr();
     }
@@ -397,14 +397,11 @@ void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno) {
         return;
     }
 
-    if (from.type->base != BK_Int || !from.isConst || !from.type->isScalar())
+    if (from.type->base != BK_Int || !from.type->isScalar())
         SemanticError("foreach range start must be const int scalar", lineno);
 
-    if (to.type->base != BK_Int || !to.isConst || !to.type->isScalar())
+    if (to.type->base != BK_Int || !to.type->isScalar())
         SemanticError("foreach range end must be const int scalar", lineno);
-
-    if (from.getInt() >= to.getInt())
-        SemanticError("foreach range start must be less than end", lineno);
 }
 
 /*───────── check array index ─────────*/
@@ -536,6 +533,9 @@ bool checkFuncCall(Symbol* symbol, const std::string& name, const std::vector<Ex
     if (!args.empty()) {
         for (size_t i = 0; i < argCount; ++i) {
             const ExprInfo& arg = args.at(i);
+            if (!arg.isValid) {
+                return false;
+            }
 
             if (!arg.type->isCompatibleWith(*symbol->type->params[i])) {
                 SemanticError("argument type mismatch", lineno);

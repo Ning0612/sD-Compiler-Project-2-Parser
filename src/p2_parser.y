@@ -208,6 +208,10 @@ func_decl
         }
 
         for (auto& expr : ctx->returnsExpr) {
+            if (!expr.first.isValid) {
+                break;
+            }
+
             if (!$1->isCompatibleWith(*expr.first.type)) {
                 SemanticError("return type mismatch !", expr.second);
             }
@@ -308,23 +312,23 @@ simple_stmt
     : assign_stmt
     | PRINT expression SEMICOLON {
         ExprInfo expr = *$2; delete $2;
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
     | PRINTLN expression SEMICOLON {
         ExprInfo expr = *$2; delete $2;
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
     | READ lvalue SEMICOLON {
         ExprInfo expr = *$2; delete $2;
-        checkRead(expr, yylineno);
+        if (expr.isValid) checkRead(expr, yylineno);
     }
     | lvalue INC SEMICOLON {
         ExprInfo expr = *$1; delete $1;
-        checkIncDecValid("increment", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
      }
     | lvalue DEC SEMICOLON {
         ExprInfo expr = *$1; delete $1;
-        checkIncDecValid("decrement", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
     | SEMICOLON
     ;
@@ -333,7 +337,9 @@ assign_stmt
     : lvalue ASSIGN expression SEMICOLON {
         ExprInfo target = *$1; delete $1;
         ExprInfo value = *$3; delete $3;
-        checkAssignment(target, value, yylineno);
+        if (target.isValid && value.isValid) {
+            checkAssignment(target, value, yylineno);
+        }
     }
     ;
 
@@ -380,11 +386,11 @@ lvalue
 if_stmt
     : IF LPAREN expression RPAREN statement %prec IFX {
         ExprInfo expr = *$3; delete $3;
-        checkBoolExpr("if", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
     | IF LPAREN expression RPAREN statement ELSE statement {
         ExprInfo expr = *$3; delete $3;
-        checkBoolExpr("if", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
     ;
 
@@ -392,20 +398,22 @@ if_stmt
 loop_stmt
     : WHILE LPAREN expression RPAREN statement{ 
         ExprInfo expr = *$3; delete $3;
-        checkBoolExpr("while", expr, yylineno); 
+        if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
     }
     | DO statement WHILE LPAREN expression RPAREN SEMICOLON {
         ExprInfo expr = *$5; delete $5;
-        checkBoolExpr("do while", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
     }
     | FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
         ExprInfo expr = *$5; delete $5;
-        checkBoolExpr("for", expr, yylineno);
+        if (expr.isValid) checkBoolExpr("for", expr, yylineno);
     }
     | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
         ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
         std::string id = *$3; delete $3;
-        checkForeachRange(from, to, yylineno);
+        if (from.isValid && to.isValid) {
+            checkForeachRange(from, to, yylineno);
+        }
         checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
     ;
@@ -421,23 +429,23 @@ for_simple_item
     : assign_no_semi
     | PRINT  expression  {
         ExprInfo expr = *$2; delete $2;
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
     | PRINTLN expression  {
         ExprInfo expr = *$2; delete $2;
-        checkPrint(expr, yylineno);
+        if (expr.isValid) checkPrint(expr, yylineno);
     }
     | READ lvalue  {
         ExprInfo expr = *$2; delete $2;
-        checkRead(expr, yylineno);
+        if (expr.isValid) checkRead(expr, yylineno);
     }
     | lvalue INC  {
         ExprInfo expr = *$1; delete $1;
-        checkIncDecValid("increment", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
      }
     | lvalue DEC  {
         ExprInfo expr = *$1; delete $1;
-        checkIncDecValid("decrement", expr, yylineno);
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
     ;
 
@@ -445,6 +453,9 @@ assign_no_semi
     : lvalue ASSIGN expression {
         ExprInfo target = *$1; delete $1;
         ExprInfo value = *$3; delete $3;
+        if (target.isValid && value.isValid) {
+            checkAssignment(target, value, yylineno);
+        }
     }
     ;
 

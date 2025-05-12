@@ -5,9 +5,9 @@
 std::vector<std::pair<int, std::string>> SemanticWarning::warnings;
 
 // 建構子
-SemanticWarning::SemanticWarning(const std::string& msg, int ln)
-    : std::runtime_error(msg), line(ln) {
+SemanticWarning::SemanticWarning(const std::string& msg, int ln) : std::runtime_error(msg), line(ln) {
     warnings.emplace_back(ln, msg);
+    // printf("[Warning] Line %d: %s\n", ln, msg.c_str());
 }
 
 // 是否有警告
