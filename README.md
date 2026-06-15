@@ -2,7 +2,7 @@
 ---
 
 
-# sD Compiler – Project 2
+# sD Compiler Parser
 
 This project implements a front-end compiler for a custom C-like language called **sD**, designed for educational compiler construction. The compiler performs **lexical analysis**, **parsing**, and **semantic analysis**, including type checking, constant folding, and error detection.
 
